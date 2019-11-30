@@ -30,4 +30,5 @@ add_library(
         src/Threshold.cpp
         src/Threshold.h
         src/VCO.cpp
-        src/VCO.h )
+        src/VCO.h
+)
