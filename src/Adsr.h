@@ -23,7 +23,7 @@ public:
 
    void configureTrig(Signal *trig);
 
-   double read(double time) override;
+   double update(double time) override;
 
 private:
    Signal *_gate;

@@ -34,8 +34,6 @@ add_library(
         src/Demiurge.h
         src/GatePort.cpp
         src/GatePort.h
-        src/GhostSignal.cpp
-        src/GhostSignal.h
         src/Inverter.cpp
         src/Inverter.h
         src/mcp48x2/MCP48x2.cpp
@@ -44,12 +42,12 @@ add_library(
         src/Mixer.h
         src/Pan.cpp
         src/Pan.h
+        src/Passthru.cpp
+        src/Passthru.h
         src/Potentiometer.cpp
         src/Potentiometer.h
         src/PushButton.cpp
         src/PushButton.h
-        src/ScaledSignal.cpp
-        src/ScaledSignal.h
         src/Signal.cpp
         src/Signal.h
         src/Sink.cpp
@@ -60,4 +58,6 @@ add_library(
         src/Threshold.h
         src/VCO.cpp
         src/VCO.h
+        src/Volume.cpp
+        src/Volume.h
 )

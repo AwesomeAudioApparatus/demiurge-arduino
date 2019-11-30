@@ -16,3 +16,10 @@ void Signal::setScale(double scale) {
 void Signal::setOffset(double offset) {
    _offset = offset;
 }
+
+double Signal::read(double time) {
+   if (time > lastRead) {
+      output = update(time);
+   }
+   return output;
+}

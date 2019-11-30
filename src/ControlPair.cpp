@@ -20,3 +20,9 @@ void ControlPair::setPotentiometerScale(double scale) {
 void ControlPair::setCvScale(double scale) {
    _cvScale = scale;
 }
+
+double ControlPair::update(double time) {
+   double potIn = _potentiometer->read(time) * _potentiometerScale;
+   double cvIn = _cvIn->read(time) * _cvScale;
+   return potIn + cvIn;
+}

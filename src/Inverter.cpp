@@ -26,7 +26,7 @@ void Inverter::configure(Signal *input) {
    _input = input;
 }
 
-double Inverter::read(double time) {
+double Inverter::update(double time) {
    return 0;
 }
 

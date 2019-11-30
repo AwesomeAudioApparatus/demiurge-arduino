@@ -15,7 +15,7 @@ public:
 
    int _position;
 
-   double read(double time) override;
+   double update(double time) override;
 };
 
 

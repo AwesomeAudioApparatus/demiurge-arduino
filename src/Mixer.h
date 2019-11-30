@@ -3,22 +3,22 @@
 
 #include <list>
 #include "Signal.h"
-#include "ScaledSignal.h"
+#include "Passthru.h"
+#include "Volume.h"
 
 class Mixer : public Signal {
 
 public:
    explicit Mixer(int numberOfInputs);
 
-   ~Mixer();
+   ~Mixer() override;
 
-   void configureInput(int number, Signal *source, double scale, double offet);
+   void configure(int number, Signal *source, Signal *control);
 
-   void configureVolume(int number, Signal *source, double scale, double offset);
+   double update(double time) override;
 
 private:
-   ScaledSignal **_inputs;
-   Signal **_volumes;
+   Volume **_inputs;
    int _numberOfInputs;
 };
 

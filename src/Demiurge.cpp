@@ -133,11 +133,11 @@ void Demiurge::setDAC(int channel, double voltage) {
 }
 
 analog_in_t *Demiurge::inputs() {
-   return _inputs;
+   return &_inputs;
 }
 
-analog_in_t *Demiurge::outputs() {
-   return _outputs;
+analog_out_t *Demiurge::outputs() {
+   return &_outputs;
 }
 
 bool Demiurge::gpio(int pin) {

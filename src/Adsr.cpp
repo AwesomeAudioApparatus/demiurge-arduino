@@ -35,7 +35,7 @@ void Adsr::configureTrig(Signal *trig) {
    _trig = trig;
 }
 
-double Adsr::read(double time) {
+double Adsr::update(double time) {
    double output;
 
    bool trigIn = _trigThreshold->compute(_trig->read(time));

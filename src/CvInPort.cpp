@@ -9,6 +9,6 @@ CvInPort::CvInPort(int position) {
 
 CvInPort::~CvInPort() = default;
 
-double CvInPort::read(double time) {
+double CvInPort::update(double time) {
    return Demiurge::runtime()->inputs()->value[_position] * scale() + offset();
 }

@@ -9,13 +9,15 @@
 class ControlPair : public Signal {
 
 public:
-   ControlPair(int position);
+   explicit ControlPair(int position);
 
-   ~ControlPair();
+   ~ControlPair() override;
 
    void setPotentiometerScale(double scale);
 
    void setCvScale(double scale);
+
+   double update(double time) override;
 
 private:
    Potentiometer *_potentiometer;

@@ -26,6 +26,7 @@
 #include "Inverter.h"
 #include "Mixer.h"
 #include "Pan.h"
+#include "Passthru.h"
 #include "Potentiometer.h"
 #include "PushButton.h"
 #include "Signal.h"
@@ -77,7 +78,7 @@ public:
 
    analog_in_t *inputs();
 
-   analog_in_t *outputs();
+   analog_out_t *outputs();
 
    void setDAC(int channel, double voltage);
 
@@ -102,6 +103,9 @@ private:
    Sink *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
 
    void readADC();
+
+   analog_in_t _inputs;
+   analog_out_t _outputs;
 
    double timerCounter = 0;         // in microseconds, increments 50 at a time.
    esp_timer_create_args_t *_config;

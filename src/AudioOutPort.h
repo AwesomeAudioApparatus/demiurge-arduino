@@ -8,8 +8,8 @@
 class AudioOutPort : public Sink, public Signal{
 
 public:
-   AudioOutPort(int position);
-   ~AudioOutPort();
+   explicit AudioOutPort(int position);
+   ~AudioOutPort() override;
 
    void configure( Signal* input );
 

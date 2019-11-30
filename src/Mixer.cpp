@@ -3,28 +3,29 @@
 #include "Mixer.h"
 
 Mixer::Mixer(int numberOfInputs) {
-   _inputs = static_cast<ScaledSignal **>(malloc(sizeof(ScaledSignal *) * numberOfInputs));
-   _volumes = static_cast<Signal **>(malloc(sizeof(Signal *) * numberOfInputs));
+   _inputs = static_cast<Volume **>(malloc(sizeof(Volume *) * numberOfInputs));
    _numberOfInputs = numberOfInputs;
 }
 
 Mixer::~Mixer() {
    for (int i = 0; i < _numberOfInputs; i++) {
-      delete _volumes[i];
+      delete _inputs[i];
    }
    free(_inputs);
-   free(_volumes);
 }
 
-void Mixer::configureInput(int number, Signal *source, double scale, double offset) {
+void Mixer::configure(int number, Signal *source, Signal *control) {
    if (number >= 0 && number < _numberOfInputs) {
-      _inputs[number] = new ScaledSignal(source, scale, offset);
+      Volume *v = new Volume();
+      v->configure(source, control);
+      _inputs[number] = v;
    }
 }
 
-void Mixer::configureVolume(int number, Signal *source, double scale, double offset) {
-   if (number >= 0 && number < _numberOfInputs) {
-      _volumes[number] = new ScaledSignal(source, scale, offset);
+double Mixer::update(double time) {
+   double output = 0.0;
+   for (int i = 0; i < _numberOfInputs; i++) {
+      output = output + _inputs[i]->read(time);
    }
+   return output;
 }
-

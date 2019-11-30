@@ -16,7 +16,7 @@ public:
 
    void configure(Signal *input);
 
-   double read(double time) override;
+   double update(double time) override;
 
 private:
    double _midpoint;

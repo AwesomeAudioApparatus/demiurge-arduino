@@ -1,19 +1,19 @@
-#ifndef DEMIURGE_AUDIOINPORT_H
-#define DEMIURGE_AUDIOINPORT_H
+#ifndef _DEMIURGE_AUDIOINPORT_H_
+#define _DEMIURGE_AUDIOINPORT_H_
 
 #include "Signal.h"
 
 class AudioInPort : public Signal {
 
 public:
-   AudioInPort(int position);
-   ~AudioInPort();
+   explicit AudioInPort(int position);
+   ~AudioInPort() override;
 
    void configure( double scale, double offset );
 
-private:
-   double read(double time) override;
+   double update(double time) override;
 
+private:
    int _position;
 };
 

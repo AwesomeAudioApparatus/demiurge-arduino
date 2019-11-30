@@ -15,11 +15,11 @@
 class GatePort : public Signal {
 
 public:
-   GatePort(int position);
+   explicit GatePort(int position);
 
-   ~GatePort();
+   ~GatePort() override;
 
-   double read(double time) override;
+   double update(double time) override;
 
 private:
 
