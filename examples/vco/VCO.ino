@@ -2,15 +2,15 @@
 
 #include "Demiurge.h"
 
-CvInPort cv1 = CvInPort(1);
-CvInPort cv2 = CvInPort(2);
-CvInPort cv3 = CvInPort(3);
-CvInPort cv4 = CvInPort(4);
+CvInPort cv1(1);
+CvInPort cv2(2);
+CvInPort cv3(3);
+CvInPort cv4(4);
 
-GatePort gate = GatePort(1);
+GatePort gate(1);
 
-AudioOutPort out1 = AudioOutPort(1);
-AudioOutPort out2 = AudioOutPort(2);
+AudioOutPort out1(1);
+AudioOutPort out2(2);
 
 VCO vco1();
 Mixer mixer(2);
