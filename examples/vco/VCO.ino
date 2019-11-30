@@ -14,7 +14,7 @@ AudioOutPort out2(2);
 
 VCO vco1();
 Mixer mixer(2);
-Pan pan;
+Pan pan();
 
 void setup()
 {
