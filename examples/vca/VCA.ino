@@ -12,13 +12,10 @@ Potentiometer pot2(2);
 Potentiometer pot3(3);
 Potentiometer pot4(4);
 
-GatePort gate(1);
-
 AudioOutPort out1(1);
 AudioOutPort out2(2);
 
 Mixer mixer(4);
-Pan pan();
 
 void setup()
 {
@@ -34,9 +31,8 @@ void setup()
    mixer.configureInput(4, in4, 1, 0.0 );
    mixer.configureScale(4, pot4);
 
-   pan.configure(mixer);
-   out1.configure(pan.outputLeft())
-   out2.configure(pan.outputRight())
+   out1.configure(mixer)
+   out2.configure(mixer)
 }
 
 void loop()
