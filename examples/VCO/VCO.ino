@@ -12,11 +12,11 @@ GatePort gate(1);
 AudioOutPort out1(1);
 AudioOutPort out2(2);
 
-VCO vco1();
+VCO vco1;
 
 Mixer mixer(2);
 
-Pan pan();
+Pan pan;
 
 void setup() {
    Demiurge::initialize(20000);

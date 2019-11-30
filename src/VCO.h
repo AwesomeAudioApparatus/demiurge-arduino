@@ -5,14 +5,13 @@
 
 #include "Signal.h"
 
-class VCO : Signal {
+class VCO : public Signal {
 
 public:
    VCO();
 
    virtual ~VCO();
 
-protected:
    void configureFrequency(Signal *freqControl);
 
    void configureAmplitude(Signal *amplitudeControl);

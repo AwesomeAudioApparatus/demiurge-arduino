@@ -4,7 +4,7 @@
 
 #include "Signal.h"
 
-class Potentiometer : Signal {
+class Potentiometer : public Signal {
 
 public:
    Potentiometer(int position);

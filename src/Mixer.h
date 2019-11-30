@@ -3,7 +3,7 @@
 
 #include "Signal.h"
 
-class Mixer : Signal {
+class Mixer : public Signal {
 
 public:
    Mixer(int numberOfInputs);

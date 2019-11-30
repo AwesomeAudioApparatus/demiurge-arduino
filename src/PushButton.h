@@ -4,7 +4,7 @@
 
 #include "Signal.h"
 
-class PushButton : Signal {
+class PushButton : public Signal {
 
 public:
    PushButton(int position);

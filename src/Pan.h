@@ -8,10 +8,14 @@ class Pan : SoundProcessor {
 
 public:
    Pan();
+
    ~Pan();
 
-   Signal* outputLeft();
-   Signal* outputRight();
+   void configure(Signal *input);
+
+   Signal *outputLeft();
+
+   Signal *outputRight();
 };
 
 

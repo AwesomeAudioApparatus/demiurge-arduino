@@ -3,7 +3,7 @@
 
 #include "Signal.h"
 
-class CvInPort : Signal {
+class CvInPort : public Signal {
 
 public:
    CvInPort( int position );

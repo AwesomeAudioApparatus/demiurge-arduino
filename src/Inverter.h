@@ -4,7 +4,7 @@
 
 #include "Signal.h"
 
-class Inverter : Signal {
+class Inverter : public Signal {
 
 public:
    Inverter();

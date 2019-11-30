@@ -3,7 +3,7 @@
 
 #include "Signal.h"
 
-class AudioOutPort : Signal {
+class AudioOutPort : public Signal {
 
 public:
    AudioOutPort(int position);

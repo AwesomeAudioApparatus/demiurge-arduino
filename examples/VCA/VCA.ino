@@ -5,7 +5,7 @@
 AudioInPort in1(1);
 AudioInPort in2(2);
 AudioInPort in3(3);
-AudioInPort in1(4);
+AudioInPort in4(4);
 
 Potentiometer pot1(1);
 Potentiometer pot2(2);
@@ -16,8 +16,6 @@ AudioOutPort out1(1);
 AudioOutPort out2(2);
 
 Mixer mixer(4);
-
-Demiurge runtime(20000);
 
 void setup()
 {

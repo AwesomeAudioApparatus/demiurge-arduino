@@ -4,8 +4,12 @@
 
 #include "Signal.h"
 
-class GatePort : Signal {
+class GatePort : public Signal {
 
+public:
+   GatePort(int position);
+
+   ~GatePort();
 };
 
 

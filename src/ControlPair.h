@@ -6,7 +6,7 @@
 #include "Potentiometer.h"
 #include "CvInPort.h"
 
-class ControlPair : Signal {
+class ControlPair : public Signal {
 
 public:
    ControlPair(int position);

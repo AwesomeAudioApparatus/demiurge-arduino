@@ -3,7 +3,7 @@
 
 #include "Signal.h"
 
-class Adsr : Signal {
+class Adsr : public Signal {
 
 public:
    Adsr();
