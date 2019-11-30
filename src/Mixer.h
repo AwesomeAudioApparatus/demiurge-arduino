@@ -11,6 +11,8 @@ public:
 
    void configureInput( int number, Signal* source, double scale, double offet);
 
+   void configureScale( int number, Signal* source);
+
 };
 
 

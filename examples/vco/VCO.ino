@@ -1,5 +1,5 @@
 
-
+#include "Arduino.h"
 #include "Demiurge.h"
 
 CvInPort cv1(1);
@@ -25,6 +25,7 @@ void setup()
    vco1.configureAmplitude( cv3 );
    vco1.configureMute( gate );
 
+   pan.configure(vco1);
    out1.configure(pan.outputLeft())
    out2.configure(pan.outputRight())
 }
