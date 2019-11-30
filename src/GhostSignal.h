@@ -9,6 +9,8 @@ class GhostSignal : public Signal {
 
 public:
    GhostSignal();
+   ~GhostSignal();
+
    void setValue(double value);
 
    double read(double time) override;

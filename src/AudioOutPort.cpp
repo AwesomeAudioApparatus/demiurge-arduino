@@ -5,9 +5,7 @@ AudioOutPort::AudioOutPort(int position) {
    _position = position;
 }
 
-AudioOutPort::~AudioOutPort() {
-
-}
+AudioOutPort::~AudioOutPort() = default;
 
 void AudioOutPort::configure(Signal *input) {
    _input = input;

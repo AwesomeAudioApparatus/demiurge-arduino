@@ -2,13 +2,14 @@
 #define _DEMIURGE_ADSR_H_
 
 #include "Signal.h"
+#include "Threshold.h"
 
 class Adsr : public Signal {
 
 public:
    Adsr();
 
-   ~Adsr();
+   ~Adsr() override;
 
    void configureGate(Signal *gate);
 
@@ -22,19 +23,26 @@ public:
 
    void configureTrig(Signal *trig);
 
-   double attack();
-
-   double decay();
-
-   double sustain();
-
-   double release();
+   double read(double time) override;
 
 private:
-   double _attack;
-   double _decay;
-   double _sustain;
-   double _release;
+   Signal *_gate;
+   Signal *_trig;
+   Signal *_attack;
+   Signal *_decay;
+   Signal *_sustain;
+   Signal *_release;
+
+   Threshold *_gateThreshold;
+   Threshold *_trigThreshold;
+
+   int stateMachine = 0;
+   double doneAt = 0.0;
+   double startedAt = 0.0;
+   bool _currentTrig;
+   bool _currentGate;
+
+   double slopeTime(double voltage);
 };
 
 

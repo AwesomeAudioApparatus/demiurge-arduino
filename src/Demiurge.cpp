@@ -110,7 +110,7 @@ void IRAM_ATTR Demiurge::tick() {
    for (auto &_sink : _sinks) {
       _sink->tick(timerCounter);
    }
-   timerCounter++;
+   timerCounter = timerCounter + 50;
 }
 
 void IRAM_ATTR Demiurge::readADC() {
@@ -130,4 +130,16 @@ void Demiurge::setDAC(int channel, double voltage) {
    {
       _dac->send(CHANNEL_B | GAIN_1 | MODE_ACTIVE, output);
    }
+}
+
+analog_in_t *Demiurge::inputs() {
+   return _inputs;
+}
+
+analog_in_t *Demiurge::outputs() {
+   return _outputs;
+}
+
+bool Demiurge::gpio(int pin) {
+   return 0;
 }

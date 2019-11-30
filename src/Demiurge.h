@@ -43,13 +43,6 @@ typedef struct {
    double value[2];
 } analog_out_t;
 
-typedef struct {
-   int type;  // the type of timer's event
-   int timer_group;
-   int timer_idx;
-   uint64_t timer_counter_value;
-} timer_event_t;
-
 class Demiurge {
 
    void registerSink(Sink *processor);
@@ -64,6 +57,7 @@ public:
       _runtime = new Demiurge();
       _initialized = true;
    }
+
    static void shutdown() {
       delete _runtime;
       _initialized = false;
@@ -73,6 +67,12 @@ public:
       return _runtime;
    }
 
+   static double clip(double value) {
+      if (value > 10.0) return 10.0;
+      if (value < -10.0) return -10.0;
+      return value;
+   };
+
    void tick();
 
    analog_in_t *inputs();
@@ -81,6 +81,8 @@ public:
 
    void setDAC(int channel, double voltage);
 
+   bool gpio(int i);
+
 private:
    static bool _initialized;
    static Demiurge *_runtime;
@@ -88,16 +90,20 @@ private:
    Demiurge();
 
    ~Demiurge();
+
    void initializeSpi();
+
    void initializeDac();
+
    void initializeTimer();
+
    void initializeSinks();
 
    Sink *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
+
    void readADC();
 
-   // Increases by +1.0 per 50 microseconds, and passed to algorithms.
-   double timerCounter = 0;
+   double timerCounter = 0;         // in microseconds, increments 50 at a time.
    esp_timer_create_args_t *_config;
 
    esp_timer_handle_t _timer;

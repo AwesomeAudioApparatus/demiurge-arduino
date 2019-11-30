@@ -1,9 +1,13 @@
 
 #include "Demiurge.h"
+#include "AudioInPort.h"
+
 
 AudioInPort::AudioInPort(int position) {
    _position = position;
 }
+
+AudioInPort::~AudioInPort() = default;
 
 void AudioInPort::configure(double scale, double offset) {
    setScale(scale);

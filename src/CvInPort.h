@@ -11,6 +11,7 @@ class CvInPort : public Signal {
 
 public:
    explicit CvInPort(int position);
+   ~CvInPort();
 
    int _position;
 

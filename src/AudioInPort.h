@@ -7,7 +7,7 @@ class AudioInPort : public Signal {
 
 public:
    AudioInPort(int position);
-   virtual ~AudioInPort() = 0;
+   ~AudioInPort();
 
    void configure( double scale, double offset );
 
