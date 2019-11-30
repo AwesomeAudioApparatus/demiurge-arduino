@@ -20,8 +20,9 @@
 #include "Adsr.h"
 #include "AudioInPort.h"
 #include "AudioOutPort.h"
-#include "CvInPort.h"
 #include "ControlPair.h"
+#include "CvInPort.h"
+#include "FixedSignal.h"
 #include "GatePort.h"
 #include "Inverter.h"
 #include "Mixer.h"
@@ -86,6 +87,7 @@ public:
 
 private:
    static bool _initialized;
+
    static Demiurge *_runtime;
 
    Demiurge();

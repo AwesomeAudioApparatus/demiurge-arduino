@@ -9,7 +9,7 @@ ControlPair release(4);
 
 Adsr adsr;
 
-GatePort gate;
+GatePort gate(1);
 
 Inverter invert;
 

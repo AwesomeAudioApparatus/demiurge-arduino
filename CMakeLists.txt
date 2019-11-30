@@ -32,6 +32,8 @@ add_library(
         src/CvInPort.h
         src/Demiurge.cpp
         src/Demiurge.h
+        src/FixedSignal.cpp
+        src/FixedSignal.h
         src/GatePort.cpp
         src/GatePort.h
         src/Inverter.cpp
@@ -40,6 +42,8 @@ add_library(
         src/mcp48x2/MCP48x2.h
         src/Mixer.cpp
         src/Mixer.h
+        src/OctavePerVolt.cpp
+        src/OctavePerVolt.h
         src/Pan.cpp
         src/Pan.h
         src/Passthru.cpp

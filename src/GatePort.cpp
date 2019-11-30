@@ -4,7 +4,7 @@
 static const int DEMIURGE_GATE_GPIO[1] = {27};
 
 GatePort::GatePort(int position) {
-   _position = position;
+   _position = position-1;
 }
 
 GatePort::~GatePort() = default;
