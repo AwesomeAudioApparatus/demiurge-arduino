@@ -5,16 +5,22 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_library(
         demiurge
+        src/Adsr.cpp
+        src/Adsr.h
         src/AudioInPort.cpp
         src/AudioInPort.h
         src/AudioOutPort.cpp
         src/AudioOutPort.h
+        src/ControlPair.cpp
+        src/ControlPair.h
         src/CvInPort.cpp
         src/CvInPort.h
         src/Demiurge.cpp
         src/Demiurge.h
         src/GatePort.cpp
         src/GatePort.h
+        src/Inverter.cpp
+        src/Inverter.h
         src/Mixer.cpp
         src/Mixer.h
         src/Pan.cpp
