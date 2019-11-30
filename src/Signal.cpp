@@ -1,10 +1,6 @@
 
 #include "Signal.h"
 
-double Signal::output() {
-   return _output;
-}
-
 double Signal::scale() {
    return _scale;
 }

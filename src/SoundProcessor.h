@@ -6,9 +6,7 @@
 class SoundProcessor {
 
 public:
-   virtual void readInputs();
-   virtual void compute();
-   virtual void writeOutputs();
+   virtual double read(double time) = 0;
 };
 
 

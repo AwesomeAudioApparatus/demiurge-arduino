@@ -19,7 +19,7 @@ Mixer mixer(2);
 Pan pan;
 
 void setup() {
-   Demiurge::initialize(20000);
+   Demiurge::initialize();
 
    mixer.configureInput(2, &cv1, 0.1, 0.0);
    mixer.configureInput(1, &cv2, 1.0, 0.0);

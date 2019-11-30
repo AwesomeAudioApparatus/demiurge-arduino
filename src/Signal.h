@@ -4,11 +4,10 @@
 
 #include "SoundProcessor.h"
 
-class Signal : SoundProcessor {
+class Signal : public SoundProcessor {
 
 public:
-   double output();
-
+   virtual ~Signal() = 0;
    double scale();
    double offset();
 
@@ -16,10 +15,8 @@ public:
    void setOffset( double offset );
 
 private:
-   double _output;
-   double _input;
-   double _scale;
-   double _offset;
+   double _scale = 1.0;
+   double _offset = 0.0;
 };
 
 
