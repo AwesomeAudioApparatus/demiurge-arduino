@@ -19,7 +19,7 @@ Mixer mixer(4);
 
 void setup()
 {
-   Demiurge::initialize();
+   Demiurge::runtime().begin();
 
    mixer.configure(1, &in1, &pot1);
 

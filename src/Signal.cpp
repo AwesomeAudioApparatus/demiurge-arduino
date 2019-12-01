@@ -1,6 +1,8 @@
 
 #include "Signal.h"
 
+Signal::~Signal() {}
+
 double Signal::scale() {
    return _scale;
 }
@@ -19,7 +21,7 @@ void Signal::setOffset(double offset) {
 
 double Signal::read(double time) {
    if (time > lastRead) {
-      output = update(time);
+      output = update(time) * _scale + _offset;
    }
    return output;
 }

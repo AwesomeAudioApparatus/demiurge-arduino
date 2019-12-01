@@ -20,6 +20,10 @@ INCLUDE_DIRECTORIES(
 
 add_library(
         demiurge
+        src/adc128s102/ADC128S102.cpp
+        src/adc128s102/ADC128S102.h
+        src/mcp4822/MCP4822.cpp
+        src/mcp4822/MCP4822.h
         src/Adsr.cpp
         src/Adsr.h
         src/AudioInPort.cpp
@@ -38,8 +42,6 @@ add_library(
         src/GatePort.h
         src/Inverter.cpp
         src/Inverter.h
-        src/mcp48x2/MCP48x2.cpp
-        src/mcp48x2/MCP48x2.h
         src/Mixer.cpp
         src/Mixer.h
         src/OctavePerVolt.cpp

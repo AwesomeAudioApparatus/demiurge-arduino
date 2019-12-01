@@ -19,7 +19,7 @@ FixedSignal fixed(1.0);
 Pan pan;
 
 void setup() {
-   Demiurge::initialize();
+   Demiurge::runtime().begin();
 
    mixer.configure(2, &cv1, &fixed);
    mixer.configure(1, &cv2, &fixed);

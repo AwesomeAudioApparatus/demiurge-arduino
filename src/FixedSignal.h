@@ -9,7 +9,7 @@ class FixedSignal : public Signal {
 
 public:
    explicit FixedSignal(double value);
-   ~FixedSignal() override;
+   ~FixedSignal() ;
 
 protected:
    double update(double time) override;

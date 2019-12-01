@@ -11,7 +11,7 @@ class ControlPair : public Signal {
 public:
    explicit ControlPair(int position);
 
-   ~ControlPair() override;
+   ~ControlPair() ;
 
    void setPotentiometerScale(double scale);
 

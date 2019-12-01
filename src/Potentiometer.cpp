@@ -6,5 +6,5 @@ Potentiometer::Potentiometer(int position) {
 }
 
 double Potentiometer::update(double time) {
-   return Demiurge::runtime()->inputs()->value[_position] * scale() + offset();
+   return Demiurge::runtime().inputs()->value[_position];
 }

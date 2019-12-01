@@ -5,7 +5,9 @@ AudioOutPort::AudioOutPort(int position) {
    _position = position;
 }
 
-AudioOutPort::~AudioOutPort() = default;
+AudioOutPort::~AudioOutPort(){
+
+};
 
 void AudioOutPort::configure(Signal *input) {
    _input = input;
@@ -17,7 +19,11 @@ void AudioOutPort::configure(Signal *input, double scale, double offset) {
    setOffset(offset);
 }
 
+double AudioOutPort::update(double time) {
+   return _input->read(time);
+}
+
 void AudioOutPort::tick(double time) {
-   double voltage = scale() * _input->read(time) + offset();
-   Demiurge::runtime()->setDAC(_position, voltage);
+   double voltage = update(time);
+   Demiurge::runtime().setDAC(_position, voltage);
 }

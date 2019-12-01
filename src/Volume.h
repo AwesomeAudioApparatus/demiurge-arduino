@@ -10,7 +10,7 @@ class Volume : public Signal {
 public:
    Volume();
 
-   ~Volume() override;
+   ~Volume() ;
 
    void configure( Signal *input, Signal *control);
 

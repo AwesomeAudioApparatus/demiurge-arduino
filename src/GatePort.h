@@ -17,7 +17,7 @@ class GatePort : public Signal {
 public:
    explicit GatePort(int position);
 
-   ~GatePort() override;
+   ~GatePort() ;
 
    double update(double time) override;
 

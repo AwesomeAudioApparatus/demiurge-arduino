@@ -9,7 +9,7 @@ class Adsr : public Signal {
 public:
    Adsr();
 
-   ~Adsr() override;
+   ~Adsr();
 
    void configureGate(Signal *gate);
 

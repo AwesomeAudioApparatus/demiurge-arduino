@@ -15,5 +15,5 @@ void AudioInPort::configure(double scale, double offset) {
 }
 
 double AudioInPort::update(double time) {
-   return scale() * Demiurge::runtime()->inputs()->value[_position] + offset();
+   return Demiurge::runtime().inputs()->value[_position];
 }

@@ -17,7 +17,7 @@ public:
    double read(double time) final;
 
 protected:
-   virtual double update(double time);
+   virtual double update(double time) = 0;
 
 private:
    double lastRead = -1.0;

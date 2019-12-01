@@ -17,7 +17,7 @@ AudioOutPort out1(1);
 AudioOutPort out2(2);
 
 void setup() {
-   Demiurge::initialize();
+   Demiurge::runtime().begin();
 
    adsr.configureGate(&gate);
    adsr.configureAttack(&attack);

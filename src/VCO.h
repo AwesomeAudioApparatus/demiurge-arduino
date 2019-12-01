@@ -14,7 +14,7 @@ class VCO : public Signal {
 public:
    VCO(int mode);
 
-   ~VCO() override;
+   ~VCO() ;
 
    void configureFrequency(Signal *freqControl);
 

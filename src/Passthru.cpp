@@ -8,5 +8,5 @@ Passthru::Passthru(Signal *input) {
 Passthru::~Passthru() = default;
 
 double Passthru::update(double time) {
-   return _input->read(time) * scale() + offset();
+   return _input->read(time);
 }

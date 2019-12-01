@@ -10,7 +10,7 @@ GatePort::GatePort(int position) {
 GatePort::~GatePort() = default;
 
 double GatePort::update(double time) {
-   bool state = Demiurge::runtime()->gpio(DEMIURGE_GATE_GPIO[_position]);
+   bool state = Demiurge::runtime().gpio(DEMIURGE_GATE_GPIO[_position]);
    if( state )
    {
       return DEMIURGE_GATE_HIGH;

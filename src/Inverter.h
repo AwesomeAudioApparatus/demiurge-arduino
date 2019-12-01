@@ -8,7 +8,7 @@ class Inverter : public Signal {
 
 public:
    Inverter();
-   ~Inverter() override;
+   ~Inverter() ;
 
    explicit Inverter(double midpoint);
 

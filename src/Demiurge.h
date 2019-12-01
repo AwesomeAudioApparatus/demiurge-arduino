@@ -5,16 +5,36 @@
 #define DEMIURGE_MAX_SINKS 2
 #endif
 
-#ifndef PIN_NUM_MOSI
-#define PIN_NUM_MOSI 13
+#ifndef DEMIURGE_VMOSI_PIN
+#define DEMIURGE_VMOSI_PIN 23
 #endif
 
-#ifndef PIN_NUM_CLK
-#define PIN_NUM_CLK 14
+#ifndef DEMIURGE_VMISO_PIN
+#define DEMIURGE_VMISO_PIN 19
 #endif
 
-#ifndef PIN_NUM_CS
-#define PIN_NUM_CS 15
+#ifndef DEMIURGE_VCLK_PIN
+#define DEMIURGE_VCLK_PIN 18
+#endif
+
+#ifndef DEMIURGE_VCS_PIN
+#define DEMIURGE_VCS_PIN 5
+#endif
+
+#ifndef DEMIURGE_HMISO_PIN
+#define DEMIURGE_HMISO_PIN 12
+#endif
+
+#ifndef DEMIURGE_HMOSI_PIN
+#define DEMIURGE_HMOSI_PIN 13
+#endif
+
+#ifndef DEMIURGE_HCLK_PIN
+#define DEMIURGE_HCLK_PIN 14
+#endif
+
+#ifndef DEMIURGE_HCS_PIN
+#define DEMIURGE_HCS_PIN 15
 #endif
 
 #include "Adsr.h"
@@ -35,7 +55,8 @@
 #include "SoundProcessor.h"
 #include "Threshold.h"
 #include "VCO.h"
-#include "mcp48x2/MCP48x2.h"
+#include "adc128s102/ADC128S102.h"
+#include "mcp4822/MCP4822.h"
 
 typedef struct {
    double value[8];
@@ -53,27 +74,22 @@ class Demiurge {
 
 public:
 
-   static void initialize() {
-      if (_initialized)
-         return;
-      _runtime = new Demiurge();
-      _initialized = true;
+   static Demiurge &runtime() {
+      static Demiurge instance;
+      return instance;
    }
 
-   static void shutdown() {
-      delete _runtime;
-      _initialized = false;
-   }
+   Demiurge(Demiurge const &) = delete;
 
-   static Demiurge *runtime() {
-      return _runtime;
-   }
+   void operator=(Demiurge const &) = delete;
 
    static double clip(double value) {
       if (value > 10.0) return 10.0;
       if (value < -10.0) return -10.0;
       return value;
    };
+
+   void begin();
 
    void tick();
 
@@ -85,18 +101,16 @@ public:
 
    bool gpio(int i);
 
-private:
-   static bool _initialized;
 
-   static Demiurge *_runtime;
+private:
 
    Demiurge();
 
    ~Demiurge();
 
-   void initializeSpi();
+   void initializeDacSpi();
 
-   void initializeDac();
+   void initializeAdcSpi();
 
    void initializeTimer();
 
@@ -113,11 +127,17 @@ private:
    esp_timer_create_args_t *_config;
 
    esp_timer_handle_t _timer;
-   spi_device_handle_t spi;
-   spi_bus_config_t spiBusConfig;
-   spi_device_interface_config_t spiDeviceIntfConfig;
+   spi_device_handle_t _hspi;
+   spi_bus_config_t _hspiBusConfig;
+   spi_device_interface_config_t _hspiDeviceIntfConfig;
 
-   MCP48x2 *_dac;
+   spi_device_handle_t _vspi;
+   spi_bus_config_t _vspiBusConfig;
+   spi_device_interface_config_t _vspiDeviceIntfConfig;
+
+   MCP4822 *_dac;
+   ADC128S102 *_adc;
 };
+
 
 #endif

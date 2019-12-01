@@ -17,6 +17,9 @@ public:
 
    void tick(double time) override;
 
+protected:
+   double update(double time) override;
+
 private:
    int _position;
    Signal *_input;

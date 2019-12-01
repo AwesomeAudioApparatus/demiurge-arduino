@@ -30,7 +30,7 @@ class PanChannel : public Signal {
 public:
    PanChannel(Pan *host, double factor);
 
-   ~PanChannel() override;
+   ~PanChannel() ;
 
    double update(double time) override;
 

@@ -11,7 +11,7 @@ class Mixer : public Signal {
 public:
    explicit Mixer(int numberOfInputs);
 
-   ~Mixer() override;
+   ~Mixer() ;
 
    void configure(int number, Signal *source, Signal *control);
 
