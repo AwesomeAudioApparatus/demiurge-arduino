@@ -58,14 +58,6 @@
 #include "adc128s102/ADC128S102.h"
 #include "mcp4822/MCP4822.h"
 
-typedef struct {
-   double value[8];
-} analog_in_t;
-
-typedef struct {
-   double value[2];
-} analog_out_t;
-
 class Demiurge {
 
    void registerSink(Sink *processor);
@@ -93,9 +85,9 @@ public:
 
    void tick();
 
-   analog_in_t *inputs();
+   double *inputs();
 
-   analog_out_t *outputs();
+   double *outputs();
 
    void setDAC(int channel, double voltage);
 
@@ -120,8 +112,8 @@ private:
 
    void readADC();
 
-   analog_in_t _inputs;
-   analog_out_t _outputs;
+   double _inputs[8];
+   double _outputs[2];
 
    double timerCounter = 0;         // in microseconds, increments 50 at a time.
    esp_timer_create_args_t *_config;

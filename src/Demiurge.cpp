@@ -151,15 +151,14 @@ void IRAM_ATTR Demiurge::readADC() {
    _adc->queue();  // start new conversion.
    uint16_t *channels = _adc->channels();
    double k = 20 / 4095;
-   for(int i=0; i < 8; i++)
-   {
+   for (int i = 0; i < 8; i++) {
       // k = (y1-y2) / (x1-x2)
       // k = (10- -10) / (4095 - 0)
       // k = 20 / 4095
 
       // m = y1 - k * x1;
       // m = 10 - k * 4095;
-      _inputs.value[i] = k * channels[i] - 10;
+      _inputs[i] = k * channels[i] - 10;
    }
 }
 
@@ -176,14 +175,16 @@ void Demiurge::setDAC(int channel, double voltage) {
       dacError = _dac->send(MCP4822_CHANNEL_B | MCP4822_GAIN | MCP4822_ACTIVE, output);
    }
    ESP_ERROR_CHECK(dacError)
+
+   _outputs[channel - 1] = voltage;
 }
 
-analog_in_t *Demiurge::inputs() {
-   return &_inputs;
+double *Demiurge::inputs() {
+   return _inputs;
 }
 
-analog_out_t *Demiurge::outputs() {
-   return &_outputs;
+double *Demiurge::outputs() {
+   return _outputs;
 }
 
 bool Demiurge::gpio(int pin) {

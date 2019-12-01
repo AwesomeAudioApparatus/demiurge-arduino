@@ -10,5 +10,5 @@ CvInPort::CvInPort(int position) {
 CvInPort::~CvInPort() = default;
 
 double CvInPort::update(double time) {
-   return Demiurge::runtime().inputs()->value[_position];
+   return Demiurge::runtime().inputs()[_position];
 }
