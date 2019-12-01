@@ -11,10 +11,11 @@ class Mixer : public Signal {
 public:
    explicit Mixer(int numberOfInputs);
 
-   ~Mixer() ;
+   ~Mixer() override;
 
    void configure(int number, Signal *source, Signal *control);
 
+protected:
    double update(double time) override;
 
 private:

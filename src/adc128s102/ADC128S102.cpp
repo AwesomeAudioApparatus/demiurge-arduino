@@ -21,17 +21,29 @@ ADC128S102::ADC128S102(spi_device_handle_t spi) {
 ADC128S102::~ADC128S102() {
 }
 
-void ADC128S102::queue() {
-   esp_err_t err = spi_device_acquire_bus(_spi, portMAX_DELAY);
-   ESP_ERROR_CHECK(err)
+void IRAM_ATTR ADC128S102::queue() {
+   try {
+      esp_err_t err = spi_device_acquire_bus(_spi, portMAX_DELAY);
+      ESP_ERROR_CHECK(err)
 
-   err = spi_device_queue_trans(_spi, &_tx, 10); // 10 ticks is probably very long.
-   ESP_ERROR_CHECK(err)
+      err = spi_device_queue_trans(_spi, &_tx, 10); // 10 ticks is probably very long.
+      ESP_ERROR_CHECK(err)
+   } catch (...)
+   {
+      spi_device_release_bus(_spi);
+
+   }
+
 }
 
-void ADC128S102::read() {
-   esp_err_t err = spi_device_get_trans_result(_spi, &_rx, 10);
-   ESP_ERROR_CHECK(err)
+void IRAM_ATTR ADC128S102::read() {
+   try {
+      esp_err_t err = spi_device_get_trans_result(_spi, &_rx, 10);
+      ESP_ERROR_CHECK(err)
+   } catch(...)
+   {
+
+   }
    spi_device_release_bus(_spi);
    for (int i = 0; i < 8; i++) {
       uint16_t high = _rxdata[i * 2];

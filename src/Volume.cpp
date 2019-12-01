@@ -1,8 +1,8 @@
 
-#include "Volume.h"
+#include <esp_task.h>
+#include "Demiurge.h"
 
 Volume::Volume() {
-
 }
 
 Volume::~Volume() {
@@ -10,6 +10,7 @@ Volume::~Volume() {
 }
 
 void Volume::configure(Signal *input, Signal *control) {
+   configASSERT(input != nullptr && control != nullptr)
    _input = input;
    _control = control;
 }

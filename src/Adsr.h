@@ -9,7 +9,7 @@ class Adsr : public Signal {
 public:
    Adsr();
 
-   ~Adsr();
+   ~Adsr() override;
 
    void configureGate(Signal *gate);
 
@@ -23,6 +23,7 @@ public:
 
    void configureTrig(Signal *trig);
 
+protected:
    double update(double time) override;
 
 private:

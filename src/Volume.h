@@ -10,10 +10,11 @@ class Volume : public Signal {
 public:
    Volume();
 
-   ~Volume() ;
+   ~Volume() override;
 
    void configure( Signal *input, Signal *control);
 
+protected:
    double update(double time) override;
 
 private:

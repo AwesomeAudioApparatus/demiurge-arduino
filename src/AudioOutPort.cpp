@@ -2,11 +2,13 @@
 #include "Demiurge.h"
 
 AudioOutPort::AudioOutPort(int position) {
+   configASSERT(position > 0 && position <= 2 )
    _position = position;
+   Demiurge::runtime().registerSink(this);
 }
 
 AudioOutPort::~AudioOutPort(){
-
+   Demiurge::runtime().unregisterSink(this);
 };
 
 void AudioOutPort::configure(Signal *input) {

@@ -7,10 +7,11 @@ class AudioInPort : public Signal {
 
 public:
    explicit AudioInPort(int position);
-   ~AudioInPort();
+   ~AudioInPort() override;
 
    void configure( double scale, double offset );
 
+protected:
    double update(double time) override;
 
 private:

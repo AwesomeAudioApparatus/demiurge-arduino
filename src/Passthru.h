@@ -9,7 +9,7 @@ class Passthru : public Signal {
 
 public:
    explicit Passthru(Signal *input);
-   ~Passthru() ;
+   ~Passthru() override;
 
 protected:
    double update(double time) override;

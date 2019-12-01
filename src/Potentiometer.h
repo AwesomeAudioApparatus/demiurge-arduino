@@ -12,7 +12,9 @@ class Potentiometer : public Signal {
 
 public:
    explicit Potentiometer(int position);
+   ~Potentiometer() override;
 
+protected:
    double update(double time) override;
 
 private:

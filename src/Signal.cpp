@@ -20,8 +20,14 @@ void Signal::setOffset(double offset) {
 }
 
 double Signal::read(double time) {
-   if (time > lastRead) {
-      output = update(time) * _scale + _offset;
+   if (time > _lastRead)
+   {
+      _output = update(time);// * _scale + _offset;
+      _lastRead = time;
    }
-   return output;
+   return _output;
+}
+
+double Signal::currentValue() {
+   return _output;
 }

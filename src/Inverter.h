@@ -8,7 +8,7 @@ class Inverter : public Signal {
 
 public:
    Inverter();
-   ~Inverter() ;
+   ~Inverter() override;
 
    explicit Inverter(double midpoint);
 
@@ -16,6 +16,7 @@ public:
 
    void configure(Signal *input);
 
+protected:
    double update(double time) override;
 
 private:

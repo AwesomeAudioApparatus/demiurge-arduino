@@ -60,20 +60,18 @@
 
 class Demiurge {
 
-   void registerSink(Sink *processor);
-
-   void unregisterSink(Sink *processor);
+//   Demiurge(Demiurge const &) = delete;
 
 public:
 
    static Demiurge &runtime() {
+
       static Demiurge instance;
       return instance;
    }
 
-   Demiurge(Demiurge const &) = delete;
 
-   void operator=(Demiurge const &) = delete;
+//   void operator=(Demiurge const &) = delete;
 
    static double clip(double value) {
       if (value > 10.0) return 10.0;
@@ -85,6 +83,10 @@ public:
 
    void tick();
 
+   void registerSink(Sink *processor);
+
+   void unregisterSink(Sink *processor);
+
    double *inputs();
 
    double *outputs();
@@ -93,6 +95,17 @@ public:
 
    bool gpio(int i);
 
+   uint64_t lastMeasure();
+
+   uint64_t micros();
+
+   bool ontimerEnter();
+
+   void ontimerExit();
+
+   uint32_t overruns();
+
+   uint32_t timerruns();
 
 private:
 
@@ -111,23 +124,29 @@ private:
    Sink *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
 
    void readADC();
-
    double _inputs[8];
+
    double _outputs[2];
+   uint64_t _startTime;
+   volatile bool _enterred;
+   volatile uint32_t _timerruns;
+   volatile uint32_t _overruns;
 
-   double timerCounter = 0;         // in microseconds, increments 50 at a time.
+   uint64_t _lastMeasure;
+   double timerCounter;         // in microseconds, increments 50 at a time.
+
    esp_timer_create_args_t *_config;
-
    esp_timer_handle_t _timer;
    spi_device_handle_t _hspi;
    spi_bus_config_t _hspiBusConfig;
-   spi_device_interface_config_t _hspiDeviceIntfConfig;
 
+   spi_device_interface_config_t _hspiDeviceIntfConfig;
    spi_device_handle_t _vspi;
    spi_bus_config_t _vspiBusConfig;
-   spi_device_interface_config_t _vspiDeviceIntfConfig;
 
+   spi_device_interface_config_t _vspiDeviceIntfConfig;
    MCP4822 *_dac;
+
    ADC128S102 *_adc;
 };
 

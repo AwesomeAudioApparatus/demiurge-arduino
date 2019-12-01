@@ -1,9 +1,8 @@
 
 #include "Demiurge.h"
-#include "CvInPort.h"
-
 
 CvInPort::CvInPort(int position) {
+   configASSERT(position > 0 && position <= 4 )
    _position = position + DEMIURGE_CVINPUT_OFFSET;
 }
 

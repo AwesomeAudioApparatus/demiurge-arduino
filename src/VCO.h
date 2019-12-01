@@ -12,9 +12,9 @@
 class VCO : public Signal {
 
 public:
-   VCO(int mode);
+   explicit VCO(int mode);
 
-   ~VCO() ;
+   ~VCO() override;
 
    void configureFrequency(Signal *freqControl);
 
@@ -22,8 +22,9 @@ public:
 
    void configureTrig(Signal *trigControl);
 
-protected:
+   // TODO: Move to protected when testing is over
    double update(double time) override;
+protected:
 
 private:
    int _mode;

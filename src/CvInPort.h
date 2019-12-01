@@ -11,10 +11,12 @@ class CvInPort : public Signal {
 
 public:
    explicit CvInPort(int position);
-   ~CvInPort();
+
+   ~CvInPort() override;
 
    int _position;
 
+protected:
    double update(double time) override;
 };
 

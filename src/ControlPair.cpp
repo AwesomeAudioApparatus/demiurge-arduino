@@ -1,7 +1,8 @@
 
-#include "ControlPair.h"
+#include "Demiurge.h"
 
 ControlPair::ControlPair(int position) {
+   configASSERT(position > 0 && position <= 8 )
    _potentiometer = new Potentiometer(position);
    _cvIn = new CvInPort(position);
    _potentiometerScale = 1.0;

@@ -12,9 +12,7 @@ public:
    }
 
 private:
-   OctavePerVolt();
-
-   ~OctavePerVolt();
+   OctavePerVolt() = delete;
 };
 
 

@@ -16,12 +16,14 @@ public:
 
    double read(double time) final;
 
+   double currentValue();
+
 protected:
    virtual double update(double time) = 0;
 
 private:
-   double lastRead = -1.0;
-   double output = 0.0;
+   double _lastRead = -1.0;
+   double _output = 0.0;
    double _scale = 1.0;
    double _offset = 0.0;
 };

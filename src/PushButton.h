@@ -8,7 +8,7 @@ class PushButton : public Signal {
 
 public:
    PushButton(int position);
-   ~PushButton();
+   ~PushButton() override;
 };
 
 

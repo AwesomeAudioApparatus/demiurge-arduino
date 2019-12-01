@@ -11,12 +11,13 @@ class ControlPair : public Signal {
 public:
    explicit ControlPair(int position);
 
-   ~ControlPair() ;
+   ~ControlPair() override;
 
    void setPotentiometerScale(double scale);
 
    void setCvScale(double scale);
 
+protected:
    double update(double time) override;
 
 private:

@@ -4,6 +4,7 @@
 static const int DEMIURGE_GATE_GPIO[1] = {27};
 
 GatePort::GatePort(int position) {
+   configASSERT(position > 0 && position <= 1 )
    _position = position-1;
 }
 
