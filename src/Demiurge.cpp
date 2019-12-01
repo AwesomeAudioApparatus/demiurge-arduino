@@ -1,4 +1,6 @@
 
+#include "Arduino.h"
+
 #include "esp_types.h"
 #include "string.h"
 #include "freertos/FreeRTOS.h"
@@ -7,8 +9,12 @@
 #include "driver/periph_ctrl.h"
 #include "driver/timer.h"
 #include "driver/spi_master.h"
-
 #include "Demiurge.h"
+
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+#include "esp_log.h"
+
+static const char* TAG = "Demiurge";
 
 portMUX_TYPE demiurgeTimerMux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -24,15 +30,21 @@ void IRAM_ATTR onTimer(void *parameter) {
 Demiurge::Demiurge() = default;
 
 void Demiurge::begin() {
+   ESP_LOGI(TAG, "Starting Demiurge");
+   Serial.println("Starting Demiurge");
+
    initializeDacSpi();
+   initializeAdcSpi();
    _dac = new MCP4822(_hspi);
    _adc = new ADC128S102(_hspi);
    _adc->queue();
-   initializeTimer();
+//   initializeTimer();
    initializeSinks();
 }
 
 void Demiurge::initializeDacSpi() {
+   ESP_LOGI(TAG, "Initializing DAC SPI");
+   Serial.println("Initializing DAC SPI");
    memset(&_hspiBusConfig, 0, sizeof(_hspiBusConfig));
    _hspiBusConfig.miso_io_num = -1;
    _hspiBusConfig.mosi_io_num = DEMIURGE_HMISO_PIN;
@@ -49,7 +61,7 @@ void Demiurge::initializeDacSpi() {
    _hspiDeviceIntfConfig.spics_io_num = DEMIURGE_HCS_PIN;   //CS pin
    _hspiDeviceIntfConfig.queue_size = 8;
 //   _hspiDeviceIntfConfig.flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_NO_DUMMY;
-   _hspiDeviceIntfConfig.command_bits = 0;
+//   _hspiDeviceIntfConfig.command_bits = 0;
 //   _hspiDeviceIntfConfig.address_bits = 0;
 
    esp_err_t ret = spi_bus_initialize(HSPI_HOST, &_hspiBusConfig, 1);
@@ -60,6 +72,8 @@ void Demiurge::initializeDacSpi() {
 }
 
 void Demiurge::initializeAdcSpi() {
+   ESP_LOGI(TAG, "Initializing ADC SPI");
+   Serial.println("Initializing ADC SPI");
    memset(&_vspiBusConfig, 0, sizeof(_vspiBusConfig));
    _vspiBusConfig.miso_io_num = DEMIURGE_VMISO_PIN;
    _vspiBusConfig.mosi_io_num = DEMIURGE_VMOSI_PIN;
@@ -67,7 +81,7 @@ void Demiurge::initializeAdcSpi() {
    _vspiBusConfig.quadwp_io_num = -1;
    _vspiBusConfig.quadhd_io_num = -1;
    _vspiBusConfig.max_transfer_sz = 32;
-   _vspiBusConfig.flags = SPICOMMON_BUSFLAG_MASTER;
+//   _vspiBusConfig.flags = SPICOMMON_BUSFLAG_MASTER;
 //   _vspiBusConfig.intr_flags = ESP_INTR_FLAG_IRAM;
 
    memset(&_vspiDeviceIntfConfig, 0, sizeof(_vspiDeviceIntfConfig));
@@ -79,7 +93,7 @@ void Demiurge::initializeAdcSpi() {
 //   _vspiDeviceIntfConfig.command_bits = 0;
 //   _vspiDeviceIntfConfig.address_bits = 0;
 
-   esp_err_t ret = spi_bus_initialize(HSPI_HOST, &_vspiBusConfig, 2);
+   esp_err_t ret = spi_bus_initialize(VSPI_HOST, &_vspiBusConfig, 2);
    ESP_ERROR_CHECK(ret);
 
    ret = spi_bus_add_device(HSPI_HOST, &_vspiDeviceIntfConfig, &_vspi);
@@ -87,6 +101,8 @@ void Demiurge::initializeAdcSpi() {
 }
 
 void Demiurge::initializeTimer() {
+   ESP_LOGI(TAG, "Initializing Timer");
+   Serial.println( "Initializing Timer");
    _config = static_cast<esp_timer_create_args_t *>(malloc(sizeof(esp_timer_create_args_t)));
    _config->callback = onTimer;
    _config->name = "Sampler";
@@ -101,6 +117,8 @@ void Demiurge::initializeTimer() {
 }
 
 void Demiurge::initializeSinks() {
+   ESP_LOGI(TAG, "Initializing Sinks");
+   Serial.println( "Initializing Sinks");
    for (auto &_sink : _sinks) {
       _sink = nullptr;
    }
@@ -109,6 +127,8 @@ void Demiurge::initializeSinks() {
 #pragma clang diagnostic pop
 
 Demiurge::~Demiurge() {
+   ESP_LOGI(TAG, "Destructor");
+   Serial.println( "Destructor");
 
    spi_bus_remove_device(_vspi);
    spi_bus_remove_device(_hspi);
@@ -119,6 +139,8 @@ Demiurge::~Demiurge() {
 }
 
 void Demiurge::registerSink(Sink *processor) {
+   ESP_LOGI(TAG, "Registering sink");
+   Serial.println( "Registering sink");
    for (auto &_sink : _sinks) {
       if (_sink == nullptr) {
          _sink = processor;
@@ -129,6 +151,8 @@ void Demiurge::registerSink(Sink *processor) {
 
 
 void Demiurge::unregisterSink(Sink *processor) {
+   ESP_LOGI(TAG, "Unregistering sink");
+   Serial.println( "Unregistering sink");
    for (auto &_sink : _sinks) {
       if (_sink == processor) {
          _sink = nullptr;
@@ -138,6 +162,8 @@ void Demiurge::unregisterSink(Sink *processor) {
 }
 
 void IRAM_ATTR Demiurge::tick() {
+   ESP_LOGD(TAG, "tick()");
+   Serial.println( "tick()");
    readADC();
    for (auto &_sink : _sinks) {
       _sink->tick(timerCounter);
@@ -147,6 +173,8 @@ void IRAM_ATTR Demiurge::tick() {
 
 
 void IRAM_ATTR Demiurge::readADC() {
+   ESP_LOGI(TAG, "Reading ADC");
+   Serial.println( "Reading ADC");
    _adc->read(); // get the previous cycle's data.
    _adc->queue();  // start new conversion.
    uint16_t *channels = _adc->channels();
@@ -163,6 +191,8 @@ void IRAM_ATTR Demiurge::readADC() {
 }
 
 void Demiurge::setDAC(int channel, double voltage) {
+   ESP_LOGI(TAG, "Writing to DAC");
+   Serial.println( "Writing to DAC");
 
    // Convert to 12 bit DAC levels. -10V -> 0, 0 -> 2048, +10V -> 4095
    auto output = (unsigned int) (voltage * 204.8 + 204.8);

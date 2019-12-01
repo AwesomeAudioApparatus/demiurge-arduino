@@ -9,13 +9,14 @@ else ()
 endif ()
 
 INCLUDE_DIRECTORIES(
-        ${ESP_INCLUDES}/freertos
-        ${ESP_INCLUDES}/newlib
         ${ESP_INCLUDES}/config
-        ${ESP_INCLUDES}/esp32
-        ${ESP_INCLUDES}/soc
-        ${ESP_INCLUDES}/heap
         ${ESP_INCLUDES}/driver
+        ${ESP_INCLUDES}/esp32
+        ${ESP_INCLUDES}/freertos
+        ${ESP_INCLUDES}/heap
+        ${ESP_INCLUDES}/log
+        ${ESP_INCLUDES}/newlib
+        ${ESP_INCLUDES}/soc
 )
 
 add_library(
