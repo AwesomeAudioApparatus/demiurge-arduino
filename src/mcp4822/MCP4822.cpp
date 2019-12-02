@@ -31,13 +31,13 @@ MCP4822::MCP4822(spi_device_handle_t spi) {
 }
 
 esp_err_t MCP4822::dac1Output(uint16_t output) {
-   _tx1.tx_data[0] = MCP4822_CHANNEL_A | MCP4822_GAIN | MCP4822_ACTIVE | ((output >> 8) & 0xFF);
+   _tx1.tx_data[0] = MCP4822_CHANNEL_A | MCP4822_ACTIVE | ((output >> 8) & 0xFF);
    _tx1.tx_data[1] = output & 0xFF;
    return spi_device_queue_trans(_spi, &_tx1, 10); // 10 ticks is probably very long.
 }
 
 esp_err_t MCP4822::dac2Output(uint16_t output) {
-   _tx2.tx_data[0] = MCP4822_CHANNEL_B | MCP4822_GAIN | MCP4822_ACTIVE | ((output >> 8) & 0xFF);
+   _tx2.tx_data[0] = MCP4822_CHANNEL_B | MCP4822_ACTIVE | ((output >> 8) & 0xFF);
    _tx2.tx_data[1] = output & 0xFF;
    return spi_device_queue_trans(_spi, &_tx2, 10); // 10 ticks is probably very long.
 }

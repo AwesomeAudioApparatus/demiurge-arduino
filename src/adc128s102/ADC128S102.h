@@ -41,7 +41,6 @@ private :
    uint8_t _rxdata[16];
 
    uint16_t _channels[8];
-
 };
 
 

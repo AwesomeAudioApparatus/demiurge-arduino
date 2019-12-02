@@ -37,8 +37,18 @@ Mixer mixer(2);
 FixedSignal fixed(1.0);
 Pan pan;
 
+#define ADC_CS 5
+#define ADC_CLK 18
+#define ADC_MISO 19
+#define ADC_MOSI 23
+
 void setup() {
-   Serial.begin(115200);
+  Serial.begin(115200);
+
+  pinMode(ADC_CS, OUTPUT); digitalWrite(ADC_CS, HIGH);
+  pinMode(ADC_MOSI, OUTPUT); digitalWrite(ADC_MOSI, LOW);
+  pinMode(ADC_MISO, INPUT);
+  pinMode(ADC_CLK, OUTPUT); digitalWrite(ADC_CLK, LOW);
 
    Serial.println("setting up mixer");
    mixer.configure(2, &cv1, &fixed);
@@ -58,13 +68,13 @@ void setup() {
 
 void loop() {
    Demiurge::runtime().printReport();
-   double *inputs = Demiurge::runtime().inputs();
-   double value1 = vco1.currentValue();
+   uint16_t *inputs = Demiurge::runtime().rawAdc();
    for( int i=0; i < 8; i++ ) {
      Serial.print( inputs[i] );
      Serial.print( "    " );
    }
    Serial.println();
+   
    Serial.print( Demiurge::runtime().output1() );
    Serial.print( "    " );
    Serial.print( Demiurge::runtime().dac1() );
@@ -73,6 +83,8 @@ void loop() {
    Serial.print( "    " );
    Serial.print( Demiurge::runtime().dac2() );
    Serial.println();
+
+   double value1 = vco1.currentValue();
    Serial.println(value1);
    delay(872);
 }

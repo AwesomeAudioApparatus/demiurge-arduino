@@ -122,6 +122,7 @@ public:
    uint16_t dac2();
    double output1();
    double output2();
+   uint16_t *rawAdc();
 
    Timing *timing[5];
 
@@ -161,16 +162,16 @@ private:
 
    esp_timer_create_args_t *_config;
    esp_timer_handle_t _timer;
+
    spi_device_handle_t _hspi;
    spi_bus_config_t _hspiBusConfig;
-
    spi_device_interface_config_t _hspiDeviceIntfConfig;
+
    spi_device_handle_t _vspi;
    spi_bus_config_t _vspiBusConfig;
-
    spi_device_interface_config_t _vspiDeviceIntfConfig;
-   MCP4822 *_dac;
 
+   MCP4822 *_dac;
    ADC128S102 *_adc;
 
    void readGpio();

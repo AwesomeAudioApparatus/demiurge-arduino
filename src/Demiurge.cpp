@@ -58,7 +58,7 @@ void Demiurge::begin() {
    initializeDacSpi();
    initializeAdcSpi();
    _dac = new MCP4822(_hspi);
-   _adc = new ADC128S102(_hspi);
+   _adc = new ADC128S102(_vspi);
    _adc->queue();
    initializeTimer();
    initializeSinks();
@@ -72,17 +72,12 @@ void Demiurge::initializeDacSpi() {
    _hspiBusConfig.quadwp_io_num = -1;
    _hspiBusConfig.quadhd_io_num = -1;
    _hspiBusConfig.max_transfer_sz = 16;
-   //_hspiBusConfig.flags = SPICOMMON_BUSFLAG_MASTER;
-   //_hspiBusConfig.intr_flags = ESP_INTR_FLAG_IRAM;
 
    memset(&_hspiDeviceIntfConfig, 0, sizeof(_hspiDeviceIntfConfig));
    _hspiDeviceIntfConfig.clock_speed_hz = 10000000;
    _hspiDeviceIntfConfig.mode = 0;                    //SPI mode 0
    _hspiDeviceIntfConfig.spics_io_num = DEMIURGE_HCS_PIN;   //CS pin
    _hspiDeviceIntfConfig.queue_size = 8;
-//   _hspiDeviceIntfConfig.flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_NO_DUMMY;
-//   _hspiDeviceIntfConfig.command_bits = 0;
-//   _hspiDeviceIntfConfig.address_bits = 0;
 
    esp_err_t ret = spi_bus_initialize(HSPI_HOST, &_hspiBusConfig, 1);
    ESP_ERROR_CHECK(ret);
@@ -92,29 +87,25 @@ void Demiurge::initializeDacSpi() {
 }
 
 void Demiurge::initializeAdcSpi() {
-   memset(&_vspiBusConfig, 0, sizeof(_vspiBusConfig));
+   memset(&_vspiBusConfig, 0, sizeof(spi_bus_config_t));
    _vspiBusConfig.miso_io_num = DEMIURGE_VMISO_PIN;
    _vspiBusConfig.mosi_io_num = DEMIURGE_VMOSI_PIN;
    _vspiBusConfig.sclk_io_num = DEMIURGE_VCLK_PIN;
    _vspiBusConfig.quadwp_io_num = -1;
    _vspiBusConfig.quadhd_io_num = -1;
    _vspiBusConfig.max_transfer_sz = 32;
-//   _vspiBusConfig.flags = SPICOMMON_BUSFLAG_MASTER;
-//   _vspiBusConfig.intr_flags = ESP_INTR_FLAG_IRAM;
+   _vspiBusConfig.flags = SPICOMMON_BUSFLAG_MASTER;
 
-   memset(&_vspiDeviceIntfConfig, 0, sizeof(_vspiDeviceIntfConfig));
+   memset(&_vspiDeviceIntfConfig, 0, sizeof(spi_device_interface_config_t));
    _vspiDeviceIntfConfig.clock_speed_hz = 10000000;
    _vspiDeviceIntfConfig.mode = 0;                    //SPI mode 0
    _vspiDeviceIntfConfig.spics_io_num = DEMIURGE_VCS_PIN;   //CS pin
    _vspiDeviceIntfConfig.queue_size = 8;
-//   _vspiDeviceIntfConfig.flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_NO_DUMMY;
-//   _vspiDeviceIntfConfig.command_bits = 0;
-//   _vspiDeviceIntfConfig.address_bits = 0;
 
    esp_err_t ret = spi_bus_initialize(VSPI_HOST, &_vspiBusConfig, 2);
    ESP_ERROR_CHECK(ret);
 
-   ret = spi_bus_add_device(HSPI_HOST, &_vspiDeviceIntfConfig, &_vspi);
+   ret = spi_bus_add_device(VSPI_HOST, &_vspiDeviceIntfConfig, &_vspi);
    ESP_ERROR_CHECK(ret);
 }
 
@@ -263,6 +254,10 @@ uint16_t Demiurge::dac1() {
 
 uint16_t Demiurge::dac2() {
    return _dac2;
+}
+
+uint16_t *Demiurge::rawAdc() {
+   return _adc->channels();
 }
 
 
