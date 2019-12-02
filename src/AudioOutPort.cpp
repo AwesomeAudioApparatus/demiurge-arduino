@@ -17,16 +17,18 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 
 AudioOutPort::AudioOutPort(int position) {
-   configASSERT(position > 0 && position <= 2 )
+   configASSERT(position > 0 && position <= 2)
    _position = position;
-   Demiurge::runtime().registerSink(this);
 }
 
-AudioOutPort::~AudioOutPort(){
-   Demiurge::runtime().unregisterSink(this);
+AudioOutPort::~AudioOutPort() {
+   if (_registered)
+      Demiurge::runtime().unregisterSink(this);
 };
 
 void AudioOutPort::configure(Signal *input) {
+   if (!_registered)
+      Demiurge::runtime().registerSink(this);
    _input = input;
 }
 

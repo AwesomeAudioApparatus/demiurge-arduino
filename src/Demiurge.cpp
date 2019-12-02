@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 
 #include <sys/time.h>
 #include "esp_types.h"
+#include "esp_timer.h"
 #include "string.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -25,25 +26,33 @@ See the License for the specific language governing permissions and
 #include "driver/spi_master.h"
 #include "Demiurge.h"
 
-static const char *TAG = "Demiurge";
-
 portMUX_TYPE demiurgeTimerMux = portMUX_INITIALIZER_UNLOCKED;
 
 void IRAM_ATTR onTimer(void *parameter) {
-   if( Demiurge::runtime().ontimerEnter() )
-      return;
-   portENTER_CRITICAL_ISR(&demiurgeTimerMux);
-   Demiurge::runtime().tick();
-   portEXIT_CRITICAL_ISR(&demiurgeTimerMux);
-   Demiurge::runtime().ontimerExit();
+   if (Demiurge::runtime().timing[0]->start()) {
+      portENTER_CRITICAL_ISR(&demiurgeTimerMux);
+      Demiurge::runtime().tick();
+      portEXIT_CRITICAL_ISR(&demiurgeTimerMux);
+      Demiurge::runtime().timing[0]->stop();
+   }
 }
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cppcoreguidelines-pro-type-member-init"
 
-Demiurge::Demiurge() = default;
+Demiurge::Demiurge() {
+   begin();
+};
 
 void Demiurge::begin() {
+   if (_started)
+      return;
+   _started = true;
+   timing[0] = new Timing("onTimer");
+   timing[1] = new Timing("ADC");
+   timing[2] = new Timing("DAC");
+   timing[3] = nullptr;
+   timing[4] = nullptr;
    initializeDacSpi();
    initializeAdcSpi();
    _dac = new MCP4822(_hspi);
@@ -160,7 +169,7 @@ void IRAM_ATTR Demiurge::tick() {
    readADC();
    timerCounter = timerCounter + 50;
    for (auto &_sink : _sinks) {
-      if (_sink != nullptr){
+      if (_sink != nullptr) {
          _sink->tick(timerCounter);
       }
    }
@@ -168,6 +177,8 @@ void IRAM_ATTR Demiurge::tick() {
 
 
 void IRAM_ATTR Demiurge::readADC() {
+   timing[1]->start();
+
    _adc->read(); // get the previous cycle's data.
    _adc->queue();  // start new conversion.
    uint16_t *channels = _adc->channels();
@@ -181,22 +192,35 @@ void IRAM_ATTR Demiurge::readADC() {
       // m = 10 - k * 4095;
       _inputs[i] = k * channels[i] - 10;
    }
+   timing[1]->stop();
 }
 
 void Demiurge::setDAC(int channel, double voltage) {
+   timing[2]->start();
    // Convert to 12 bit DAC levels. -10V -> 0, 0 -> 2048, +10V -> 4095
-   auto output = (unsigned int) (voltage * 204.8 + 204.8);
+   auto output = (uint16_t) (voltage * 204.75 + 2048.0);
 
+   // x1 = 10
+   // x2 = -10
+   // y1 = 4095
+   // y2 = 0
+   // k = 4095 / 20 = 204.75
+   // m = 4095 - k*10 = 2048
    esp_err_t dacError = ESP_OK;
    if (channel == 1) {
       dacError = _dac->send(MCP4822_CHANNEL_A | MCP4822_GAIN | MCP4822_ACTIVE, output);
+      _dac1 = output;
+      _output1 = voltage;
    }
    if (channel == 2) {
       dacError = _dac->send(MCP4822_CHANNEL_B | MCP4822_GAIN | MCP4822_ACTIVE, output);
+      _dac2 = output;
+      _output2 = voltage;
    }
    ESP_ERROR_CHECK(dacError)
 
    _outputs[channel - 1] = voltage;
+   timing[2]->stop();
 }
 
 double *Demiurge::inputs() {
@@ -211,38 +235,25 @@ bool Demiurge::gpio(int pin) {
    return 0;
 }
 
-uint64_t Demiurge::lastMeasure() {
-   return _lastMeasure;
-}
-
-bool Demiurge::ontimerEnter() {
-   if( _enterred ){
-      _overruns++;
-      return true;
+void Demiurge::printReport() {
+   for (auto &t : timing) {
+      if (t != nullptr)
+         t->report();
    }
-   _enterred = true;
-   _startTime = micros();
-   return false;
 }
 
-void Demiurge::ontimerExit() {
-   _enterred = false;
-   _lastMeasure = micros() - _startTime;
-   _timerruns++;
+double Demiurge::output1() {
+   return _output1;
+}
+double Demiurge::output2() {
+   return _output2;
+}
+uint16_t Demiurge::dac1() {
+   return _dac1;
+}
+
+uint16_t Demiurge::dac2() {
+   return _dac2;
 }
 
 
-uint64_t Demiurge::micros()
-{
-   struct timeval tv{};
-   gettimeofday(&tv, NULL);
-   return ((uint64_t ) tv.tv_sec) * 1000000 + tv.tv_usec;
-}
-
-uint32_t Demiurge::overruns() {
-   return _overruns;
-}
-
-uint32_t Demiurge::timerruns() {
-   return _timerruns;
-}

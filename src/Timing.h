@@ -14,32 +14,29 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#ifndef _DEMIURGE_AUDIOOUTPORT_H_
-#define _DEMIURGE_AUDIOOUTPORT_H_
+#ifndef _DEMIURGE_TIMING_H_
+#define _DEMIURGE_TIMING_H_
 
-#include "Signal.h"
-#include "Sink.h"
+#include <stdint.h>
 
-
-class AudioOutPort : public Sink, public Signal{
+class Timing {
 
 public:
-   explicit AudioOutPort(int position);
-   ~AudioOutPort() override;
-
-   void configure( Signal* input );
-
-   void configure( Signal* input, double scale, double offset );
-
-   void tick(double time) override;
-
-protected:
-   double update(double time) override;
+   Timing(const char *name);
+   bool started();
+   bool start();
+   void stop();
+   uint64_t lastInterval();
+   void report();
 
 private:
-   int _position;
-   bool _registered;
-   Signal *_input;
+   const char *_name;
+   bool _started;
+   uint64_t _startedAt;
+   uint64_t _stoppedAt;
+
+   uint64_t _lastInterval;
+   int _overruns;
 };
 
 

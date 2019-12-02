@@ -70,9 +70,11 @@ See the License for the specific language governing permissions and
 #include "Sink.h"
 #include "SoundProcessor.h"
 #include "Threshold.h"
+#include "Timing.h"
 #include "VCO.h"
 #include "adc128s102/ADC128S102.h"
 #include "mcp4822/MCP4822.h"
+#include "Timing.h"
 
 class Demiurge {
 
@@ -95,6 +97,8 @@ public:
       return value;
    };
 
+   static uint64_t micros();
+
    void begin();
 
    void tick();
@@ -111,17 +115,13 @@ public:
 
    bool gpio(int i);
 
-   uint64_t lastMeasure();
+   void printReport();
+   uint16_t dac1();
+   uint16_t dac2();
+   double output1();
+   double output2();
 
-   uint64_t micros();
-
-   bool ontimerEnter();
-
-   void ontimerExit();
-
-   uint32_t overruns();
-
-   uint32_t timerruns();
+   Timing *timing[5];
 
 private:
 
@@ -140,15 +140,20 @@ private:
    Sink *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
 
    void readADC();
+   bool _started;
    double _inputs[8];
+   double _output1;
+   double _output2;
+   uint16_t _dac1;
+   uint16_t _dac2;
 
    double _outputs[2];
    uint64_t _startTime;
+   uint64_t _lastMeasure;
    volatile bool _enterred;
    volatile uint32_t _timerruns;
    volatile uint32_t _overruns;
 
-   uint64_t _lastMeasure;
    double timerCounter;         // in microseconds, increments 50 at a time.
 
    esp_timer_create_args_t *_config;

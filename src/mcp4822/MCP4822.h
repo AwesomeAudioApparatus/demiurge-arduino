@@ -29,12 +29,14 @@ See the License for the specific language governing permissions and
 #define MCP4822_SHUTDOWN_SELECT 4
 
 class MCP4822 {
-  public:
-   MCP4822(spi_device_handle_t spi);
+public:
+   explicit MCP4822(spi_device_handle_t spi);
 
-   esp_err_t send(unsigned char config, unsigned int data);
+   esp_err_t send(uint8_t config, uint16_t data);
 
-  private:
-    spi_device_handle_t _spi;
+private:
+   spi_device_handle_t _spi;
+   spi_transaction_t _tx;
 };
+
 #endif

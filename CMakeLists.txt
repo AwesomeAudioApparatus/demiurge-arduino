@@ -79,6 +79,8 @@ add_library(
         src/SoundProcessor.h
         src/Threshold.cpp
         src/Threshold.h
+        src/Timing.cpp
+        src/Timing.h
         src/VCO.cpp
         src/VCO.h
         src/Volume.cpp

@@ -28,16 +28,22 @@ double Signal::offset() {
 
 void Signal::setScale(double scale) {
    _scale = scale;
+   if (_scale == 1.0 && _offset == 0.0)
+      _noRecalc = true;
 }
 
 void Signal::setOffset(double offset) {
    _offset = offset;
+   if (_scale == 1.0 && _offset == 0.0)
+      _noRecalc = true;
 }
 
 double Signal::read(double time) {
-   if (time > _lastRead)
-   {
-      _output = update(time);// * _scale + _offset;
+   if (time > _lastRead) {
+      if (_noRecalc)
+         _output = update(time);
+      else
+         _output = update(time) * _scale + _offset;
       _lastRead = time;
    }
    return _output;
