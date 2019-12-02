@@ -62,11 +62,13 @@ See the License for the specific language governing permissions and
 #include "GatePort.h"
 #include "Inverter.h"
 #include "Mixer.h"
+#include "OctavePerVolt.h"
 #include "Pan.h"
 #include "Passthru.h"
 #include "Potentiometer.h"
 #include "PushButton.h"
 #include "Signal.h"
+#include "Sine.h"
 #include "Sink.h"
 #include "SoundProcessor.h"
 #include "Threshold.h"
@@ -155,7 +157,7 @@ private:
    volatile uint32_t _timerruns;
    volatile uint32_t _overruns;
 
-   double timerCounter;         // in microseconds, increments 50 at a time.
+   uint64_t timerCounter;         // in microseconds, increments 50 at a time.
 
    esp_timer_create_args_t *_config;
    esp_timer_handle_t _timer;

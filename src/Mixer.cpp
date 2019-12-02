@@ -15,8 +15,10 @@ See the License for the specific language governing permissions and
 */
 
 #include <malloc.h>
+#include <esp_system.h>
 #include <esp_task.h>
 #include "Mixer.h"
+
 
 Mixer::Mixer(int numberOfInputs) {
    _inputs = static_cast<Volume **>(malloc(sizeof(Volume *) * numberOfInputs));
@@ -37,7 +39,7 @@ void Mixer::configure(int number, Signal *source, Signal *control) {
    _inputs[number-1] = v;
 }
 
-double Mixer::update(double time) {
+double IRAM_ATTR Mixer::update(uint64_t time) {
    double output = 0.0;
    for (int i = 0; i < _numberOfInputs; i++) {
       Volume *inp = _inputs[i];

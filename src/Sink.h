@@ -17,10 +17,12 @@ See the License for the specific language governing permissions and
 #ifndef _DEMIURGE_SINK_H_
 #define _DEMIURGE_SINK_H_
 
+#include "stdint.h"
+
 class Sink {
 
 public:
-   virtual void tick(double time);
+   virtual void tick(uint64_t time);
 };
 
 

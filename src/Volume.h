@@ -30,7 +30,7 @@ public:
    void configure( Signal *input, Signal *control);
 
 protected:
-   double update(double time) override;
+   double update(uint64_t time) override;
 
 private:
    Signal *_input;

@@ -16,8 +16,7 @@ See the License for the specific language governing permissions and
 
 #include <math.h>
 #include <esp_task.h>
-#include "VCO.h"
-#include "OctavePerVolt.h"
+#include "Demiurge.h"
 
 static const double SINE_CONST = 1000000 / M_TWOPI;
 
@@ -45,7 +44,7 @@ void VCO::configureTrig(Signal *trigControl) {
    _triggerControl = trigControl;
 }
 
-double VCO::update(double time) {
+double IRAM_ATTR VCO::update(uint64_t time) {
    double freq;
    if (_frequencyControl == nullptr)
       freq = 440;
@@ -54,21 +53,28 @@ double VCO::update(double time) {
 
    double amplitude;
    if (_amplitudeControl == nullptr)
-      amplitude = 1.0;
+      amplitude = 10.0;
    else
       amplitude = _amplitudeControl->read(time);
 
    switch (_mode) {
-      case DEMIURGE_SINE:
-         return sin(freq * (time - _lastTrig) / SINE_CONST) * amplitude;
-      case DEMIURGE_SQUARE:
+      case DEMIURGE_SINE: {
+         Demiurge::runtime().timing[3]->start();
+         double result = ((double) isin(freq * (time - _lastTrig))) / 4096 * amplitude;
+         Demiurge::runtime().timing[3]->stop();
+         return result;
+      }
+      case DEMIURGE_SQUARE: {
          // TODO
          break;
-      case DEMIURGE_TRIANGLE:
+      }
+      case DEMIURGE_TRIANGLE: {
          // TODO
          break;
-      case DEMIURGE_SAW:
+      }
+      case DEMIURGE_SAW: {
          // TODO
          break;
+      }
    }
 }

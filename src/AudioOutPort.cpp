@@ -38,11 +38,11 @@ void AudioOutPort::configure(Signal *input, double scale, double offset) {
    setOffset(offset);
 }
 
-double AudioOutPort::update(double time) {
+double IRAM_ATTR AudioOutPort::update(uint64_t time) {
    return _input->read(time);
 }
 
-void AudioOutPort::tick(double time) {
+void IRAM_ATTR AudioOutPort::tick(uint64_t time) {
    double voltage = update(time);
    Demiurge::runtime().setDAC(_position, voltage);
 }

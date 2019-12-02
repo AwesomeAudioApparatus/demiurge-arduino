@@ -73,6 +73,8 @@ add_library(
         src/PushButton.h
         src/Signal.cpp
         src/Signal.h
+        src/Sine.cpp
+        src/Sine.h
         src/Sink.cpp
         src/Sink.h
         src/SoundProcessor.cpp

@@ -30,6 +30,6 @@ void AudioInPort::configure(double scale, double offset) {
    setOffset(offset);
 }
 
-double AudioInPort::update(double time) {
+double IRAM_ATTR AudioInPort::update(uint64_t time) {
    return Demiurge::runtime().inputs()[_position];
 }

@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 */
 
 #include "Inverter.h"
+#include "esp_system.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
@@ -41,7 +42,7 @@ void Inverter::configure(Signal *input) {
    _input = input;
 }
 
-double Inverter::update(double time) {
+double IRAM_ATTR Inverter::update(uint64_t time) {
    return 0;
 }
 

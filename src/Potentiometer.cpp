@@ -24,6 +24,6 @@ Potentiometer::Potentiometer(int position) {
 
 Potentiometer::~Potentiometer() = default;
 
-double Potentiometer::update(double time) {
+double IRAM_ATTR Potentiometer::update(uint64_t time) {
    return Demiurge::runtime().inputs()[_position];
 }

@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 */
 
 #include "FixedSignal.h"
+#include "esp_system.h"
 
 FixedSignal::FixedSignal(double value) {
    _value = value;
@@ -22,6 +23,6 @@ FixedSignal::FixedSignal(double value) {
 
 FixedSignal::~FixedSignal() = default;
 
-double FixedSignal::update(double time) {
+double IRAM_ATTR FixedSignal::update(uint64_t time) {
    return _value;
 }

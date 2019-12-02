@@ -17,11 +17,12 @@ See the License for the specific language governing permissions and
 #ifndef _DEMIURGE_SOUNDPROCESSOR_H_
 #define _DEMIURGE_SOUNDPROCESSOR_H_
 
+#include "stdint.h"
 
 class SoundProcessor {
 
 public:
-   virtual double read(double time) = 0;
+   virtual double read(uint64_t time) = 0;
 };
 
 

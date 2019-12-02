@@ -24,19 +24,18 @@ See the License for the specific language governing permissions and
 #define MCP4822_GAIN 0x20
 #define MCP4822_ACTIVE 0x10
 
-#define MCP4822_CHANNEL_SELECT 7
-#define MCP4822_GAIN_SELECT 5
-#define MCP4822_SHUTDOWN_SELECT 4
-
 class MCP4822 {
 public:
    explicit MCP4822(spi_device_handle_t spi);
 
-   esp_err_t send(uint8_t config, uint16_t data);
+   esp_err_t dac1Output(uint16_t data);
+
+   esp_err_t dac2Output(uint16_t data);
 
 private:
    spi_device_handle_t _spi;
-   spi_transaction_t _tx;
+   spi_transaction_t _tx1;
+   spi_transaction_t _tx2;
 };
 
 #endif

@@ -31,10 +31,10 @@ public:
 
    void configure( Signal* input, double scale, double offset );
 
-   void tick(double time) override;
+   void tick(uint64_t time) override;
 
 protected:
-   double update(double time) override;
+   double update(uint64_t time) override;
 
 private:
    int _position;

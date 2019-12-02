@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 */
 
 #include "Passthru.h"
+#include <esp_system.h>
 
 Passthru::Passthru(Signal *input) {
    _input = input;
@@ -22,6 +23,6 @@ Passthru::Passthru(Signal *input) {
 
 Passthru::~Passthru() = default;
 
-double Passthru::update(double time) {
+double IRAM_ATTR Passthru::update(uint64_t time) {
    return _input->read(time);
 }

@@ -33,7 +33,7 @@ public:
    int _position;
 
 protected:
-   double update(double time) override;
+   double update(uint64_t time) override;
 };
 
 

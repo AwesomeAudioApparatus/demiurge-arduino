@@ -30,12 +30,12 @@ public:
    void setScale( double scale );
    void setOffset( double offset );
 
-   double read(double time) final;
+   double read(uint64_t time) final;
 
    double currentValue();
 
 protected:
-   virtual double update(double time) = 0;
+   virtual double update(uint64_t time) = 0;
 
 private:
    double _lastRead = -1.0;

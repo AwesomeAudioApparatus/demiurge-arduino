@@ -35,7 +35,7 @@ public:
    ~GatePort() override;
 
 protected:
-   double update(double time) override;
+   double update(uint64_t time) override;
 
 private:
 

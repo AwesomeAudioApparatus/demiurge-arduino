@@ -23,6 +23,7 @@ CvInPort::CvInPort(int position) {
 
 CvInPort::~CvInPort() = default;
 
-double CvInPort::update(double time) {
-   return Demiurge::runtime().inputs()[_position];
+double IRAM_ATTR CvInPort::update(uint64_t time) {
+//   return Demiurge::runtime().inputs()[_position];
+   return 1.0;
 }

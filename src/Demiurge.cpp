@@ -53,7 +53,7 @@ void Demiurge::begin() {
    timing[0] = new Timing("onTimer");
    timing[1] = new Timing("ADC");
    timing[2] = new Timing("DAC");
-   timing[3] = nullptr;
+   timing[3] = new Timing("Sine");
    timing[4] = nullptr;
    initializeDacSpi();
    initializeAdcSpi();
@@ -179,7 +179,7 @@ void IRAM_ATTR Demiurge::tick() {
 }
 
 
-void Demiurge::readGpio() {
+void IRAM_ATTR Demiurge::readGpio() {
    _gpios = gpio_input_get(); // get all 32 gpios
 }
 
@@ -202,10 +202,10 @@ void IRAM_ATTR Demiurge::readADC() {
    timing[1]->stop();
 }
 
-void Demiurge::setDAC(int channel, double voltage) {
+void IRAM_ATTR Demiurge::setDAC(int channel, double voltage) {
    timing[2]->start();
    // Convert to 12 bit DAC levels. -10V -> 0, 0 -> 2048, +10V -> 4095
-   auto output = (uint16_t) (voltage * 204.75 + 2048.0);
+   auto rawOut = (uint16_t) (voltage * 204.75 + 2048.0);
 
    // x1 = 10
    // x2 = -10
@@ -216,13 +216,13 @@ void Demiurge::setDAC(int channel, double voltage) {
    esp_err_t dacError = ESP_OK;
    gpio_output_set(LDAC_MASK, 0, LDAC_MASK, 0);
    if (channel == 1) {
-      dacError = _dac->send(MCP4822_CHANNEL_A | MCP4822_GAIN | MCP4822_ACTIVE, output);
-      _dac1 = output;
+      dacError = _dac->dac1Output(rawOut);
+      _dac1 = rawOut;
       _output1 = voltage;
    }
    if (channel == 2) {
-      dacError = _dac->send(MCP4822_CHANNEL_B | MCP4822_GAIN | MCP4822_ACTIVE, output);
-      _dac2 = output;
+      dacError = _dac->dac2Output(rawOut);
+      _dac2 = rawOut;
       _output2 = voltage;
    }
    gpio_output_set(0, LDAC_MASK, LDAC_MASK, 0);
@@ -232,15 +232,15 @@ void Demiurge::setDAC(int channel, double voltage) {
    timing[2]->stop();
 }
 
-double *Demiurge::inputs() {
+double IRAM_ATTR *Demiurge::inputs() {
    return _inputs;
 }
 
-double *Demiurge::outputs() {
+double IRAM_ATTR *Demiurge::outputs() {
    return _outputs;
 }
 
-bool Demiurge::gpio(int pin) {
+bool IRAM_ATTR Demiurge::gpio(int pin) {
    return (_gpios & (1 << pin)) != 0;
 }
 

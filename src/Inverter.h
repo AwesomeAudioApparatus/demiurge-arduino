@@ -32,7 +32,7 @@ public:
    void configure(Signal *input);
 
 protected:
-   double update(double time) override;
+   double update(uint64_t time) override;
 
 private:
    double _midpoint;

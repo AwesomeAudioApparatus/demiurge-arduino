@@ -33,7 +33,7 @@ public:
    void setCvScale(double scale);
 
 protected:
-   double update(double time) override;
+   double update(uint64_t time) override;
 
 private:
    Potentiometer *_potentiometer;

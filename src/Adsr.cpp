@@ -50,7 +50,7 @@ void Adsr::configureTrig(Signal *trig) {
    _trig = trig;
 }
 
-double Adsr::update(double time) {
+double IRAM_ATTR Adsr::update(uint64_t time) {
    double output;
 
    bool trigIn = _trigThreshold->compute(_trig->read(time));

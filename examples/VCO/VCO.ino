@@ -46,7 +46,7 @@ void setup() {
 
    Serial.println("setting up vco");
    vco1.configureFrequency(&mixer);
-   vco1.configureAmplitude(&cv3);
+//   vco1.configureAmplitude(&cv3);
 
    Serial.println("setting up pan");
    pan.configure(&vco1, &cv4);

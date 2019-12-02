@@ -28,7 +28,7 @@ public:
    void configure( double scale, double offset );
 
 protected:
-   double update(double time) override;
+   double update(uint64_t time) override;
 
 private:
    int _position;

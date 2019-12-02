@@ -38,7 +38,7 @@ void Signal::setOffset(double offset) {
       _noRecalc = true;
 }
 
-double Signal::read(double time) {
+double Signal::read(uint64_t time) {
    if (time > _lastRead) {
       if (_noRecalc)
          _output = update(time);

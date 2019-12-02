@@ -40,7 +40,7 @@ public:
    void configureTrig(Signal *trig);
 
 protected:
-   double update(double time) override;
+   double update(uint64_t time) override;
 
 private:
    Signal *_gate;

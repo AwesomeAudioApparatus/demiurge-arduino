@@ -43,7 +43,7 @@ PanChannel::PanChannel(Pan *host, double factor) {
 
 PanChannel::~PanChannel() = default;
 
-double PanChannel::update(double time) {
+double IRAM_ATTR PanChannel::update(uint64_t time) {
    double control = _host->_control->read(time);
    return _host->_input->read(time) * control * _factor;
 }

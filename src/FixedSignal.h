@@ -27,7 +27,7 @@ public:
    ~FixedSignal() override;
 
 protected:
-   double update(double time) override;
+   double update(uint64_t time) override;
 
 private:
    double _value;

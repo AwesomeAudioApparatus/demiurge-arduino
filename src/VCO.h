@@ -38,7 +38,7 @@ public:
    void configureTrig(Signal *trigControl);
 
    // TODO: Move to protected when testing is over
-   double update(double time) override;
+   double update(uint64_t time) override;
 protected:
 
 private:
