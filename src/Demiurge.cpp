@@ -26,6 +26,8 @@ See the License for the specific language governing permissions and
 #include "driver/spi_master.h"
 #include "Demiurge.h"
 
+#define LDAC_MASK 0x10  // GPIO4
+
 portMUX_TYPE demiurgeTimerMux = portMUX_INITIALIZER_UNLOCKED;
 
 void IRAM_ATTR onTimer(void *parameter) {
@@ -65,7 +67,7 @@ void Demiurge::begin() {
 void Demiurge::initializeDacSpi() {
    memset(&_hspiBusConfig, 0, sizeof(_hspiBusConfig));
    _hspiBusConfig.miso_io_num = -1;
-   _hspiBusConfig.mosi_io_num = DEMIURGE_HMISO_PIN;
+   _hspiBusConfig.mosi_io_num = DEMIURGE_HMOSI_PIN;
    _hspiBusConfig.sclk_io_num = DEMIURGE_HCLK_PIN;
    _hspiBusConfig.quadwp_io_num = -1;
    _hspiBusConfig.quadhd_io_num = -1;
@@ -74,7 +76,7 @@ void Demiurge::initializeDacSpi() {
    //_hspiBusConfig.intr_flags = ESP_INTR_FLAG_IRAM;
 
    memset(&_hspiDeviceIntfConfig, 0, sizeof(_hspiDeviceIntfConfig));
-   _hspiDeviceIntfConfig.clock_speed_hz = 16000000;   //80 MHz
+   _hspiDeviceIntfConfig.clock_speed_hz = 10000000;
    _hspiDeviceIntfConfig.mode = 0;                    //SPI mode 0
    _hspiDeviceIntfConfig.spics_io_num = DEMIURGE_HCS_PIN;   //CS pin
    _hspiDeviceIntfConfig.queue_size = 8;
@@ -101,7 +103,7 @@ void Demiurge::initializeAdcSpi() {
 //   _vspiBusConfig.intr_flags = ESP_INTR_FLAG_IRAM;
 
    memset(&_vspiDeviceIntfConfig, 0, sizeof(_vspiDeviceIntfConfig));
-   _vspiDeviceIntfConfig.clock_speed_hz = 16000000;   //16 MHz
+   _vspiDeviceIntfConfig.clock_speed_hz = 10000000;
    _vspiDeviceIntfConfig.mode = 0;                    //SPI mode 0
    _vspiDeviceIntfConfig.spics_io_num = DEMIURGE_VCS_PIN;   //CS pin
    _vspiDeviceIntfConfig.queue_size = 8;
@@ -166,6 +168,7 @@ void Demiurge::unregisterSink(Sink *processor) {
 }
 
 void IRAM_ATTR Demiurge::tick() {
+   readGpio();
    readADC();
    timerCounter = timerCounter + 50;
    for (auto &_sink : _sinks) {
@@ -175,6 +178,10 @@ void IRAM_ATTR Demiurge::tick() {
    }
 }
 
+
+void Demiurge::readGpio() {
+   _gpios = gpio_input_get(); // get all 32 gpios
+}
 
 void IRAM_ATTR Demiurge::readADC() {
    timing[1]->start();
@@ -207,6 +214,7 @@ void Demiurge::setDAC(int channel, double voltage) {
    // k = 4095 / 20 = 204.75
    // m = 4095 - k*10 = 2048
    esp_err_t dacError = ESP_OK;
+   gpio_output_set(LDAC_MASK, 0, LDAC_MASK, 0);
    if (channel == 1) {
       dacError = _dac->send(MCP4822_CHANNEL_A | MCP4822_GAIN | MCP4822_ACTIVE, output);
       _dac1 = output;
@@ -217,6 +225,7 @@ void Demiurge::setDAC(int channel, double voltage) {
       _dac2 = output;
       _output2 = voltage;
    }
+   gpio_output_set(0, LDAC_MASK, LDAC_MASK, 0);
    ESP_ERROR_CHECK(dacError)
 
    _outputs[channel - 1] = voltage;
@@ -232,7 +241,7 @@ double *Demiurge::outputs() {
 }
 
 bool Demiurge::gpio(int pin) {
-   return 0;
+   return (_gpios & (1 << pin)) != 0;
 }
 
 void Demiurge::printReport() {
@@ -241,13 +250,13 @@ void Demiurge::printReport() {
          t->report();
    }
 }
-
 double Demiurge::output1() {
    return _output1;
 }
 double Demiurge::output2() {
    return _output2;
 }
+
 uint16_t Demiurge::dac1() {
    return _dac1;
 }

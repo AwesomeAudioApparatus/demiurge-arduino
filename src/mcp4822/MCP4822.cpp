@@ -28,8 +28,8 @@ MCP4822::MCP4822(spi_device_handle_t spi) {
 }
 
 esp_err_t MCP4822::send(uint8_t config, uint16_t output) {
-   _tx.tx_data[0] = config || (output >> 8);
-   _tx.tx_data[1] = output && 0xFF;
+   _tx.tx_data[0] = config | ((output >> 8) & 0xFF);
+   _tx.tx_data[1] = output & 0xFF;
 
 //   return spi_device_polling_transmit(_spi, &t);
 

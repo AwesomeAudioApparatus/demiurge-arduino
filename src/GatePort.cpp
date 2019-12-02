@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 */
 
 #include "Demiurge.h"
+#include "driver/gpio.h"
 
 static const int DEMIURGE_GATE_GPIO[1] = {27};
 

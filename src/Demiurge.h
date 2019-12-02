@@ -141,6 +141,7 @@ private:
 
    void readADC();
    bool _started;
+   uint32_t _gpios;
    double _inputs[8];
    double _output1;
    double _output2;
@@ -169,6 +170,8 @@ private:
    MCP4822 *_dac;
 
    ADC128S102 *_adc;
+
+   void readGpio();
 };
 
 
