@@ -42,7 +42,7 @@ private:
    double _output = 0.0;
    double _scale = 1.0;
    double _offset = 0.0;
-   bool _noRecalc;
+   bool _noRecalc = true;
 };
 
 #endif

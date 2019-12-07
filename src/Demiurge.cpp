@@ -15,34 +15,72 @@ See the License for the specific language governing permissions and
 */
 
 #include <sys/time.h>
+#include <esp_task_wdt.h>
 #include "esp_types.h"
 #include "esp_timer.h"
 #include "string.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "driver/periph_ctrl.h"
+//#include "freertos/queue.h"
+//#include "driver/periph_ctrl.h"
 #include "driver/timer.h"
 #include "driver/spi_master.h"
 #include "Demiurge.h"
 
 #define LDAC_MASK 0x10  // GPIO4
-
-portMUX_TYPE demiurgeTimerMux = portMUX_INITIALIZER_UNLOCKED;
+#define DEMIURGE_TIMER_GROUP TIMER_GROUP_1
+#define DEMIURGE_TIMER TIMER_0
 
 void IRAM_ATTR onTimer(void *parameter) {
    if (Demiurge::runtime().timing[0]->start()) {
-      portENTER_CRITICAL_ISR(&demiurgeTimerMux);
       Demiurge::runtime().tick();
-      portEXIT_CRITICAL_ISR(&demiurgeTimerMux);
       Demiurge::runtime().timing[0]->stop();
    }
 }
 
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+
+void IRAM_ATTR startTask(void *parameter) {
+   gpio_set_level(GPIO_NUM_21, 0 );
+   esp_err_t error = timer_start(DEMIURGE_TIMER_GROUP, DEMIURGE_TIMER);
+   ESP_ERROR_CHECK(error);
+   uint64_t counter = 0;
+   uint64_t next = 0;
+   bool flip1 = true;
+
+   while (true) {
+      gpio_set_level(GPIO_NUM_22, flip1 ? 0 : 1 );
+      taskYIELD();
+      timer_get_counter_value(DEMIURGE_TIMER_GROUP, DEMIURGE_TIMER, &counter);
+      while (counter < next) {
+      } // WAIT
+      gpio_set_level(GPIO_NUM_25, 0 );
+
+      if (Demiurge::runtime().timing[0]->start()) {
+         Demiurge::runtime().tick();
+         gpio_set_level(GPIO_NUM_26, 0 );
+         Demiurge::runtime().timing[0]->stop();
+      }
+      flip1 = !flip1;
+      next = counter + 5;
+   }
+
+}
+
+#pragma clang diagnostic pop
+
+#pragma clang diagnostic push
 #pragma ide diagnostic ignored "cppcoreguidelines-pro-type-member-init"
 
 Demiurge::Demiurge() {
+   gpio_set_level(GPIO_NUM_21, 1 );
+   gpio_set_level(GPIO_NUM_22, 1 );
+   gpio_set_level(GPIO_NUM_25, 1 );
+   gpio_set_level(GPIO_NUM_26, 1 );
+   gpio_set_direction(GPIO_NUM_21, GPIO_MODE_OUTPUT );
+   gpio_set_direction(GPIO_NUM_22, GPIO_MODE_OUTPUT );
+   gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT );
+   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT );
+
    begin();
 };
 
@@ -60,7 +98,7 @@ void Demiurge::begin() {
    _dac = new MCP4822(_hspi);
    _adc = new ADC128S102(_vspi);
    _adc->queue();
-   initializeTimer();
+   initializeConcurrency();
    initializeSinks();
 }
 
@@ -109,18 +147,21 @@ void Demiurge::initializeAdcSpi() {
    ESP_ERROR_CHECK(ret);
 }
 
-void Demiurge::initializeTimer() {
-   _config = static_cast<esp_timer_create_args_t *>(malloc(sizeof(esp_timer_create_args_t)));
-   _config->callback = onTimer;
-   _config->name = "Sampler";
-   _config->dispatch_method = ESP_TIMER_TASK;
+void Demiurge::initializeConcurrency() {
+//   _config = static_cast<esp_timer_create_args_t *>(malloc(sizeof(esp_timer_create_args_t)));
+//   _config->callback = onTimer;
+//   _config->name = "Sampler";
+//   _config->dispatch_method = ESP_TIMER_TASK;
+//
+//   esp_err_t timerError = esp_timer_create(_config, &_timer);
+//   ESP_ERROR_CHECK(timerError)
+//
+//   // TODO: We can not run faster than 50 microseconds on soft-ish timers. Use hardware timers??
+//   timerError = esp_timer_start_periodic(_timer, 200);
+//   ESP_ERROR_CHECK(timerError)
 
-   esp_err_t timerError = esp_timer_create(_config, &_timer);
-   ESP_ERROR_CHECK(timerError)
 
-   // TODO: We can not run faster than 50 microseconds on soft-ish timers. Use hardware timers??
-   timerError = esp_timer_start_periodic(_timer, 500);
-   ESP_ERROR_CHECK(timerError)
+   xTaskCreatePinnedToCore(startTask, "Audio", 8192, nullptr, 0, &_taskHandle, 0);
 }
 
 void Demiurge::initializeSinks() {
@@ -241,9 +282,11 @@ void Demiurge::printReport() {
          t->report();
    }
 }
+
 double Demiurge::output1() {
    return _output1;
 }
+
 double Demiurge::output2() {
    return _output2;
 }

@@ -50,6 +50,7 @@ double IRAM_ATTR VCO::update(uint64_t time) {
       freq = 440;
    else
       freq = OctavePerVolt::frequencyOf(_frequencyControl->read(time));
+   freq = 440;
 
    double amplitude;
    if (_amplitudeControl == nullptr)
@@ -60,7 +61,7 @@ double IRAM_ATTR VCO::update(uint64_t time) {
    switch (_mode) {
       case DEMIURGE_SINE: {
          Demiurge::runtime().timing[3]->start();
-         double result = ((double) isin(freq * (time - _lastTrig))) / 4096 * amplitude;
+         double result = ((double) isin(freq * (time - _lastTrig)/3.2767)) / 4096 * amplitude;
          Demiurge::runtime().timing[3]->stop();
          return result;
       }

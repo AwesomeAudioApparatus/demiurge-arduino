@@ -53,6 +53,9 @@ See the License for the specific language governing permissions and
 #define DEMIURGE_HCS_PIN 15
 #endif
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include "Adsr.h"
 #include "AudioInPort.h"
 #include "AudioOutPort.h"
@@ -136,7 +139,7 @@ private:
 
    void initializeAdcSpi();
 
-   void initializeTimer();
+   void initializeConcurrency();
 
    void initializeSinks();
 
@@ -157,6 +160,7 @@ private:
    volatile bool _enterred;
    volatile uint32_t _timerruns;
    volatile uint32_t _overruns;
+   TaskHandle_t _taskHandle;
 
    uint64_t timerCounter;         // in microseconds, increments 50 at a time.
 
