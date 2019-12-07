@@ -23,6 +23,6 @@ Passthru::Passthru(Signal *input) {
 
 Passthru::~Passthru() = default;
 
-double IRAM_ATTR Passthru::update(uint64_t time) {
+float IRAM_ATTR Passthru::update(uint64_t time) {
    return _input->read(time);
 }

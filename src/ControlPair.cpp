@@ -29,16 +29,16 @@ ControlPair::~ControlPair() {
    delete _cvIn;
 }
 
-void ControlPair::setPotentiometerScale(double scale) {
+void ControlPair::setPotentiometerScale(float scale) {
    _potentiometerScale = scale;
 }
 
-void ControlPair::setCvScale(double scale) {
+void ControlPair::setCvScale(float scale) {
    _cvScale = scale;
 }
 
-double IRAM_ATTR ControlPair::update(uint64_t time) {
-   double potIn = _potentiometer->read(time) * _potentiometerScale;
-   double cvIn = _cvIn->read(time) * _cvScale;
+float IRAM_ATTR ControlPair::update(uint64_t time) {
+   float potIn = _potentiometer->read(time) * _potentiometerScale;
+   float cvIn = _cvIn->read(time) * _cvScale;
    return potIn + cvIn;
 }

@@ -23,14 +23,14 @@ See the License for the specific language governing permissions and
 class FixedSignal : public Signal {
 
 public:
-   explicit FixedSignal(double value);
+   explicit FixedSignal(float value);
    ~FixedSignal() override;
 
 protected:
-   double update(uint64_t time) override;
+   float update(uint64_t time) override;
 
 private:
-   double _value;
+   float _value;
 };
 
 

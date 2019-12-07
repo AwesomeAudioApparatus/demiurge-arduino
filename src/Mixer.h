@@ -32,7 +32,7 @@ public:
    void configure(int number, Signal *source, Signal *control);
 
 protected:
-   double update(uint64_t time) override;
+   float update(uint64_t time) override;
 
 private:
    Volume **_inputs;

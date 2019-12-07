@@ -23,13 +23,13 @@ class Threshold {
 public:
    Threshold();
 
-   Threshold(double setpoint, double hyst);
+   Threshold(float setpoint, float hyst);
 
-   bool compute(double input);
+   bool compute(float input);
 
 private:
-   double _setpoint;
-   double _hysteresis;
+   float _setpoint;
+   float _hysteresis;
    bool _output;
 };
 

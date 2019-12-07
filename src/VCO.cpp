@@ -18,7 +18,7 @@ See the License for the specific language governing permissions and
 #include <esp_task.h>
 #include "Demiurge.h"
 
-static const double SINE_CONST = 1000000 / M_TWOPI;
+static const float SINE_CONST = 1000000 / M_TWOPI;
 
 VCO::VCO(int mode) {
    _mode = mode;
@@ -44,15 +44,15 @@ void VCO::configureTrig(Signal *trigControl) {
    _triggerControl = trigControl;
 }
 
-double IRAM_ATTR VCO::update(uint64_t time) {
-   double freq;
+float IRAM_ATTR VCO::update(uint64_t time) {
+   float freq;
    if (_frequencyControl == nullptr)
       freq = 440;
    else
       freq = OctavePerVolt::frequencyOf(_frequencyControl->read(time));
    freq = 440;
 
-   double amplitude;
+   float amplitude;
    if (_amplitudeControl == nullptr)
       amplitude = 10.0;
    else
@@ -61,7 +61,7 @@ double IRAM_ATTR VCO::update(uint64_t time) {
    switch (_mode) {
       case DEMIURGE_SINE: {
          Demiurge::runtime().timing[3]->start();
-         double result = ((double) isin(freq * (time - _lastTrig)/3.2767)) / 4096 * amplitude;
+         float result = ((float) isin(freq * (time - _lastTrig)/3.2767)) / 4096 * amplitude;
          Demiurge::runtime().timing[3]->stop();
          return result;
       }

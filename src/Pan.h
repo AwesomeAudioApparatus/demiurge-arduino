@@ -43,16 +43,16 @@ private :
 class PanChannel : public Signal {
 
 public:
-   PanChannel(Pan *host, double factor);
+   PanChannel(Pan *host, float factor);
 
    ~PanChannel() override;
 
 protected:
-   double update(uint64_t time) override;
+   float update(uint64_t time) override;
 
 private:
    Pan *_host;
-   double _factor;
+   float _factor;
 };
 
 #endif

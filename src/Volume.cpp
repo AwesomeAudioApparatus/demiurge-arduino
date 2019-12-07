@@ -30,9 +30,9 @@ void Volume::configure(Signal *input, Signal *control) {
    _control = control;
 }
 
-double IRAM_ATTR Volume::update(uint64_t time) {
-   double in = _input->read(time);
-   double control = _control->read(time);
-   double factor = 0.05 * control + 0.5;
+float IRAM_ATTR Volume::update(uint64_t time) {
+   float in = _input->read(time);
+   float control = _control->read(time);
+   float factor = 0.05 * control + 0.5;
    return in * factor;
 }

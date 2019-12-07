@@ -22,7 +22,7 @@ See the License for the specific language governing permissions and
 class OctavePerVolt {
 
 public:
-   static double frequencyOf(double voltage) {
+   static float frequencyOf(float voltage) {
       return 440 / pow(2, 2.75) * pow(2, voltage);
    }
 

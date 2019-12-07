@@ -27,7 +27,7 @@ public:
    ~Passthru() override;
 
 protected:
-   double update(uint64_t time) override;
+   float update(uint64_t time) override;
 
 private:
    Signal *_input;

@@ -18,27 +18,27 @@ See the License for the specific language governing permissions and
 
 Signal::~Signal() {}
 
-double Signal::scale() {
+float Signal::scale() {
    return _scale;
 }
 
-double Signal::offset() {
+float Signal::offset() {
    return _offset;
 }
 
-void Signal::setScale(double scale) {
+void Signal::setScale(float scale) {
    _scale = scale;
    if (_scale == 1.0 && _offset == 0.0)
       _noRecalc = true;
 }
 
-void Signal::setOffset(double offset) {
+void Signal::setOffset(float offset) {
    _offset = offset;
    if (_scale == 1.0 && _offset == 0.0)
       _noRecalc = true;
 }
 
-double Signal::read(uint64_t time) {
+float Signal::read(uint64_t time) {
    if (time > _lastRead) {
       if (_noRecalc)
          _output = update(time);
@@ -49,6 +49,6 @@ double Signal::read(uint64_t time) {
    return _output;
 }
 
-double Signal::currentValue() {
+float Signal::currentValue() {
    return _output;
 }

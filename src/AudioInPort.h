@@ -25,10 +25,10 @@ public:
    explicit AudioInPort(int position);
    ~AudioInPort() override;
 
-   void configure( double scale, double offset );
+   void configure( float scale, float offset );
 
 protected:
-   double update(uint64_t time) override;
+   float update(uint64_t time) override;
 
 private:
    int _position;

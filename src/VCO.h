@@ -38,11 +38,11 @@ public:
    void configureTrig(Signal *trigControl);
 
 protected:
-   double update(uint64_t time) override;
+   float update(uint64_t time) override;
 
 private:
    int _mode;
-   double _lastTrig;
+   float _lastTrig;
    Signal *_frequencyControl;
    Signal *_amplitudeControl;
    Signal *_triggerControl;

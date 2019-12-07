@@ -17,12 +17,12 @@ See the License for the specific language governing permissions and
 #include "FixedSignal.h"
 #include "esp_system.h"
 
-FixedSignal::FixedSignal(double value) {
+FixedSignal::FixedSignal(float value) {
    _value = value;
 }
 
 FixedSignal::~FixedSignal() = default;
 
-double IRAM_ATTR FixedSignal::update(uint64_t time) {
+float IRAM_ATTR FixedSignal::update(uint64_t time) {
    return _value;
 }

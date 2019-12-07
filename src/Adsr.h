@@ -40,7 +40,7 @@ public:
    void configureTrig(Signal *trig);
 
 protected:
-   double update(uint64_t time) override;
+   float update(uint64_t time) override;
 
 private:
    Signal *_gate;
@@ -54,12 +54,12 @@ private:
    Threshold *_trigThreshold;
 
    int stateMachine = 0;
-   double doneAt = 0.0;
-   double startedAt = 0.0;
+   float doneAt = 0.0;
+   float startedAt = 0.0;
    bool _currentTrig;
    bool _currentGate;
 
-   double slopeTime(double voltage);
+   float slopeTime(float voltage);
 };
 
 

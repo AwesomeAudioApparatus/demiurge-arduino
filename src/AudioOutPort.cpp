@@ -32,17 +32,17 @@ void AudioOutPort::configure(Signal *input) {
    _input = input;
 }
 
-void AudioOutPort::configure(Signal *input, double scale, double offset) {
+void AudioOutPort::configure(Signal *input, float scale, float offset) {
    _input = input;
    setScale(scale);
    setOffset(offset);
 }
 
-double IRAM_ATTR AudioOutPort::update(uint64_t time) {
+float IRAM_ATTR AudioOutPort::update(uint64_t time) {
    return _input->read(time);
 }
 
 void IRAM_ATTR AudioOutPort::tick(uint64_t time) {
-   double voltage = update(time);
+   float voltage = update(time);
    Demiurge::runtime().setDAC(_position, voltage);
 }

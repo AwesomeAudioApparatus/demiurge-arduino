@@ -28,18 +28,18 @@ public:
 
    ~ControlPair() override;
 
-   void setPotentiometerScale(double scale);
+   void setPotentiometerScale(float scale);
 
-   void setCvScale(double scale);
+   void setCvScale(float scale);
 
 protected:
-   double update(uint64_t time) override;
+   float update(uint64_t time) override;
 
 private:
    Potentiometer *_potentiometer;
    CvInPort *_cvIn;
-   double _cvScale;
-   double _potentiometerScale;
+   float _cvScale;
+   float _potentiometerScale;
 };
 
 

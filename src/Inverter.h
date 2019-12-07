@@ -25,18 +25,18 @@ public:
    Inverter();
    ~Inverter() override;
 
-   explicit Inverter(double midpoint);
+   explicit Inverter(float midpoint);
 
-   Inverter(double midpoint, double scale);
+   Inverter(float midpoint, float scale);
 
    void configure(Signal *input);
 
 protected:
-   double update(uint64_t time) override;
+   float update(uint64_t time) override;
 
 private:
-   double _midpoint;
-   double _scale;
+   float _midpoint;
+   float _scale;
    Signal* _input;
 };
 

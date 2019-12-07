@@ -96,7 +96,7 @@ public:
 
 //   void operator=(Demiurge const &) = delete;
 
-   static double clip(double value) {
+   static float clip(float value) {
       if (value > 10.0) return 10.0;
       if (value < -10.0) return -10.0;
       return value;
@@ -112,19 +112,19 @@ public:
 
    void unregisterSink(Sink *processor);
 
-   double *inputs();
+   float *inputs();
 
-   double *outputs();
+   float *outputs();
 
-   void setDAC(int channel, double voltage);
+   void setDAC(int channel, float voltage);
 
    bool gpio(int i);
 
    void printReport();
    uint16_t dac1();
    uint16_t dac2();
-   double output1();
-   double output2();
+   float output1();
+   float output2();
    uint16_t *rawAdc();
 
    Timing *timing[5];
@@ -148,13 +148,13 @@ private:
    void readADC();
    bool _started;
    uint32_t _gpios;
-   double _inputs[8];
-   double _output1;
-   double _output2;
+   float _inputs[8];
+   float _output1;
+   float _output2;
    uint16_t _dac1;
    uint16_t _dac2;
 
-   double _outputs[2];
+   float _outputs[2];
    uint64_t _startTime;
    uint64_t _lastMeasure;
    volatile bool _enterred;

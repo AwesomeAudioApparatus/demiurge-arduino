@@ -26,12 +26,12 @@ Inverter::Inverter() {
    _scale = 1.0;
 }
 
-Inverter::Inverter(double midpoint) {
+Inverter::Inverter(float midpoint) {
    _midpoint = midpoint;
    _scale = 1.0;
 }
 
-Inverter::Inverter(double midpoint, double scale) {
+Inverter::Inverter(float midpoint, float scale) {
    _midpoint = midpoint;
    _scale = scale;
 }
@@ -42,7 +42,7 @@ void Inverter::configure(Signal *input) {
    _input = input;
 }
 
-double IRAM_ATTR Inverter::update(uint64_t time) {
+float IRAM_ATTR Inverter::update(uint64_t time) {
    return 0;
 }
 

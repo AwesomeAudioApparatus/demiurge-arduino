@@ -22,7 +22,7 @@ See the License for the specific language governing permissions and
 class SoundProcessor {
 
 public:
-   virtual double read(uint64_t time) = 0;
+   virtual float read(uint64_t time) = 0;
 };
 
 

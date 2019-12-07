@@ -25,11 +25,11 @@ AudioInPort::AudioInPort(int position) {
 
 AudioInPort::~AudioInPort() = default;
 
-void AudioInPort::configure(double scale, double offset) {
+void AudioInPort::configure(float scale, float offset) {
    setScale(scale);
    setOffset(offset);
 }
 
-double IRAM_ATTR AudioInPort::update(uint64_t time) {
+float IRAM_ATTR AudioInPort::update(uint64_t time) {
    return Demiurge::runtime().inputs()[_position];
 }

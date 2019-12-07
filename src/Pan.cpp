@@ -36,14 +36,14 @@ Signal *Pan::outputRight() {
    return _right;
 }
 
-PanChannel::PanChannel(Pan *host, double factor) {
+PanChannel::PanChannel(Pan *host, float factor) {
    _host = host;
    _factor = factor;
 }
 
 PanChannel::~PanChannel() = default;
 
-double IRAM_ATTR PanChannel::update(uint64_t time) {
-   double control = _host->_control->read(time);
+float IRAM_ATTR PanChannel::update(uint64_t time) {
+   float control = _host->_control->read(time);
    return _host->_input->read(time) * control * _factor;
 }

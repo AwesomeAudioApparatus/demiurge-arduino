@@ -22,13 +22,13 @@ Threshold::Threshold() {
    _output = false;
 }
 
-Threshold::Threshold(double setp, double hyst) {
+Threshold::Threshold(float setp, float hyst) {
    _setpoint = setp;
    _hysteresis = hyst;
    _output = false;
 }
 
-bool Threshold::compute(double input) {
+bool Threshold::compute(float input) {
    if (_output) {
       _output = input < _setpoint - _hysteresis;
    } else {

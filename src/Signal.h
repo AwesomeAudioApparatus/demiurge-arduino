@@ -24,24 +24,24 @@ class Signal : public SoundProcessor {
 
 public:
    virtual ~Signal() = 0;
-   double scale();
-   double offset();
+   float scale();
+   float offset();
 
-   void setScale( double scale );
-   void setOffset( double offset );
+   void setScale( float scale );
+   void setOffset( float offset );
 
-   double read(uint64_t time) final;
+   float read(uint64_t time) final;
 
-   double currentValue();
+   float currentValue();
 
 protected:
-   virtual double update(uint64_t time) = 0;
+   virtual float update(uint64_t time) = 0;
 
 private:
-   double _lastRead = -1.0;
-   double _output = 0.0;
-   double _scale = 1.0;
-   double _offset = 0.0;
+   float _lastRead = -1.0;
+   float _output = 0.0;
+   float _scale = 1.0;
+   float _offset = 0.0;
    bool _noRecalc = true;
 };
 

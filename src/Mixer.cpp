@@ -39,8 +39,8 @@ void Mixer::configure(int number, Signal *source, Signal *control) {
    _inputs[number-1] = v;
 }
 
-double IRAM_ATTR Mixer::update(uint64_t time) {
-   double output = 0.0;
+float IRAM_ATTR Mixer::update(uint64_t time) {
+   float output = 0.0;
    for (int i = 0; i < _numberOfInputs; i++) {
       Volume *inp = _inputs[i];
       if (inp != nullptr) {

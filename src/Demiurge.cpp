@@ -221,7 +221,7 @@ void IRAM_ATTR Demiurge::readADC() {
    _adc->read(); // get the previous cycle's data.
    _adc->queue();  // start new conversion.
    uint16_t *channels = _adc->channels();
-   double k = 20 / 4095;
+   float k = 20 / 4095;
    for (int i = 0; i < 8; i++) {
       // k = (y1-y2) / (x1-x2)
       // k = (10- -10) / (4095 - 0)
@@ -234,7 +234,7 @@ void IRAM_ATTR Demiurge::readADC() {
    timing[1]->stop();
 }
 
-void IRAM_ATTR Demiurge::setDAC(int channel, double voltage) {
+void IRAM_ATTR Demiurge::setDAC(int channel, float voltage) {
    timing[2]->start();
    // Convert to 12 bit DAC levels. -10V -> 0, 0 -> 2048, +10V -> 4095
    auto rawOut = (uint16_t) (voltage * 204.75 + 2048.0);
@@ -264,11 +264,11 @@ void IRAM_ATTR Demiurge::setDAC(int channel, double voltage) {
    timing[2]->stop();
 }
 
-double IRAM_ATTR *Demiurge::inputs() {
+float IRAM_ATTR *Demiurge::inputs() {
    return _inputs;
 }
 
-double IRAM_ATTR *Demiurge::outputs() {
+float IRAM_ATTR *Demiurge::outputs() {
    return _outputs;
 }
 
@@ -283,11 +283,11 @@ void Demiurge::printReport() {
    }
 }
 
-double Demiurge::output1() {
+float Demiurge::output1() {
    return _output1;
 }
 
-double Demiurge::output2() {
+float Demiurge::output2() {
    return _output2;
 }
 

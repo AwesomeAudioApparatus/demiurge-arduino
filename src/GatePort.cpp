@@ -26,7 +26,7 @@ GatePort::GatePort(int position) {
 
 GatePort::~GatePort() = default;
 
-double IRAM_ATTR GatePort::update(uint64_t time) {
+float IRAM_ATTR GatePort::update(uint64_t time) {
    bool state = Demiurge::runtime().gpio(DEMIURGE_GATE_GPIO[_position]);
    if( state )
    {
