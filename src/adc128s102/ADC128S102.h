@@ -19,20 +19,7 @@ See the License for the specific language governing permissions and
 
 #include "driver/spi_master.h"
 
-class ADC128S102 {
-
-public:
-   explicit ADC128S102(spi_device_handle_t spi);
-
-   ~ADC128S102();
-
-   void queue();
-
-   void read();
-
-   uint16_t *channels();
-
-private :
+typedef struct {
    spi_device_handle_t _spi;
    spi_transaction_t _tx;
    spi_transaction_t *_rx;
@@ -41,7 +28,12 @@ private :
    uint8_t _rxdata[16];
 
    uint16_t _channels[8];
-};
+} adc128s102;
 
+void adc128s102_init(adc128s102 *handle, spi_device_handle_t spi);
+
+void adc128s102_queue(adc128s102 *handle);
+
+void adc128s102_read(adc128s102 *handle);
 
 #endif

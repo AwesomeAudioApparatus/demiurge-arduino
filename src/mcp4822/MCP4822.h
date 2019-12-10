@@ -24,18 +24,13 @@ See the License for the specific language governing permissions and
 #define MCP4822_GAIN 0x20
 #define MCP4822_ACTIVE 0x10
 
-class MCP4822 {
-public:
-   explicit MCP4822(spi_device_handle_t spi);
-
-   esp_err_t dac1Output(uint16_t data);
-
-   esp_err_t dac2Output(uint16_t data);
-
-private:
+typedef struct {
    spi_device_handle_t _spi;
-   spi_transaction_t _tx1;
-   spi_transaction_t _tx2;
-};
+   spi_transaction_t _tx;
+} mcp4822;
+
+void mcp4822_init( mcp4822 *handle, spi_device_handle_t spi );
+
+void mcp4822_dacOutput(mcp4822 *handle, uint16_t outputA, uint16_t outputB);
 
 #endif

@@ -175,10 +175,12 @@ private:
    spi_bus_config_t _vspiBusConfig;
    spi_device_interface_config_t _vspiDeviceIntfConfig;
 
-   MCP4822 *_dac;
-   ADC128S102 *_adc;
+   mcp4822 _dac;
+   adc128s102 _adc;
 
    void readGpio();
+
+   void transferDacs();
 };
 
 

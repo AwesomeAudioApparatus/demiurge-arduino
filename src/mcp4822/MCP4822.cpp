@@ -20,24 +20,18 @@ See the License for the specific language governing permissions and
 
 #include "MCP4822.h"
 
-MCP4822::MCP4822(spi_device_handle_t spi) {
-   _spi = spi;
-   memset(&_tx1, 0, sizeof(_tx1));       //Zero out the transaction
-   memset(&_tx2, 0, sizeof(_tx2));       //Zero out the transaction
-   _tx1.flags = SPI_TRANS_USE_TXDATA;
-   _tx1.length = 16;
-   _tx2.flags = SPI_TRANS_USE_TXDATA;
-   _tx2.length = 16;
+void mcp4822_dacOutput(mcp4822 *handle, uint16_t outputA, uint16_t outputB)
+{
+   handle->_tx.tx_data[0] = MCP4822_CHANNEL_A | MCP4822_ACTIVE | ((outputA >> 8) & 0xFF);
+   handle->_tx.tx_data[1] = outputA & 0xFF;
+   handle->_tx.tx_data[2] = MCP4822_CHANNEL_B | MCP4822_ACTIVE | ((outputB >> 8) & 0xFF);
+   handle->_tx.tx_data[3] = outputB & 0xFF;
+   spi_device_queue_trans(handle->_spi, &handle->_tx, 10); // 10 ticks is probably very long.
 }
 
-esp_err_t MCP4822::dac1Output(uint16_t output) {
-   _tx1.tx_data[0] = MCP4822_CHANNEL_A | MCP4822_ACTIVE | ((output >> 8) & 0xFF);
-   _tx1.tx_data[1] = output & 0xFF;
-   return spi_device_queue_trans(_spi, &_tx1, 10); // 10 ticks is probably very long.
-}
-
-esp_err_t MCP4822::dac2Output(uint16_t output) {
-   _tx2.tx_data[0] = MCP4822_CHANNEL_B | MCP4822_ACTIVE | ((output >> 8) & 0xFF);
-   _tx2.tx_data[1] = output & 0xFF;
-   return spi_device_queue_trans(_spi, &_tx2, 10); // 10 ticks is probably very long.
+void mcp4822_init( mcp4822 *handle, spi_device_handle_t spi) {
+   handle->_spi = spi;
+   memset(&handle->_tx, 0, sizeof(handle->_tx));       //Zero out the transaction
+   handle->_tx.flags = SPI_TRANS_USE_TXDATA;
+   handle->_tx.length = 32;
 }

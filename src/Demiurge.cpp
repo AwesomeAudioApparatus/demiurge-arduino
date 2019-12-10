@@ -95,9 +95,9 @@ void Demiurge::begin() {
    timing[4] = nullptr;
    initializeDacSpi();
    initializeAdcSpi();
-   _dac = new MCP4822(_hspi);
-   _adc = new ADC128S102(_vspi);
-   _adc->queue();
+   mcp4822_init(&_dac, _hspi);
+   adc128s102_init(&_adc,_vspi);
+   adc128s102_queue(&_adc);
    initializeConcurrency();
    initializeSinks();
 }
@@ -210,7 +210,6 @@ void IRAM_ATTR Demiurge::tick() {
    }
 }
 
-
 void IRAM_ATTR Demiurge::readGpio() {
    _gpios = gpio_input_get(); // get all 32 gpios
 }
@@ -218,9 +217,9 @@ void IRAM_ATTR Demiurge::readGpio() {
 void IRAM_ATTR Demiurge::readADC() {
    timing[1]->start();
 
-   _adc->read(); // get the previous cycle's data.
-   _adc->queue();  // start new conversion.
-   uint16_t *channels = _adc->channels();
+   adc128s102_read(&_adc); // get the previous cycle's data.
+   adc128s102_queue(&_adc);  // start new conversion.
+   uint16_t *channels = _adc._channels;
    float k = 20 / 4095;
    for (int i = 0; i < 8; i++) {
       // k = (y1-y2) / (x1-x2)
@@ -235,32 +234,29 @@ void IRAM_ATTR Demiurge::readADC() {
 }
 
 void IRAM_ATTR Demiurge::setDAC(int channel, float voltage) {
-   timing[2]->start();
    // Convert to 12 bit DAC levels. -10V -> 0, 0 -> 2048, +10V -> 4095
-   auto rawOut = (uint16_t) (voltage * 204.75 + 2048.0);
-
    // x1 = 10
    // x2 = -10
    // y1 = 4095
    // y2 = 0
    // k = 4095 / 20 = 204.75
    // m = 4095 - k*10 = 2048
-   esp_err_t dacError = ESP_OK;
-   gpio_output_set(LDAC_MASK, 0, LDAC_MASK, 0);
-   if (channel == 1) {
-      dacError = _dac->dac1Output(rawOut);
-      _dac1 = rawOut;
+   if( channel == 1) {
+      _dac1 = (uint16_t) (voltage * 204.75 + 2048.0);
       _output1 = voltage;
    }
-   if (channel == 2) {
-      dacError = _dac->dac2Output(rawOut);
-      _dac2 = rawOut;
+   else{
+      _dac2 = (uint16_t) (voltage * 204.75 + 2048.0);
       _output2 = voltage;
    }
-   gpio_output_set(0, LDAC_MASK, LDAC_MASK, 0);
-   ESP_ERROR_CHECK(dacError)
+}
 
-   _outputs[channel - 1] = voltage;
+void IRAM_ATTR Demiurge::transferDacs()
+{
+   timing[2]->start();
+   gpio_output_set(LDAC_MASK, 0, LDAC_MASK, 0);
+   mcp4822_dacOutput(&_dac, _dac1, _dac2);
+   gpio_output_set(0, LDAC_MASK, LDAC_MASK, 0);
    timing[2]->stop();
 }
 
@@ -300,7 +296,7 @@ uint16_t Demiurge::dac2() {
 }
 
 uint16_t *Demiurge::rawAdc() {
-   return _adc->channels();
+   return _adc._channels;
 }
 
 
