@@ -27,19 +27,20 @@ See the License for the specific language governing permissions and
 
 #include "Signal.h"
 
+typedef struct {
+   int position;
+} gate_in_port_t;
+
+float gateinport_read(void *handle, uint64_t time);
+
 class GatePort : public Signal {
 
 public:
    explicit GatePort(int position);
 
    ~GatePort() override;
-
-protected:
-   float update(uint64_t time) override;
-
 private:
-
-   int _position;
+   gate_in_port_t _data{};
 };
 
 

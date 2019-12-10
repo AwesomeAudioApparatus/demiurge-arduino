@@ -20,6 +20,26 @@ See the License for the specific language governing permissions and
 #include "Signal.h"
 #include "Threshold.h"
 
+typedef struct {
+   signal_t *me;
+   signal_t *attack;
+   signal_t *decay;
+   signal_t *sustain;
+   signal_t *release;
+   signal_t *gate;
+   signal_t *trig;
+   int stateMachine = 0;
+   float doneAt = 0.0;
+   float startedAt = 0.0;
+   bool currentTrig;
+   bool currentGate;
+   threshold_t gateThreshold;
+   threshold_t trigThreshold;
+} adsr_t;
+
+float adsr_read(void *handle, uint64_t time);
+float adsr_slopeTime(float voltage);
+
 class Adsr : public Signal {
 
 public:
@@ -39,27 +59,14 @@ public:
 
    void configureTrig(Signal *trig);
 
-protected:
-   float update(uint64_t time) override;
-
 private:
+   adsr_t _data{};
    Signal *_gate;
    Signal *_trig;
    Signal *_attack;
    Signal *_decay;
    Signal *_sustain;
    Signal *_release;
-
-   Threshold *_gateThreshold;
-   Threshold *_trigThreshold;
-
-   int stateMachine = 0;
-   float doneAt = 0.0;
-   float startedAt = 0.0;
-   bool _currentTrig;
-   bool _currentGate;
-
-   float slopeTime(float voltage);
 };
 
 

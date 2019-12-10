@@ -17,12 +17,23 @@ See the License for the specific language governing permissions and
 #include "Passthru.h"
 #include <esp_system.h>
 
-Passthru::Passthru(Signal *input) {
-   _input = input;
+Passthru::Passthru() {
+   _signal.read_fn = passthru_read;
 }
 
 Passthru::~Passthru() = default;
 
-float IRAM_ATTR Passthru::update(uint64_t time) {
-   return _input->read(time);
+void Passthru::configure( Signal *input)
+{
+   _input = input;
+   _data.input = &input->_signal;
+}
+
+float IRAM_ATTR passthru_read(void *handle, uint64_t time) {
+   auto *passthru = (passthru_t *) handle;
+   float input = passthru->input->read_fn(passthru->input, time);
+   signal_t *data = passthru->me;
+   if (data->noRecalc)
+      return input;
+   return input * data->scale + data->offset;
 }

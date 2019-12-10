@@ -18,21 +18,23 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 
 Volume::Volume() {
+   _signal.read_fn = volume_read;
 }
 
-Volume::~Volume() {
-
-}
+Volume::~Volume() = default;
 
 void Volume::configure(Signal *input, Signal *control) {
    configASSERT(input != nullptr && control != nullptr)
    _input = input;
    _control = control;
+   _data.input = &input->_signal;
+   _data.control = &control->_signal;
 }
 
-float IRAM_ATTR Volume::update(uint64_t time) {
-   float in = _input->read(time);
-   float control = _control->read(time);
+float IRAM_ATTR volume_read(void *handle, uint64_t time) {
+   auto *me = (volume_t *) handle;
+   float control = me->control->read_fn(me->control, time);
+   float in = me->control->read_fn(me->control, time);
    float factor = 0.05 * control + 0.5;
    return in * factor;
 }

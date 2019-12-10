@@ -17,33 +17,20 @@ See the License for the specific language governing permissions and
 #include "Inverter.h"
 #include "esp_system.h"
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
-#pragma ide diagnostic ignored "cppcoreguidelines-pro-type-member-init"
 
-Inverter::Inverter() {
-   _midpoint = 0.0;
-   _scale = 1.0;
-}
-
-Inverter::Inverter(float midpoint) {
-   _midpoint = midpoint;
-   _scale = 1.0;
-}
-
-Inverter::Inverter(float midpoint, float scale) {
-   _midpoint = midpoint;
-   _scale = scale;
+// TODO:
+Inverter::Inverter(Signal *midpoint, Signal *scale) {
+   _data.midpoint = &midpoint->_signal;
+   _data.scale = &scale->_signal;
 }
 
 Inverter::~Inverter() = default;
 
 void Inverter::configure(Signal *input) {
-   _input = input;
+   _data.input = &input->_signal;
 }
 
-float IRAM_ATTR Inverter::update(uint64_t time) {
-   return 0;
+float IRAM_ATTR inverter_read(void *handle, uint64_t time)
+{
+   return 0.0;
 }
-
-#pragma clang diagnostic pop

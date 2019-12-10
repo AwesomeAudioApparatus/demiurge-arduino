@@ -18,11 +18,14 @@ See the License for the specific language governing permissions and
 #include "esp_system.h"
 
 FixedSignal::FixedSignal(float value) {
-   _value = value;
+   _data.value = value;
+   _signal.read_fn = fixedsignal_read;
 }
 
 FixedSignal::~FixedSignal() = default;
 
-float IRAM_ATTR FixedSignal::update(uint64_t time) {
-   return _value;
+float IRAM_ATTR fixedsignal_read(void *handle, uint64_t time)
+{
+   auto *fixed = (fixed_signal_t *) handle;
+   return fixed->value;
 }

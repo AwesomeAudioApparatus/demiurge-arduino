@@ -16,6 +16,13 @@ See the License for the specific language governing permissions and
 
 #include "Signal.h"
 
+Signal::Signal() noexcept {
+   _signal.read_fn = nullptr;
+   _signal.noRecalc = true;
+   _signal.scale = 1.0f;
+   _signal.offset = 0.0f;
+}
+
 Signal::~Signal() {}
 
 float Signal::scale() {
@@ -30,25 +37,14 @@ void Signal::setScale(float scale) {
    _scale = scale;
    if (_scale == 1.0 && _offset == 0.0)
       _noRecalc = true;
+   _signal.scale = scale;
+   _signal.noRecalc = _noRecalc;
 }
 
 void Signal::setOffset(float offset) {
    _offset = offset;
    if (_scale == 1.0 && _offset == 0.0)
       _noRecalc = true;
-}
-
-float Signal::read(uint64_t time) {
-   if (time > _lastRead) {
-      if (_noRecalc)
-         _output = update(time);
-      else
-         _output = update(time) * _scale + _offset;
-      _lastRead = time;
-   }
-   return _output;
-}
-
-float Signal::currentValue() {
-   return _output;
+   _signal.offset = offset;
+   _signal.noRecalc = _noRecalc;
 }

@@ -17,12 +17,14 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 
 CvInPort::CvInPort(int position) {
-   configASSERT(position > 0 && position <= 4 )
-   _position = position + DEMIURGE_CVINPUT_OFFSET;
+   configASSERT(position > 0 && position <= 4)
+   _data.position = position + DEMIURGE_CVINPUT_OFFSET;
+   _signal.read_fn = cvinport_read;
 }
 
 CvInPort::~CvInPort() = default;
 
-float IRAM_ATTR CvInPort::update(uint64_t time) {
-   return Demiurge::runtime().inputs()[_position];
+float IRAM_ATTR cvinport_read(void *handle, uint64_t time) {
+   auto *cv = (cv_in_port_t *) handle;
+   return Demiurge::runtime().inputs()[cv->position];
 }

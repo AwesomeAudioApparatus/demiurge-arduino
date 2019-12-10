@@ -23,17 +23,20 @@ See the License for the specific language governing permissions and
 
 #include "Signal.h"
 
+typedef struct {
+   int position;
+} cv_in_port_t;
+
+float cvinport_read(void *handle, uint64_t time);
+
 class CvInPort : public Signal {
 
 public:
    explicit CvInPort(int position);
 
    ~CvInPort() override;
-
-   int _position;
-
-protected:
-   float update(uint64_t time) override;
+private:
+   cv_in_port_t _data;
 };
 
 

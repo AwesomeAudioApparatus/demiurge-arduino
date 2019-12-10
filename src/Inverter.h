@@ -19,25 +19,26 @@ See the License for the specific language governing permissions and
 
 #include "Signal.h"
 
+typedef struct {
+   signal_t *me;
+   signal_t *input;
+   signal_t *scale;
+   signal_t *midpoint;
+} inverter_t;
+
+float inverter_read(void *handle, uint64_t time);
+
 class Inverter : public Signal {
 
 public:
-   Inverter();
+   Inverter(Signal *midpoint, Signal *scale);
    ~Inverter() override;
-
-   explicit Inverter(float midpoint);
-
-   Inverter(float midpoint, float scale);
 
    void configure(Signal *input);
 
-protected:
-   float update(uint64_t time) override;
-
 private:
-   float _midpoint;
-   float _scale;
-   Signal* _input;
+   inverter_t _data;
+   Signal* _input{};
 };
 
 

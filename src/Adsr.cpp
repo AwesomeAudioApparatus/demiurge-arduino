@@ -18,107 +18,111 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 
 Adsr::Adsr() {
-   _gateThreshold = new Threshold();
-   _trigThreshold = new Threshold();
+   _signal.read_fn = adsr_read;
 }
 
 Adsr::~Adsr() = default;
 
 void Adsr::configureGate(Signal *gate) {
    _gate = gate;
+   _data.gate = &gate->_signal;
 }
 
 void Adsr::configureAttack(Signal *control) {
    _attack = control;
+   _data.attack = &control->_signal;
 }
 
 void Adsr::configureDecay(Signal *control) {
    _decay = control;
-
+   _data.decay = &control->_signal;
 }
 
 void Adsr::configureSustain(Signal *control) {
    _sustain = control;
-
+   _data.sustain = &control->_signal;
 }
 
 void Adsr::configureRelease(Signal *control) {
    _release = control;
+   _data.release = &control->_signal;
 }
 
 void Adsr::configureTrig(Signal *trig) {
    _trig = trig;
+   _data.trig = &trig->_signal;
 }
 
-float IRAM_ATTR Adsr::update(uint64_t time) {
+float IRAM_ATTR adsr_read(void *handle, uint64_t time){
+   auto *adsr = (adsr_t *)handle;
    float output;
 
-   bool trigIn = _trigThreshold->compute(_trig->read(time));
-   bool gateIn = _gateThreshold->compute(_gate->read(time));
+   bool trigIn = threshold_compute(&adsr->trigThreshold, adsr->trig->read_fn(adsr->trig, time));
+   bool gateIn = threshold_compute(&adsr->gateThreshold, adsr->gate->read_fn(adsr->gate, time));
 
-   if (!_currentTrig && trigIn) {
+   if (!adsr->currentTrig && trigIn) {
       // RISE
-      stateMachine = 1;
-      startedAt = time;
+      adsr->stateMachine = 1;
+      adsr->startedAt = time;
    }
-   _currentTrig = trigIn;
+   adsr->currentTrig = trigIn;
 
-   if (_currentGate) {
+   if (adsr->currentGate) {
       // Ongoing
-      switch (stateMachine) {
+      switch (adsr->stateMachine) {
          case 1:  // Attack
          {
-            float attackIn = _attack->read(time);
-            float k = 20.0 / slopeTime(attackIn);
+            float attackIn = adsr->attack->read_fn(adsr->attack, time);
+            float k = 20.0 / adsr_slopeTime(attackIn);
             float m = -10.0;
-            output = (time - startedAt) * k + m;
+            output = (time - adsr->startedAt) * k + m;
             if (output >= 10.0) {
-               startedAt = time;
-               stateMachine++;
+               adsr->startedAt = time;
+               adsr->stateMachine++;
             }
             break;
          }
          case 2:  // Decay
          {
-            float sustainIn = _sustain->read(time);
-            float decayIn = _decay->read(time);
-            float k = -(10 - sustainIn) / slopeTime(decayIn);
+            float sustainIn = adsr->sustain->read_fn(adsr->sustain, time);
+            float decayIn = adsr->decay->read_fn(adsr->decay, time);
+            float k = -(10 - sustainIn) / adsr_slopeTime(decayIn);
             float m = 10;
-            output = (time - startedAt) * k + m;
+            output = (time - adsr->startedAt) * k + m;
             if (output >= 10.0) {
-               startedAt = time;
-               stateMachine++;
+               adsr->startedAt = time;
+               adsr->stateMachine++;
             }
             break;
          }
          case 3:  // Sustain
          {
-            output = _sustain->read(time);
+            output = adsr->sustain->read_fn(adsr->sustain, time);
             break;
          }
          default:
             output = -10;
       }
    } else {
-      float releaseIn = _release->read(time);
-      float sustainIn = _sustain->read(time);
-      float k = -sustainIn / slopeTime(releaseIn);
+      float releaseIn = adsr->release->read_fn(adsr->release, time);
+      float sustainIn = adsr->sustain->read_fn(adsr->sustain, time);
+      float k = -sustainIn / adsr_slopeTime(releaseIn);
       float m = sustainIn;
-      output = (time - startedAt) * k + m;
+      output = (time - adsr->startedAt) * k + m;
       if (gateIn) {
          // Start new cycle
-         stateMachine = 0;
+         adsr->stateMachine = 0;
       }
    }
-   _currentGate = gateIn;
+   adsr->currentGate = gateIn;
 
    return Demiurge::clip(output);
 }
 
-float Adsr::slopeTime(float voltage) {
+float IRAM_ATTR adsr_slopeTime(float voltage) {
    // Logarithmic response, so that;
    // -10V = 1 microsecond, 0V = 1 millisecond, +10V = 1 second
-   // TODO: If log() is too slow, use lookup tables.
+   // TODO: If pow10() is too slow, use lookup tables.
    float millis = pow10(voltage / 3.33333);
    return millis * 1000;
 }

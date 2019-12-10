@@ -19,30 +19,35 @@ See the License for the specific language governing permissions and
 AudioOutPort::AudioOutPort(int position) {
    configASSERT(position > 0 && position <= 2)
    _position = position;
+   _signal.read_fn = audiooutport_read;
 }
 
 AudioOutPort::~AudioOutPort() {
    if (_registered)
-      Demiurge::runtime().unregisterSink(this);
+      Demiurge::runtime().unregisterSink((audio_out_port_t *)(&_signal));
 };
 
 void AudioOutPort::configure(Signal *input) {
    if (!_registered)
-      Demiurge::runtime().registerSink(this);
+      Demiurge::runtime().registerSink((audio_out_port_t *)(&_signal));
    _input = input;
+   _data.input = &input->_signal;
 }
 
 void AudioOutPort::configure(Signal *input, float scale, float offset) {
-   _input = input;
+   configure(input);
    setScale(scale);
    setOffset(offset);
 }
 
-float IRAM_ATTR AudioOutPort::update(uint64_t time) {
-   return _input->read(time);
+float IRAM_ATTR audiooutport_read(void *handle, uint64_t time) {
+   auto *port = (audio_out_port_t *) handle;
+   signal_t *upstream = port->input;
+   signal_fn fn = upstream->read_fn;
+   float input = fn(upstream, time);
+   signal_t *data = port->me;
+   if (data->noRecalc)
+      return input;
+   return input * data->scale + data->offset;
 }
 
-void IRAM_ATTR AudioOutPort::tick(uint64_t time) {
-   float voltage = update(time);
-   Demiurge::runtime().setDAC(_position, voltage);
-}

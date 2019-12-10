@@ -17,21 +17,16 @@ See the License for the specific language governing permissions and
 #ifndef _DEMIURGE_THRESHOLD_H_
 #define _DEMIURGE_THRESHOLD_H_
 
+typedef struct {
 
-class Threshold {
+   float setpoint = 2.5;
+   float hysteresis = 1.0;
+   bool output = false;
+} threshold_t;
 
-public:
-   Threshold();
+void threshold_init(threshold_t *data, float setp, float hyst);
 
-   Threshold(float setpoint, float hyst);
-
-   bool compute(float input);
-
-private:
-   float _setpoint;
-   float _hysteresis;
-   bool _output;
-};
+bool threshold_compute(threshold_t *data, float input);
 
 
 #endif

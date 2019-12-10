@@ -17,26 +17,31 @@ See the License for the specific language governing permissions and
 #ifndef _DEMIURGE_MIXER_H_
 #define _DEMIURGE_MIXER_H_
 
+#define DEMIURGE_MAX_MIXER_IN 4
 #include <list>
 #include "Signal.h"
 #include "Passthru.h"
 #include "Volume.h"
 
+typedef struct {
+   signal_t *me;
+   signal_t *inputs[DEMIURGE_MAX_MIXER_IN];
+} mixer_t;
+
+float mixer_read(void *handle, uint64_t time);
+
+
 class Mixer : public Signal {
 
 public:
-   explicit Mixer(int numberOfInputs);
+   explicit Mixer();
 
    ~Mixer() override;
 
    void configure(int number, Signal *source, Signal *control);
 
-protected:
-   float update(uint64_t time) override;
-
 private:
-   Volume **_inputs;
-   int _numberOfInputs;
+   mixer_t _data{};
 };
 
 

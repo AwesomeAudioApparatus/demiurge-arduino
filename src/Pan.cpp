@@ -38,12 +38,21 @@ Signal *Pan::outputRight() {
 
 PanChannel::PanChannel(Pan *host, float factor) {
    _host = host;
-   _factor = factor;
+   _signal.read_fn = panchannel_read;
+   _data.factor = factor;
+   _data.host = &host->_input->_signal;
+   _data.control = &host->_control->_signal;
 }
 
 PanChannel::~PanChannel() = default;
 
-float IRAM_ATTR PanChannel::update(uint64_t time) {
-   float control = _host->_control->read(time);
-   return _host->_input->read(time) * control * _factor;
+float IRAM_ATTR panchannel_read(void *handle, uint64_t time) {
+   auto *panchannel = (panchannel_t *) handle;
+   float control = panchannel->control->read_fn(panchannel->control, time);
+   float input = panchannel->host->read_fn(panchannel->host, time);
+   input = input * control;
+   signal_t *data = panchannel->me;
+   if (data->noRecalc)
+      return input * panchannel->factor ;
+   return (input * data->scale + data->offset) * panchannel->factor ;
 }

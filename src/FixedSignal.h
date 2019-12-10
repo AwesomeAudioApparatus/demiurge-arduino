@@ -19,18 +19,19 @@ See the License for the specific language governing permissions and
 
 
 #include "Signal.h"
+typedef struct {
+   float value;
+} fixed_signal_t;
+
+float fixedsignal_read(void *handle, uint64_t time);
 
 class FixedSignal : public Signal {
 
 public:
    explicit FixedSignal(float value);
    ~FixedSignal() override;
-
-protected:
-   float update(uint64_t time) override;
-
 private:
-   float _value;
+   fixed_signal_t _data{};
 };
 
 

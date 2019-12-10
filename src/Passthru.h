@@ -20,16 +20,25 @@ See the License for the specific language governing permissions and
 
 #include "Signal.h"
 
+typedef struct {
+   signal_t *me;
+   signal_t *input;
+} passthru_t;
+
+float passthru_read(void *handle, uint64_t time);
+
 class Passthru : public Signal {
 
 public:
-   explicit Passthru(Signal *input);
+   Passthru();
+
    ~Passthru() override;
 
-protected:
-   float update(uint64_t time) override;
+   void configure(Signal *input);
 
 private:
+   passthru_t _data;
+
    Signal *_input;
 };
 

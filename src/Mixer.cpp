@@ -20,31 +20,27 @@ See the License for the specific language governing permissions and
 #include "Mixer.h"
 
 
-Mixer::Mixer(int numberOfInputs) {
-   _inputs = static_cast<Volume **>(malloc(sizeof(Volume *) * numberOfInputs));
-   _numberOfInputs = numberOfInputs;
+Mixer::Mixer() {
+   for (auto &input : _data.inputs)
+      input = nullptr;
+   _signal.read_fn = mixer_read;
 }
 
-Mixer::~Mixer() {
-   for (int i = 0; i < _numberOfInputs; i++) {
-      delete _inputs[i];
-   }
-   free(_inputs);
-}
+Mixer::~Mixer() = default;
 
 void Mixer::configure(int number, Signal *source, Signal *control) {
-   configASSERT(number > 0 && number <= _numberOfInputs)
-   Volume *v = new Volume();
+   configASSERT(number > 0 && number <= DEMIURGE_MAX_MIXER_IN)
+   auto *v = new Volume();
    v->configure(source, control);
-   _inputs[number-1] = v;
+   _data.inputs[number - 1] = &v->_signal;
 }
 
-float IRAM_ATTR Mixer::update(uint64_t time) {
+float IRAM_ATTR mixer_read(void *handle, uint64_t time) {
+   auto *mixer = (mixer_t *) handle;
    float output = 0.0;
-   for (int i = 0; i < _numberOfInputs; i++) {
-      Volume *inp = _inputs[i];
+   for (auto inp : mixer->inputs) {
       if (inp != nullptr) {
-         output = output + inp->read(time);
+         output = output + inp->read_fn(inp, time);
       }
    }
    return output;

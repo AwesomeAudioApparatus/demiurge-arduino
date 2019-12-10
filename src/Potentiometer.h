@@ -23,17 +23,20 @@ See the License for the specific language governing permissions and
 
 #include "Signal.h"
 
+typedef struct {
+   int position;
+} potentiometer_t;
+
+float potentiometer_read(void *handle, uint64_t time);
+
+
 class Potentiometer : public Signal {
 
 public:
    explicit Potentiometer(int position);
    ~Potentiometer() override;
-
-protected:
-   float update(uint64_t time) override;
-
 private:
-   int _position;
+   potentiometer_t _data{};
 };
 
 

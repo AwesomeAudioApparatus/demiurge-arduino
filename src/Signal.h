@@ -18,24 +18,33 @@ See the License for the specific language governing permissions and
 #define _DEMIURGE_SIGNAL_H_
 
 
-#include "SoundProcessor.h"
+#include <stdint.h>
 
-class Signal : public SoundProcessor {
+typedef float (*signal_fn)(void *, uint64_t);
+
+typedef struct {
+   float scale;
+   float offset;
+   signal_fn read_fn;
+   bool noRecalc;
+} signal_t;
+
+class Signal  {
 
 public:
+   Signal() noexcept;
+
    virtual ~Signal() = 0;
+
    float scale();
+
    float offset();
 
-   void setScale( float scale );
-   void setOffset( float offset );
+   void setScale(float scale);
 
-   float read(uint64_t time) final;
+   void setOffset(float offset);
 
-   float currentValue();
-
-protected:
-   virtual float update(uint64_t time) = 0;
+   signal_t _signal{};
 
 private:
    float _lastRead = -1.0;

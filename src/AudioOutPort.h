@@ -18,10 +18,16 @@ See the License for the specific language governing permissions and
 #define _DEMIURGE_AUDIOOUTPORT_H_
 
 #include "Signal.h"
-#include "Sink.h"
 
+typedef struct {
+   int position;
+   signal_t *me;
+   signal_t *input;
+} audio_out_port_t;
 
-class AudioOutPort : public Sink, public Signal{
+float audiooutport_read(void *handle, uint64_t time);
+
+class AudioOutPort : public Signal{
 
 public:
    explicit AudioOutPort(int position);
@@ -31,15 +37,11 @@ public:
 
    void configure( Signal* input, float scale, float offset );
 
-   void tick(uint64_t time) override;
-
-protected:
-   float update(uint64_t time) override;
-
 private:
+   audio_out_port_t _data{};
    int _position;
-   bool _registered;
-   Signal *_input;
+   bool _registered{};
+   Signal *_input{};
 };
 
 

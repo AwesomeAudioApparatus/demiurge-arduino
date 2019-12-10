@@ -31,9 +31,9 @@ GatePort gate(1);
 AudioOutPort out1(1);
 AudioOutPort out2(2);
 
-VCO vco1(DEMIURGE_SINE);
+Oscillator vco1(DEMIURGE_SINE);
 
-Mixer mixer(2);
+Mixer mixer;
 FixedSignal fixed(1.0);
 Pan pan;
 
@@ -84,7 +84,7 @@ void loop() {
    Serial.print( Demiurge::runtime().dac2() );
    Serial.println();
 
-   double value1 = vco1.currentValue();
+   double value1 = vco1._data.output;
    Serial.println(value1);
    delay(872);
 }

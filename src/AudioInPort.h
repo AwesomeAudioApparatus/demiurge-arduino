@@ -19,6 +19,12 @@ See the License for the specific language governing permissions and
 
 #include "Signal.h"
 
+typedef struct {
+   int position;
+} audio_in_port_t;
+
+float audioinport_read(void *handle, uint64_t time);
+
 class AudioInPort : public Signal {
 
 public:
@@ -27,11 +33,8 @@ public:
 
    void configure( float scale, float offset );
 
-protected:
-   float update(uint64_t time) override;
-
 private:
-   int _position;
+   audio_in_port_t _data{};
 };
 
 

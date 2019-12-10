@@ -21,13 +21,15 @@ static const int DEMIURGE_GATE_GPIO[1] = {27};
 
 GatePort::GatePort(int position) {
    configASSERT(position > 0 && position <= 1 )
-   _position = position-1;
+   _data.position = position-1;
 }
 
 GatePort::~GatePort() = default;
 
-float IRAM_ATTR GatePort::update(uint64_t time) {
-   bool state = Demiurge::runtime().gpio(DEMIURGE_GATE_GPIO[_position]);
+float IRAM_ATTR gateinport_read(void *handle, uint64_t time){
+   auto *gate = (gate_in_port_t *) handle;
+
+   bool state = Demiurge::runtime().gpio(DEMIURGE_GATE_GPIO[gate->position]);
    if( state )
    {
       return DEMIURGE_GATE_HIGH;

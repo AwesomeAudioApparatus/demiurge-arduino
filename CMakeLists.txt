@@ -75,16 +75,12 @@ add_library(
         src/Signal.h
         src/Sine.cpp
         src/Sine.h
-        src/Sink.cpp
-        src/Sink.h
-        src/SoundProcessor.cpp
-        src/SoundProcessor.h
         src/Threshold.cpp
         src/Threshold.h
         src/Timing.cpp
         src/Timing.h
-        src/VCO.cpp
-        src/VCO.h
+        src/Oscillator.cpp
+        src/Oscillator.h
         src/Volume.cpp
         src/Volume.h
 )

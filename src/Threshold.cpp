@@ -16,23 +16,22 @@ See the License for the specific language governing permissions and
 
 #include "Threshold.h"
 
-Threshold::Threshold() {
-   _setpoint = 2.5;
-   _hysteresis = 1.0;
-   _output = false;
+
+void threshold_init(threshold_t *data, float setp, float hyst) {
+   data->setpoint = setp;
+   data->hysteresis = hyst;
+   data->output = false;
 }
 
-Threshold::Threshold(float setp, float hyst) {
-   _setpoint = setp;
-   _hysteresis = hyst;
-   _output = false;
-}
-
-bool Threshold::compute(float input) {
-   if (_output) {
-      _output = input < _setpoint - _hysteresis;
+bool threshold_compute(threshold_t *data, float input) {
+   float setpoint = data->setpoint;
+   float hysteresis = data->hysteresis;
+   bool out;
+   if (data->output) {
+      out = input < setpoint - hysteresis;
    } else {
-      _output = input > _setpoint + _hysteresis;
+      out = input > setpoint + hysteresis;
    }
-   return _output;
+   data->output = out;
+   return out;
 }

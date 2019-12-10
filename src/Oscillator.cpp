@@ -20,48 +20,62 @@ See the License for the specific language governing permissions and
 
 static const float SINE_CONST = 1000000 / M_TWOPI;
 
-VCO::VCO(int mode) {
+Oscillator::Oscillator(int mode) {
+   _signal.read_fn = volume_read;
+   _data.mode = mode;
    _mode = mode;
    _triggerControl = nullptr;
    _amplitudeControl = nullptr;
    _frequencyControl = nullptr;
+
 }
 
-VCO::~VCO() = default;
+Oscillator::~Oscillator() = default;
 
-void VCO::configureFrequency(Signal *freqControl) {
+void Oscillator::configure(Signal *freqControl, Signal *amplitudeControl, Signal *trigControl) {
+   configureFrequency(freqControl);
+   configureAmplitude(amplitudeControl);
+   configureTrig(trigControl);
+}
+
+void Oscillator::configureFrequency(Signal *freqControl) {
    configASSERT(freqControl != nullptr)
    _frequencyControl = freqControl;
+   _data.frequency = &freqControl->_signal;
 }
 
-void VCO::configureAmplitude(Signal *amplitudeControl) {
+void Oscillator::configureAmplitude(Signal *amplitudeControl) {
    configASSERT(amplitudeControl != nullptr)
    _amplitudeControl = amplitudeControl;
+   _data.amplitude = &amplitudeControl->_signal;
 }
 
-void VCO::configureTrig(Signal *trigControl) {
+void Oscillator::configureTrig(Signal *trigControl) {
    configASSERT(trigControl != nullptr)
    _triggerControl = trigControl;
+   _data.trigger = &trigControl->_signal;
 }
 
-float IRAM_ATTR VCO::update(uint64_t time) {
+float IRAM_ATTR oscillator_read(void *handle, uint64_t time) {
+   auto *osc = (oscillator_t *) handle;
    float freq;
-   if (_frequencyControl == nullptr)
-      freq = 440;
+   if (osc->frequency == nullptr)
+      freq = 440.0f;
    else
-      freq = OctavePerVolt::frequencyOf(_frequencyControl->read(time));
-   freq = 440;
+      freq = OctavePerVolt::frequencyOf(osc->frequency->read_fn(osc->frequency, time));
+   freq = 440.0f;
 
    float amplitude;
-   if (_amplitudeControl == nullptr)
-      amplitude = 10.0;
+   if (osc->amplitude == nullptr)
+      amplitude = 10.0f;
    else
-      amplitude = _amplitudeControl->read(time);
+      amplitude = osc->amplitude->read_fn(osc->amplitude, time);
 
-   switch (_mode) {
+   switch (osc->mode) {
       case DEMIURGE_SINE: {
          Demiurge::runtime().timing[3]->start();
-         float result = ((float) isin(freq * (time - _lastTrig)/3.2767)) / 4096 * amplitude;
+         float result = ((float) isin(freq * (time - osc->lastTrig)/3.2767)) / 4096 * amplitude;
+         osc->output = result;
          Demiurge::runtime().timing[3]->stop();
          return result;
       }

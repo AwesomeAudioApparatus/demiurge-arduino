@@ -19,11 +19,12 @@ See the License for the specific language governing permissions and
 
 Potentiometer::Potentiometer(int position) {
    configASSERT(position > 0 && position <= 4 )
-   _position = position + DEMIEURGE_POTENTIOMETER_OFFSET;
+   _data.position = position + DEMIEURGE_POTENTIOMETER_OFFSET;
 }
 
 Potentiometer::~Potentiometer() = default;
 
-float IRAM_ATTR Potentiometer::update(uint64_t time) {
-   return Demiurge::runtime().inputs()[_position];
+float IRAM_ATTR potentiometer_read(void *handle, uint64_t time) {
+   auto *port = (audio_in_port_t *) handle;
+   return Demiurge::runtime().inputs()[port->position];
 }

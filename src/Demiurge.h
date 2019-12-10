@@ -72,11 +72,10 @@ See the License for the specific language governing permissions and
 #include "PushButton.h"
 #include "Signal.h"
 #include "Sine.h"
-#include "Sink.h"
-#include "SoundProcessor.h"
+#include <stdint.h>
 #include "Threshold.h"
 #include "Timing.h"
-#include "VCO.h"
+#include "Oscillator.h"
 #include "adc128s102/ADC128S102.h"
 #include "mcp4822/MCP4822.h"
 #include "Timing.h"
@@ -108,9 +107,9 @@ public:
 
    void tick();
 
-   void registerSink(Sink *processor);
+   void registerSink(audio_out_port_t *processor);
 
-   void unregisterSink(Sink *processor);
+   void unregisterSink(audio_out_port_t *processor);
 
    float *inputs();
 
@@ -143,7 +142,7 @@ private:
 
    void initializeSinks();
 
-   Sink *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
+   audio_out_port_t *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
 
    void readADC();
    bool _started;

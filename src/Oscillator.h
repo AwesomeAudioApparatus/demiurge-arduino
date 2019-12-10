@@ -24,12 +24,26 @@ See the License for the specific language governing permissions and
 
 #include "Signal.h"
 
-class VCO : public Signal {
+typedef struct {
+   uint64_t lastTrig;
+   signal_t *me;
+   signal_t *frequency;
+   signal_t *amplitude;
+   signal_t *trigger;
+   int mode;
+   float output;
+} oscillator_t;
+
+float oscillator_read(void *handle, uint64_t time);
+
+class Oscillator : public Signal {
 
 public:
-   explicit VCO(int mode);
+   explicit Oscillator(int mode);
 
-   ~VCO() override;
+   ~Oscillator() override;
+
+   void configure(Signal *freqControl, Signal *amplitudeControl, Signal *trigControl);
 
    void configureFrequency(Signal *freqControl);
 
@@ -37,12 +51,11 @@ public:
 
    void configureTrig(Signal *trigControl);
 
-protected:
-   float update(uint64_t time) override;
+   oscillator_t _data{};
 
 private:
    int _mode;
-   float _lastTrig;
+   float _lastTrig{};
    Signal *_frequencyControl;
    Signal *_amplitudeControl;
    Signal *_triggerControl;

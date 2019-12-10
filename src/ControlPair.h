@@ -21,6 +21,14 @@ See the License for the specific language governing permissions and
 #include "Potentiometer.h"
 #include "CvInPort.h"
 
+typedef struct {
+   signal_t *me;
+   signal_t *cv;
+   signal_t *potentiometer;
+} control_pair_t;
+
+float controlpair_read(void *handle, uint64_t time);
+
 class ControlPair : public Signal {
 
 public:
@@ -32,10 +40,8 @@ public:
 
    void setCvScale(float scale);
 
-protected:
-   float update(uint64_t time) override;
-
 private:
+   control_pair_t _data;
    Potentiometer *_potentiometer;
    CvInPort *_cvIn;
    float _cvScale;
