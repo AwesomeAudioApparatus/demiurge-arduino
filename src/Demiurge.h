@@ -62,7 +62,7 @@ See the License for the specific language governing permissions and
 #include "ControlPair.h"
 #include "CvInPort.h"
 #include "FixedSignal.h"
-#include "GatePort.h"
+#include "GateInPort.h"
 #include "Inverter.h"
 #include "Mixer.h"
 #include "OctavePerVolt.h"
@@ -92,8 +92,11 @@ public:
       return instance;
    }
 
+   static void begin() {
+      Demiurge::runtime().startRuntime();
+   }
 
-//   void operator=(Demiurge const &) = delete;
+   void operator=(Demiurge const &) = delete;
 
    static float clip(float value) {
       if (value > 10.0) return 10.0;
@@ -101,15 +104,13 @@ public:
       return value;
    };
 
-   static uint64_t micros();
-
-   void begin();
+   void startRuntime();
 
    void tick();
 
-   void registerSink(audio_out_port_t *processor);
+   void registerSink(signal_t *processor);
 
-   void unregisterSink(audio_out_port_t *processor);
+   void unregisterSink(signal_t *processor);
 
    float *inputs();
 
@@ -142,7 +143,7 @@ private:
 
    void initializeSinks();
 
-   audio_out_port_t *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
+   signal_t *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
 
    void readADC();
    bool _started;
@@ -178,8 +179,6 @@ private:
    adc128s102 _adc;
 
    void readGpio();
-
-   void transferDacs();
 };
 
 

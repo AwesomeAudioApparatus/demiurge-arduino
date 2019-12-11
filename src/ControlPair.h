@@ -22,12 +22,13 @@ See the License for the specific language governing permissions and
 #include "CvInPort.h"
 
 typedef struct {
-   signal_t *me;
    signal_t *cv;
    signal_t *potentiometer;
+   uint64_t lastCalc;
+   float cached;
 } control_pair_t;
 
-float controlpair_read(void *handle, uint64_t time);
+float controlpair_read(signal_t *handle, uint64_t time);
 
 class ControlPair : public Signal {
 

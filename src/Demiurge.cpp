@@ -19,8 +19,6 @@ See the License for the specific language governing permissions and
 #include "esp_types.h"
 #include "esp_timer.h"
 #include "string.h"
-//#include "freertos/queue.h"
-//#include "driver/periph_ctrl.h"
 #include "driver/timer.h"
 #include "driver/spi_master.h"
 #include "Demiurge.h"
@@ -32,29 +30,26 @@ See the License for the specific language governing permissions and
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 
-void IRAM_ATTR startTask(void *parameter) {
-   gpio_set_level(GPIO_NUM_21, 0);
+void IRAM_ATTR startTimerTask(void *parameter) {
+
+}
+
+void IRAM_ATTR startInfiniteTask(void *parameter) {
    esp_err_t error = timer_start(DEMIURGE_TIMER_GROUP, DEMIURGE_TIMER);
    ESP_ERROR_CHECK(error);
    uint64_t counter = 0;
    uint64_t next = 0;
-   bool flip1 = true;
 
    while (true) {
-      gpio_set_level(GPIO_NUM_22, flip1 ? 0 : 1);
-      taskYIELD();
-      timer_get_counter_value(DEMIURGE_TIMER_GROUP, DEMIURGE_TIMER, &counter);
-      while (counter < next) {
+//      while (counter < next)
+      {
+         timer_get_counter_value(DEMIURGE_TIMER_GROUP, DEMIURGE_TIMER, &counter);
       } // WAIT
-      gpio_set_level(GPIO_NUM_25, 0);
-
-      if (Demiurge::runtime().timing[0]->start()) {
+//      if (Demiurge::runtime().timing[0]->start()) {
          Demiurge::runtime().tick();
-         gpio_set_level(GPIO_NUM_26, 0);
-         Demiurge::runtime().timing[0]->stop();
-      }
-      flip1 = !flip1;
-      next = counter + 5;
+//         Demiurge::runtime().timing[0]->stop();
+//      }
+      next = counter + 50;
    }
 
 }
@@ -74,25 +69,24 @@ Demiurge::Demiurge() {
    gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
    gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
 
-   begin();
-};
-
-void Demiurge::begin() {
-   if (_started)
-      return;
-   _started = true;
-   timing[0] = new Timing("onTimer");
-   timing[1] = nullptr;
-   timing[2] = nullptr;
-   timing[3] = nullptr;
-   timing[4] = nullptr;
    initializeDacSpi();
    initializeAdcSpi();
    mcp4822_init(&_dac, _hspi);
    adc128s102_init(&_adc, _vspi);
    adc128s102_queue(&_adc);
-   initializeConcurrency();
    initializeSinks();
+};
+
+void Demiurge::startRuntime() {
+   if (_started)
+      return;
+   _started = true;
+   timing[0] = new Timing("tick");
+   timing[1] = new Timing("processing");
+   timing[2] = nullptr;
+   timing[3] = nullptr;
+   timing[4] = nullptr;
+   initializeConcurrency();
 }
 
 void Demiurge::initializeDacSpi() {
@@ -138,23 +132,15 @@ void Demiurge::initializeAdcSpi() {
 
    ret = spi_bus_add_device(VSPI_HOST, &_vspiDeviceIntfConfig, &_vspi);
    ESP_ERROR_CHECK(ret);
+
+   spi_device_acquire_bus(_vspi, portMAX_DELAY);
 }
 
 void Demiurge::initializeConcurrency() {
-//   _config = static_cast<esp_timer_create_args_t *>(malloc(sizeof(esp_timer_create_args_t)));
-//   _config->callback = onTimer;
-//   _config->name = "Sampler";
-//   _config->dispatch_method = ESP_TIMER_TASK;
-//
-//   esp_err_t timerError = esp_timer_create(_config, &_timer);
-//   ESP_ERROR_CHECK(timerError)
-//
-//   // TODO: We can not run faster than 50 microseconds on soft-ish timers. Use hardware timers??
-//   timerError = esp_timer_start_periodic(_timer, 200);
-//   ESP_ERROR_CHECK(timerError)
 
-
-   xTaskCreatePinnedToCore(startTask, "Audio", 8192, nullptr, 0, &_taskHandle, 0);
+   TaskHandle_t idleTask = xTaskGetIdleTaskHandle();
+   esp_task_wdt_delete(idleTask);
+   xTaskCreatePinnedToCore(startInfiniteTask, "Audio", 8192, nullptr, 7, &_taskHandle, 0);
 }
 
 void Demiurge::initializeSinks() {
@@ -166,6 +152,7 @@ void Demiurge::initializeSinks() {
 #pragma clang diagnostic pop
 
 Demiurge::~Demiurge() {
+
    spi_bus_remove_device(_vspi);
    spi_bus_remove_device(_hspi);
 
@@ -174,30 +161,61 @@ Demiurge::~Demiurge() {
    free(_config);
 }
 
-void Demiurge::registerSink(audio_out_port_t *processor) {
-   _sinks[processor->position - 1] = processor;
+void Demiurge::registerSink(signal_t *processor) {
+   configASSERT(processor != nullptr)
+   auto *port = (audio_out_port_t *) processor->data;
+   configASSERT(port != nullptr)
+   configASSERT(port->position > 0 && port->position <= DEMIURGE_MAX_SINKS)
+   _sinks[port->position - 1] = processor;
 }
 
-void Demiurge::unregisterSink(audio_out_port_t *processor) {
-   _sinks[processor->position - 1] = nullptr;
+void Demiurge::unregisterSink(signal_t *processor) {
+   configASSERT(processor != nullptr)
+   auto *port = (audio_out_port_t *) processor->data;
+   configASSERT(port != nullptr)
+   configASSERT(port->position > 0 && port->position <= DEMIURGE_MAX_SINKS)
+   _sinks[port->position - 1] = nullptr;
+}
+
+uint16_t testing_call(int i) {
+   float x = (float) i;
+   return (uint16_t) (x * 204.75 + 2048.0);
 }
 
 void IRAM_ATTR Demiurge::tick() {
-   readGpio();
-   readADC();
+//   readGpio();
+//   readADC();
    timerCounter = timerCounter + 50;
 
+   gpio_set_level(GPIO_NUM_26, 0);
+   gpio_set_level(GPIO_NUM_26, 1);
    for (int i = 0; i < DEMIURGE_MAX_SINKS; i++) {
-      audio_out_port_t *sink = _sinks[i];
-      if( sink != nullptr ){
+      signal_t *sink = _sinks[i];
+      if (sink != nullptr) {
+         gpio_set_level(GPIO_NUM_25, 0);
+         gpio_set_level(GPIO_NUM_25, 1);
+
+         gpio_set_level(GPIO_NUM_25, 0);
+         gpio_set_level(GPIO_NUM_25, 1);
+         gpio_set_level(GPIO_NUM_25, 0);
+         gpio_set_level(GPIO_NUM_25, 1);
          float voltage = audiooutport_read(sink, timerCounter);
+         gpio_set_level(GPIO_NUM_25, 0);
+         gpio_set_level(GPIO_NUM_25, 1);
+         gpio_set_level(GPIO_NUM_25, 0);
+         gpio_set_level(GPIO_NUM_25, 1);
          setDAC(i, voltage);
+         gpio_set_level(GPIO_NUM_25, 0);
+         gpio_set_level(GPIO_NUM_25, 1);
+         gpio_set_level(GPIO_NUM_25, 0);
+         gpio_set_level(GPIO_NUM_25, 1);
       }
    }
-   gpio_output_set(LDAC_MASK, 0, LDAC_MASK, 0);
+//   gpio_output_set(LDAC_MASK, 0, LDAC_MASK, 1);
    mcp4822_dacOutput(&_dac, _dac1, _dac2);
    gpio_output_set(0, LDAC_MASK, LDAC_MASK, 0);
 }
+
 
 void IRAM_ATTR Demiurge::readGpio() {
    _gpios = gpio_input_get(); // get all 32 gpios
@@ -274,5 +292,4 @@ uint16_t Demiurge::dac2() {
 uint16_t *Demiurge::rawAdc() {
    return _adc._channels;
 }
-
 

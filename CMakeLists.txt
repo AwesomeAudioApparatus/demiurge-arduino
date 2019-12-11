@@ -55,8 +55,8 @@ add_library(
         src/Demiurge.h
         src/FixedSignal.cpp
         src/FixedSignal.h
-        src/GatePort.cpp
-        src/GatePort.h
+        src/GateInPort.cpp
+        src/GateInPort.h
         src/Inverter.cpp
         src/Inverter.h
         src/Mixer.cpp

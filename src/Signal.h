@@ -20,9 +20,12 @@ See the License for the specific language governing permissions and
 
 #include <stdint.h>
 
-typedef float (*signal_fn)(void *, uint64_t);
+typedef struct signal_t signal_t;
 
-typedef struct {
+typedef float (*signal_fn)(signal_t *, uint64_t);
+
+typedef struct signal_t {
+   void *data;
    float scale;
    float offset;
    signal_fn read_fn;

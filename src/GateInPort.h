@@ -29,16 +29,18 @@ See the License for the specific language governing permissions and
 
 typedef struct {
    int position;
+   uint64_t lastCalc;
+   float cached;
 } gate_in_port_t;
 
-float gateinport_read(void *handle, uint64_t time);
+float gateinport_read(signal_t *handle, uint64_t time);
 
-class GatePort : public Signal {
+class GateInPort : public Signal {
 
 public:
-   explicit GatePort(int position);
+   explicit GateInPort(int position);
 
-   ~GatePort() override;
+   ~GateInPort() override;
 private:
    gate_in_port_t _data{};
 };

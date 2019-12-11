@@ -23,7 +23,7 @@ typedef struct {
    float value;
 } fixed_signal_t;
 
-float fixedsignal_read(void *handle, uint64_t time);
+float fixedsignal_read(signal_t *handle, uint64_t time);
 
 class FixedSignal : public Signal {
 

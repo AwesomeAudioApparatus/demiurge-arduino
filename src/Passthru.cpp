@@ -23,17 +23,26 @@ Passthru::Passthru() {
 
 Passthru::~Passthru() = default;
 
-void Passthru::configure( Signal *input)
-{
+void Passthru::configure(Signal *input) {
    _input = input;
    _data.input = &input->_signal;
+   _signal.data = &_data;
 }
 
-float IRAM_ATTR passthru_read(void *handle, uint64_t time) {
-   auto *passthru = (passthru_t *) handle;
-   float input = passthru->input->read_fn(passthru->input, time);
-   signal_t *data = passthru->me;
-   if (data->noRecalc)
-      return input;
-   return input * data->scale + data->offset;
+float IRAM_ATTR passthru_read(signal_t *handle, uint64_t time) {
+   auto *passthru = (passthru_t *) handle->data;
+   if (time > passthru->lastCalc) {
+      passthru->lastCalc = time;
+      float input = passthru->input->read_fn(passthru->input, time);
+      signal_t *data = passthru->me;
+      float result;
+      if (data->noRecalc) {
+         result = input;
+      } else {
+         result = input * data->scale + data->offset;
+      }
+      passthru->cached = result;
+      return result;
+   }
+   return passthru->cached;
 }

@@ -35,9 +35,11 @@ typedef struct {
    bool currentGate;
    threshold_t gateThreshold;
    threshold_t trigThreshold;
+   uint64_t lastCalc;
+   float cached;
 } adsr_t;
 
-float adsr_read(void *handle, uint64_t time);
+float adsr_read(signal_t *handle, uint64_t time);
 float adsr_slopeTime(float voltage);
 
 class Adsr : public Signal {

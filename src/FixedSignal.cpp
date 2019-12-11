@@ -20,12 +20,13 @@ See the License for the specific language governing permissions and
 FixedSignal::FixedSignal(float value) {
    _data.value = value;
    _signal.read_fn = fixedsignal_read;
+   _signal.data = &_data;
 }
 
 FixedSignal::~FixedSignal() = default;
 
-float IRAM_ATTR fixedsignal_read(void *handle, uint64_t time)
+float IRAM_ATTR fixedsignal_read(signal_t *handle, uint64_t time)
 {
-   auto *fixed = (fixed_signal_t *) handle;
+   auto *fixed = (fixed_signal_t *) handle->data;
    return fixed->value;
 }

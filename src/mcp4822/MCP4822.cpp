@@ -26,7 +26,8 @@ void mcp4822_dacOutput(mcp4822 *handle, uint16_t outputA, uint16_t outputB)
    handle->_tx.tx_data[1] = outputA & 0xFF;
    handle->_tx.tx_data[2] = MCP4822_CHANNEL_B | MCP4822_ACTIVE | ((outputB >> 8) & 0xFF);
    handle->_tx.tx_data[3] = outputB & 0xFF;
-   spi_device_queue_trans(handle->_spi, &handle->_tx, 10); // 10 ticks is probably very long.
+//   spi_device_queue_trans(handle->_spi, &handle->_tx, 1); // 10 ticks is probably very long.
+   spi_device_polling_transmit(handle->_spi, &handle->_tx);
 }
 
 void mcp4822_init( mcp4822 *handle, spi_device_handle_t spi) {

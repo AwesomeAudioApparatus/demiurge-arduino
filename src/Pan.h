@@ -23,10 +23,12 @@ typedef struct {
    float factor;
    signal_t *me;
    signal_t *control;
-   signal_t *host;
+   signal_t *hostInput;
+   uint64_t lastCalc;
+   float cached;
 } panchannel_t;
 
-float IRAM_ATTR panchannel_read(void *handle, uint64_t time);
+float IRAM_ATTR panchannel_read(signal_t *handle, uint64_t time);
 
 class PanChannel;
 
@@ -34,6 +36,8 @@ class Pan {
 
 public:
    Pan();
+
+   ~Pan();
 
    void configure(Signal *input, Signal *control);
 

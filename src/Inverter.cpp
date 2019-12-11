@@ -22,6 +22,7 @@ See the License for the specific language governing permissions and
 Inverter::Inverter(Signal *midpoint, Signal *scale) {
    _data.midpoint = &midpoint->_signal;
    _data.scale = &scale->_signal;
+   _signal.data = &_data;
 }
 
 Inverter::~Inverter() = default;
@@ -30,7 +31,7 @@ void Inverter::configure(Signal *input) {
    _data.input = &input->_signal;
 }
 
-float IRAM_ATTR inverter_read(void *handle, uint64_t time)
+float IRAM_ATTR inverter_read(signal_t *handle, uint64_t time)
 {
    return 0.0;
 }

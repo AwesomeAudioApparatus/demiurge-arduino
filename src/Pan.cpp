@@ -14,18 +14,31 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include "esp_log.h"
 #include "Demiurge.h"
 #include "Pan.h"
 
 
 Pan::Pan() {
-   _left = new PanChannel(this, 0.05);
-   _right = new PanChannel(this, -0.05);
+   _left = new PanChannel(this, 0.5);
+   _right = new PanChannel(this, -0.5);
 };
 
+Pan::~Pan() {
+   delete _left;
+   delete _right;
+}
+
 void Pan::configure(Signal *input, Signal *control) {
+   configASSERT(input != nullptr)
    _input = input;
+   configASSERT(control != nullptr)
    _control = control;
+
+   ((panchannel_t*) _left->_signal.data)->hostInput = &input->_signal;
+   ((panchannel_t*) _right->_signal.data)->hostInput = &input->_signal;
+   ((panchannel_t*) _left->_signal.data)->control = &control->_signal;
+   ((panchannel_t*) _right->_signal.data)->control = &control->_signal;
 }
 
 Signal *Pan::outputLeft() {
@@ -39,20 +52,31 @@ Signal *Pan::outputRight() {
 PanChannel::PanChannel(Pan *host, float factor) {
    _host = host;
    _signal.read_fn = panchannel_read;
+   _signal.data = &_data;
    _data.factor = factor;
-   _data.host = &host->_input->_signal;
-   _data.control = &host->_control->_signal;
+   _data.me = &_signal;
 }
 
 PanChannel::~PanChannel() = default;
 
-float IRAM_ATTR panchannel_read(void *handle, uint64_t time) {
-   auto *panchannel = (panchannel_t *) handle;
-   float control = panchannel->control->read_fn(panchannel->control, time);
-   float input = panchannel->host->read_fn(panchannel->host, time);
-   input = input * control;
-   signal_t *data = panchannel->me;
-   if (data->noRecalc)
-      return input * panchannel->factor ;
-   return (input * data->scale + data->offset) * panchannel->factor ;
+float IRAM_ATTR panchannel_read(signal_t *handle, uint64_t time) {
+   auto *panchannel = (panchannel_t *) handle->data;
+   if( time > panchannel->lastCalc ) {
+      panchannel->lastCalc = time;
+      signal_t *panControl = panchannel->control;
+      float control = panControl->read_fn(panControl, time);
+      signal_t *hostInput = panchannel->hostInput;
+      float input = hostInput->read_fn(hostInput, time);
+      input = input * control;
+      signal_t *data = panchannel->me;
+      if (data->noRecalc) {
+         float result = input * panchannel->factor;
+         panchannel->cached = result;
+         return result;
+      }
+      float result = (input * data->scale + data->offset) * panchannel->factor;
+      panchannel->cached = result;
+      return result;
+   }
+   return panchannel->cached;
 }

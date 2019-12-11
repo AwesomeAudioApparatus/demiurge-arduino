@@ -19,16 +19,8 @@ See the License for the specific language governing permissions and
 
 #include <math.h>
 
-class OctavePerVolt {
+float octave_frequencyOf(float voltage);
 
-public:
-   static float frequencyOf(float voltage) {
-      return 440 / pow(2, 2.75) * pow(2, voltage);
-   }
-
-private:
-   OctavePerVolt() = delete;
-};
-
+float octave_voltageOf(float frequency);
 
 #endif

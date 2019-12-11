@@ -15,3 +15,12 @@ See the License for the specific language governing permissions and
 */
 
 #include "OctavePerVolt.h"
+
+float octave_frequencyOf(float voltage) {
+   return 440 / pow(2, 2.75) * pow(2, voltage);
+}
+
+float octave_voltageOf(float frequency) {
+   // TODO:
+   return 1.0;
+}

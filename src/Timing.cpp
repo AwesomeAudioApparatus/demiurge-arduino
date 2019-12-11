@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#include "Arduino.h"
 #include "esp_timer.h"
+#include "esp_log.h"
 #include "Timing.h"
 #include "Demiurge.h"
 
@@ -54,9 +54,6 @@ uint64_t Timing::lastInterval() {
 }
 
 void Timing::report() {
-   Serial.print(_name);
-   Serial.print(" : ");
-   Serial.print((uint32_t) _lastInterval);
-   Serial.println();
+   ESP_LOGD("Timing", "%s  :  %d ", _name, (uint32_t) _lastInterval);
 }
 

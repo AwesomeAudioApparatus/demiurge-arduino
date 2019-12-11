@@ -21,13 +21,13 @@ See the License for the specific language governing permissions and
 static const float SINE_CONST = 1000000 / M_TWOPI;
 
 Oscillator::Oscillator(int mode) {
-   _signal.read_fn = volume_read;
+   _signal.read_fn = oscillator_read;
    _data.mode = mode;
-   _mode = mode;
    _triggerControl = nullptr;
    _amplitudeControl = nullptr;
    _frequencyControl = nullptr;
-
+   _signal.data = &_data;
+   _data.lastTrig = 0;
 }
 
 Oscillator::~Oscillator() = default;
@@ -56,40 +56,45 @@ void Oscillator::configureTrig(Signal *trigControl) {
    _data.trigger = &trigControl->_signal;
 }
 
-float IRAM_ATTR oscillator_read(void *handle, uint64_t time) {
-   auto *osc = (oscillator_t *) handle;
-   float freq;
-   if (osc->frequency == nullptr)
-      freq = 440.0f;
-   else
-      freq = OctavePerVolt::frequencyOf(osc->frequency->read_fn(osc->frequency, time));
-   freq = 440.0f;
+float IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time) {
+   auto *osc = (oscillator_t *) handle->data;
+   if( time > osc->lastCalc ) {
+      osc->lastCalc = time;
+      float freq;
+      signal_t *freqControl = osc->frequency;
+      if (freqControl == nullptr) {
+         freq = 440.0f;
+      } else {
+         freq = octave_frequencyOf(freqControl->read_fn(freqControl, time));
+      }
 
-   float amplitude;
-   if (osc->amplitude == nullptr)
-      amplitude = 10.0f;
-   else
-      amplitude = osc->amplitude->read_fn(osc->amplitude, time);
+      float amplitude;
+      if (osc->amplitude == nullptr)
+         amplitude = 10.0f;
+      else
+         amplitude = osc->amplitude->read_fn(osc->amplitude, time);
 
-   switch (osc->mode) {
-      case DEMIURGE_SINE: {
-         Demiurge::runtime().timing[3]->start();
-         float result = ((float) isin(freq * (time - osc->lastTrig)/3.2767)) / 4096 * amplitude;
-         osc->output = result;
-         Demiurge::runtime().timing[3]->stop();
-         return result;
+      switch (osc->mode) {
+         case DEMIURGE_SINE: {
+            float result = (((float) isin(freq * (time - osc->lastTrig) / 3.2767)) / 4096) * amplitude;
+//            float result = sinf( freq * (time - osc->lastTrig) ) * amplitude;
+            osc->cached = result;
+            return result;
+         }
+         case DEMIURGE_SQUARE: {
+            // TODO
+            break;
+         }
+         case DEMIURGE_TRIANGLE: {
+            // TODO
+            break;
+         }
+         case DEMIURGE_SAW: {
+            // TODO
+            break;
+         }
       }
-      case DEMIURGE_SQUARE: {
-         // TODO
-         break;
-      }
-      case DEMIURGE_TRIANGLE: {
-         // TODO
-         break;
-      }
-      case DEMIURGE_SAW: {
-         // TODO
-         break;
-      }
+      return 0.0;
    }
+   return osc->cached;
 }

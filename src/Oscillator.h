@@ -31,10 +31,12 @@ typedef struct {
    signal_t *amplitude;
    signal_t *trigger;
    int mode;
-   float output;
+   volatile float output;
+   uint64_t lastCalc;
+   float cached;
 } oscillator_t;
 
-float oscillator_read(void *handle, uint64_t time);
+float oscillator_read(signal_t *handle, uint64_t time);
 
 class Oscillator : public Signal {
 
@@ -54,8 +56,6 @@ public:
    oscillator_t _data{};
 
 private:
-   int _mode;
-   float _lastTrig{};
    Signal *_frequencyControl;
    Signal *_amplitudeControl;
    Signal *_triggerControl;

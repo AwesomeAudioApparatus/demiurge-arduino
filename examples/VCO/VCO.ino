@@ -21,12 +21,12 @@ See the License for the specific language governing permissions and
 
 #include "esp_log.h"
 
-CvInPort cv1(1);
-CvInPort cv2(2);
-CvInPort cv3(3);
-CvInPort cv4(4);
+ControlPair pair1(1);
+ControlPair pair2(2);
+ControlPair pair3(3);
+ControlPair pair4(4);
 
-GatePort gate(1);
+GateInPort gate(1);
 
 AudioOutPort out1(1);
 AudioOutPort out2(2);
@@ -43,30 +43,32 @@ Pan pan;
 #define ADC_MOSI 23
 
 void setup() {
+  disableCore0WDT();
   Serial.begin(115200);
-
   pinMode(ADC_CS, OUTPUT); digitalWrite(ADC_CS, HIGH);
   pinMode(ADC_MOSI, OUTPUT); digitalWrite(ADC_MOSI, LOW);
   pinMode(ADC_MISO, INPUT);
   pinMode(ADC_CLK, OUTPUT); digitalWrite(ADC_CLK, LOW);
 
    Serial.println("setting up mixer");
-   mixer.configure(2, &cv1, &fixed);
-   mixer.configure(1, &cv2, &fixed);
+   mixer.configure(2, &pair1, &fixed);
+   mixer.configure(1, &pair2, &fixed);
 
    Serial.println("setting up vco");
    vco1.configureFrequency(&mixer);
-//   vco1.configureAmplitude(&cv3);
+   vco1.configureAmplitude(&pair3);
 
    Serial.println("setting up pan");
-   pan.configure(&vco1, &cv4);
+   pan.configure(&vco1, &mixer);
 
    Serial.println("setting up output ports");
    out1.configure(pan.outputLeft());
    out2.configure(pan.outputRight());
+   Demiurge::begin();
 }
 
 void loop() {
+
    Demiurge::runtime().printReport();
    uint16_t *inputs = Demiurge::runtime().rawAdc();
    for( int i=0; i < 8; i++ ) {
@@ -84,7 +86,15 @@ void loop() {
    Serial.print( Demiurge::runtime().dac2() );
    Serial.println();
 
-   double value1 = vco1._data.output;
-   Serial.println(value1);
+   double value1 = ((oscillator_t *) vco1._signal.data)->cached;
+   double value2 = ((panchannel_t *) pan.outputLeft()->_signal.data)->cached;
+   double value3 = ((audio_out_port_t *) out1._signal.data)->cached;
+   Serial.print( "VCO: " );
+   Serial.print(value1);
+   Serial.print( "    Pan:" );
+   Serial.print(value2);
+   Serial.print( "    Out:" );
+   Serial.print(value3);
+   Serial.println();
    delay(872);
 }

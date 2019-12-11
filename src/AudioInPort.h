@@ -21,9 +21,11 @@ See the License for the specific language governing permissions and
 
 typedef struct {
    int position;
+   uint64_t lastCalc;
+   float cached;
 } audio_in_port_t;
 
-float audioinport_read(void *handle, uint64_t time);
+float audioinport_read(signal_t *handle, uint64_t time);
 
 class AudioInPort : public Signal {
 

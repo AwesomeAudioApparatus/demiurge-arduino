@@ -19,20 +19,20 @@ See the License for the specific language governing permissions and
 
 static const int DEMIURGE_GATE_GPIO[1] = {27};
 
-GatePort::GatePort(int position) {
+GateInPort::GateInPort(int position) {
    configASSERT(position > 0 && position <= 1 )
    _data.position = position-1;
+   _signal.data = &_data;
 }
 
-GatePort::~GatePort() = default;
+GateInPort::~GateInPort() = default;
 
-float IRAM_ATTR gateinport_read(void *handle, uint64_t time){
-   auto *gate = (gate_in_port_t *) handle;
-
-   bool state = Demiurge::runtime().gpio(DEMIURGE_GATE_GPIO[gate->position]);
-   if( state )
-   {
-      return DEMIURGE_GATE_HIGH;
+float IRAM_ATTR gateinport_read(signal_t *handle, uint64_t time){
+   auto *gate = (gate_in_port_t *) handle->data;
+   if( time > gate->lastCalc ) {
+      gate->lastCalc = time;
+      bool state = Demiurge::runtime().gpio(DEMIURGE_GATE_GPIO[gate->position]);
+      gate->cached = state ? DEMIURGE_GATE_HIGH : DEMIURGE_GATE_LOW;
    }
-   return 0.0;
+   return gate->cached;
 }

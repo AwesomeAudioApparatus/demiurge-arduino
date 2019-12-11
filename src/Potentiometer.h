@@ -25,9 +25,11 @@ See the License for the specific language governing permissions and
 
 typedef struct {
    int position;
+   uint64_t lastCalc;
+   float cached;
 } potentiometer_t;
 
-float potentiometer_read(void *handle, uint64_t time);
+float potentiometer_read(signal_t *handle, uint64_t time);
 
 
 class Potentiometer : public Signal {
