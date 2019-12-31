@@ -35,10 +35,10 @@ void Pan::configure(Signal *input, Signal *control) {
    configASSERT(control != nullptr)
    _control = control;
 
-   ((panchannel_t*) _left->_signal.data)->hostInput = &input->_signal;
-   ((panchannel_t*) _right->_signal.data)->hostInput = &input->_signal;
-   ((panchannel_t*) _left->_signal.data)->control = &control->_signal;
-   ((panchannel_t*) _right->_signal.data)->control = &control->_signal;
+   ((panchannel_t *) _left->_signal.data)->hostInput = &input->_signal;
+   ((panchannel_t *) _right->_signal.data)->hostInput = &input->_signal;
+   ((panchannel_t *) _left->_signal.data)->control = &control->_signal;
+   ((panchannel_t *) _right->_signal.data)->control = &control->_signal;
 }
 
 Signal *Pan::outputLeft() {
@@ -49,7 +49,7 @@ Signal *Pan::outputRight() {
    return _right;
 }
 
-PanChannel::PanChannel(Pan *host, float factor) {
+PanChannel::PanChannel(Pan *host, int32_t factor) {
    _host = host;
    _signal.read_fn = panchannel_read;
    _signal.data = &_data;
@@ -59,22 +59,23 @@ PanChannel::PanChannel(Pan *host, float factor) {
 
 PanChannel::~PanChannel() = default;
 
-float IRAM_ATTR panchannel_read(signal_t *handle, uint64_t time) {
+int32_t IRAM_ATTR panchannel_read(signal_t *handle, uint64_t time) {
    auto *panchannel = (panchannel_t *) handle->data;
-   if( time > panchannel->lastCalc ) {
+   if (time > panchannel->lastCalc) {
       panchannel->lastCalc = time;
       signal_t *panControl = panchannel->control;
-      float control = panControl->read_fn(panControl, time);
+      int32_t control = panControl->read_fn(panControl, time);
       signal_t *hostInput = panchannel->hostInput;
-      float input = hostInput->read_fn(hostInput, time);
+      int32_t input = hostInput->read_fn(hostInput, time);
       input = input * control;
       signal_t *data = panchannel->me;
       if (data->noRecalc) {
-         float result = input * panchannel->factor;
+         int32_t result = input * panchannel->factor;
          panchannel->cached = result;
          return result;
       }
-      float result = (input * data->scale + data->offset) * panchannel->factor;
+      int32_t result = scale_output(input, panchannel->factor, 0);
+      result = scale_output(result, data->scale, data->offset);
       panchannel->cached = result;
       return result;
    }

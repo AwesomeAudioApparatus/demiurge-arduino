@@ -25,11 +25,11 @@ CvInPort::CvInPort(int position) {
 
 CvInPort::~CvInPort() = default;
 
-float IRAM_ATTR cvinport_read(signal_t *handle, uint64_t time) {
+int32_t IRAM_ATTR cvinport_read(signal_t *handle, uint64_t time) {
    auto *cv = (cv_in_port_t *) handle->data;
    if (time > cv->lastCalc) {
       cv->lastCalc = time;
-      float result = Demiurge::runtime().inputs()[cv->position];
+      int32_t result = Demiurge::runtime().inputs()[cv->position];
       cv->cached = result;
       return result;
    }

@@ -65,36 +65,37 @@ void setup() {
    out1.configure(pan.outputLeft());
    out2.configure(pan.outputRight());
    Demiurge::begin();
+   delay(100);
 }
 
 void loop() {
 
-   Demiurge::runtime().printReport();
-   uint16_t *inputs = Demiurge::runtime().rawAdc();
-   for( int i=0; i < 8; i++ ) {
-     Serial.print( inputs[i] );
-     Serial.print( "    " );
-   }
-   Serial.println();
-   
-   Serial.print( Demiurge::runtime().output1() );
-   Serial.print( "    " );
-   Serial.print( Demiurge::runtime().dac1() );
-   Serial.print( "    " );
-   Serial.print( Demiurge::runtime().output2() );
-   Serial.print( "    " );
-   Serial.print( Demiurge::runtime().dac2() );
-   Serial.println();
-
-   double value1 = ((oscillator_t *) vco1._signal.data)->cached;
-   double value2 = ((panchannel_t *) pan.outputLeft()->_signal.data)->cached;
-   double value3 = ((audio_out_port_t *) out1._signal.data)->cached;
-   Serial.print( "VCO: " );
-   Serial.print(value1);
-   Serial.print( "    Pan:" );
-   Serial.print(value2);
-   Serial.print( "    Out:" );
-   Serial.print(value3);
-   Serial.println();
+//   Demiurge::runtime().printReport();
+//   uint16_t *inputs = Demiurge::runtime().rawAdc();
+//   for( int i=0; i < 8; i++ ) {
+//     Serial.print( inputs[i] );
+//     Serial.print( "    " );
+//   }
+//   Serial.println();
+//   
+//   Serial.print( Demiurge::runtime().output1() );
+//   Serial.print( "    " );
+//   Serial.print( Demiurge::runtime().dac1() );
+//   Serial.print( "    " );
+//   Serial.print( Demiurge::runtime().output2() );
+//   Serial.print( "    " );
+//   Serial.print( Demiurge::runtime().dac2() );
+//   Serial.println();
+//
+//   double value1 = ((oscillator_t *) vco1._signal.data)->cached;
+//   double value2 = ((panchannel_t *) pan.outputLeft()->_signal.data)->cached;
+//   double value3 = ((audio_out_port_t *) out1._signal.data)->cached;
+//   Serial.print( "VCO: " );
+//   Serial.print(value1);
+//   Serial.print( "    Pan:" );
+//   Serial.print(value2);
+//   Serial.print( "    Out:" );
+//   Serial.print(value3);
+//   Serial.println();
    delay(872);
 }

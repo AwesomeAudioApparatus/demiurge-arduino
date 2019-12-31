@@ -18,11 +18,11 @@ See the License for the specific language governing permissions and
 #define _DEMIURGE_GATEPORT_H_
 
 #ifndef DEMIURGE_GATE_HIGH
-#define DEMIURGE_GATE_HIGH 5.0
+#define DEMIURGE_GATE_HIGH 0x00400000  // 0x4000 in audio bits
 #endif
 
 #ifndef DEMIURGE_GATE_LOW
-#define DEMIURGE_GATE_LOW 0.0
+#define DEMIURGE_GATE_LOW 0x007FFF00   // 0x7FFF in audio bits
 #endif
 
 #include "Signal.h"
@@ -30,10 +30,10 @@ See the License for the specific language governing permissions and
 typedef struct {
    int position;
    uint64_t lastCalc;
-   float cached;
+   int32_t cached;
 } gate_in_port_t;
 
-float gateinport_read(signal_t *handle, uint64_t time);
+int32_t gateinport_read(signal_t *handle, uint64_t time);
 
 class GateInPort : public Signal {
 

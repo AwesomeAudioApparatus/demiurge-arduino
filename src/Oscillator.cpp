@@ -17,8 +17,7 @@ See the License for the specific language governing permissions and
 #include <math.h>
 #include <esp_task.h>
 #include "Demiurge.h"
-
-static const float SINE_CONST = 1000000 / M_TWOPI;
+#include "sine.h"
 
 Oscillator::Oscillator(int mode) {
    _signal.read_fn = oscillator_read;
@@ -56,19 +55,19 @@ void Oscillator::configureTrig(Signal *trigControl) {
    _data.trigger = &trigControl->_signal;
 }
 
-float IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time) {
+int32_t IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time) {
    auto *osc = (oscillator_t *) handle->data;
    if( time > osc->lastCalc ) {
       osc->lastCalc = time;
-      float freq;
+      int32_t freq;
       signal_t *freqControl = osc->frequency;
       if (freqControl == nullptr) {
-         freq = 440.0f;
+         freq = 440;
       } else {
          freq = octave_frequencyOf(freqControl->read_fn(freqControl, time));
       }
 
-      float amplitude;
+      int32_t amplitude;
       if (osc->amplitude == nullptr)
          amplitude = 10.0f;
       else
@@ -76,8 +75,7 @@ float IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time) {
 
       switch (osc->mode) {
          case DEMIURGE_SINE: {
-            float result = (((float) isin(freq * (time - osc->lastTrig) / 3.2767)) / 4096) * amplitude;
-//            float result = sinf( freq * (time - osc->lastTrig) ) * amplitude;
+            int32_t result = (((float) isin(freq * (time - osc->lastTrig) / 3.2767)) / 4096) * amplitude;
             osc->cached = result;
             return result;
          }

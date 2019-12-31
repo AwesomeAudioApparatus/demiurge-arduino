@@ -25,10 +25,10 @@ typedef struct {
    signal_t *cv;
    signal_t *potentiometer;
    uint64_t lastCalc;
-   float cached;
+   int32_t cached;
 } control_pair_t;
 
-float controlpair_read(signal_t *handle, uint64_t time);
+int32_t controlpair_read(signal_t *handle, uint64_t time);
 
 class ControlPair : public Signal {
 
@@ -37,16 +37,16 @@ public:
 
    ~ControlPair() override;
 
-   void setPotentiometerScale(float scale);
+   void setPotentiometerScale(int32_t scale);
 
-   void setCvScale(float scale);
+   void setCvScale(int32_t scale);
 
 private:
    control_pair_t _data;
    Potentiometer *_potentiometer;
    CvInPort *_cvIn;
-   float _cvScale;
-   float _potentiometerScale;
+   int32_t _cvScale;
+   int32_t _potentiometerScale;
 };
 
 

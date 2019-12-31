@@ -27,7 +27,7 @@ GateInPort::GateInPort(int position) {
 
 GateInPort::~GateInPort() = default;
 
-float IRAM_ATTR gateinport_read(signal_t *handle, uint64_t time){
+int32_t IRAM_ATTR gateinport_read(signal_t *handle, uint64_t time){
    auto *gate = (gate_in_port_t *) handle->data;
    if( time > gate->lastCalc ) {
       gate->lastCalc = time;

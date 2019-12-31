@@ -24,16 +24,18 @@ typedef struct {
    spi_transaction_t _tx;
    spi_transaction_t *_rx;
 
-   uint8_t _txdata[16];
-   uint8_t _rxdata[16];
+   uint8_t *_txdata;
+   uint8_t *_rxdata;
 
    uint16_t _channels[8];
 } adc128s102;
 
 void adc128s102_init(adc128s102 *handle, spi_device_handle_t spi);
 
-void adc128s102_queue(adc128s102 *handle);
+void adc128s102_sync_read(adc128s102 *handle);
 
 void adc128s102_read(adc128s102 *handle);
+
+void adc128s102_queue(adc128s102 *handle);
 
 #endif

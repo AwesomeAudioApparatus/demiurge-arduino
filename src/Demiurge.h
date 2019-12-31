@@ -51,6 +51,7 @@ See the License for the specific language governing permissions and
 
 #ifndef DEMIURGE_HCS_PIN
 #define DEMIURGE_HCS_PIN 15
+static const char *const TAG = "Demiurge";
 #endif
 
 #include "freertos/FreeRTOS.h"
@@ -71,7 +72,6 @@ See the License for the specific language governing permissions and
 #include "Potentiometer.h"
 #include "PushButton.h"
 #include "Signal.h"
-#include "Sine.h"
 #include <stdint.h>
 #include "Threshold.h"
 #include "Timing.h"
@@ -98,9 +98,9 @@ public:
 
    void operator=(Demiurge const &) = delete;
 
-   static float clip(float value) {
-      if (value > 10.0) return 10.0;
-      if (value < -10.0) return -10.0;
+   static int32_t clip(int32_t value) {
+      if (value >= 0x00800000) return 0x007FFFFF;
+      if (value <= -0x00800000) return -0x007FFFFF;
       return value;
    };
 
@@ -112,22 +112,24 @@ public:
 
    void unregisterSink(signal_t *processor);
 
-   float *inputs();
+   int32_t *inputs();
 
-   float *outputs();
+   int32_t *outputs();
 
-   void setDAC(int channel, float voltage);
+   void setDAC(int channel, int32_t voltage);
 
    bool gpio(int i);
 
    void printReport();
    uint16_t dac1();
    uint16_t dac2();
-   float output1();
-   float output2();
+   int32_t output1();
+   int32_t output2();
    uint16_t *rawAdc();
 
    Timing *timing[5];
+
+   void initialize();
 
 private:
 
@@ -140,6 +142,7 @@ private:
    void initializeAdcSpi();
 
    void initializeConcurrency();
+   void initializeHardware();
 
    void initializeSinks();
 
@@ -148,13 +151,13 @@ private:
    void readADC();
    bool _started;
    uint32_t _gpios;
-   float _inputs[8];
-   float _output1;
-   float _output2;
+   int32_t _inputs[8];
+   int32_t _output1;
+   int32_t _output2;
    uint16_t _dac1;
    uint16_t _dac2;
 
-   float _outputs[2];
+   int32_t _outputs[2];
    uint64_t _startTime;
    uint64_t _lastMeasure;
    volatile bool _enterred;

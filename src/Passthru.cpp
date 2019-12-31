@@ -29,17 +29,17 @@ void Passthru::configure(Signal *input) {
    _signal.data = &_data;
 }
 
-float IRAM_ATTR passthru_read(signal_t *handle, uint64_t time) {
+int32_t IRAM_ATTR passthru_read(signal_t *handle, uint64_t time) {
    auto *passthru = (passthru_t *) handle->data;
    if (time > passthru->lastCalc) {
       passthru->lastCalc = time;
-      float input = passthru->input->read_fn(passthru->input, time);
+      int32_t input = passthru->input->read_fn(passthru->input, time);
       signal_t *data = passthru->me;
-      float result;
+      int32_t result;
       if (data->noRecalc) {
          result = input;
       } else {
-         result = input * data->scale + data->offset;
+         result = scale_output(input, data->scale, data->offset );
       }
       passthru->cached = result;
       return result;

@@ -34,25 +34,25 @@ ControlPair::~ControlPair() {
    delete _cvIn;
 }
 
-void ControlPair::setPotentiometerScale(float scale) {
+void ControlPair::setPotentiometerScale(int32_t scale) {
    _potentiometerScale = scale;
 }
 
-void ControlPair::setCvScale(float scale) {
+void ControlPair::setCvScale(int32_t scale) {
    _cvScale = scale;
 }
 
-float IRAM_ATTR controlpair_read(signal_t *handle, uint64_t time) {
+int32_t IRAM_ATTR controlpair_read(signal_t *handle, uint64_t time) {
    auto *control = (control_pair_t *) handle->data;
    if( time > control->lastCalc ) {
       control->lastCalc = time;
 
       signal_t *pot = control->potentiometer;
-      float potIn = pot->read_fn(pot, time);
+      int32_t potIn = pot->read_fn(pot, time);
 
       signal_t *cv = control->cv;
-      float cvIn = cv->read_fn(cv, time);
-      float result = potIn + cvIn;
+      int32_t cvIn = cv->read_fn(cv, time);
+      int32_t result = potIn + cvIn;
       control->cached = result;
       return result;
    }

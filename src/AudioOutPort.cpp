@@ -41,23 +41,23 @@ void AudioOutPort::configure(Signal *input) {
    _signal.data = &_data;
 }
 
-void AudioOutPort::configure(Signal *input, float scale, float offset) {
+void AudioOutPort::configure(Signal *input, int32_t scale, int32_t offset) {
    configure(input);
    setScale(scale);
    setOffset(offset);
 }
 
-float IRAM_ATTR audiooutport_read(signal_t *handle, uint64_t time) {
+int32_t IRAM_ATTR audiooutport_read(signal_t *handle, uint64_t time) {
    auto *port = (audio_out_port_t *) handle->data;
    if( time > port->lastCalc ) {
       port->lastCalc = time;
       signal_t *upstream = port->input;
       signal_fn fn = upstream->read_fn;
-      float input = fn(upstream, time);
+      int32_t input = fn(upstream, time);
       signal_t *data = port->me;
       if (data->noRecalc)
          return input;
-      float result = input * data->scale + data->offset;
+      int32_t result = input * data->scale + data->offset;
       port->cached = result;
       return result;
    }

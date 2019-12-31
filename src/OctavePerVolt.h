@@ -19,8 +19,8 @@ See the License for the specific language governing permissions and
 
 #include <math.h>
 
-float octave_frequencyOf(float voltage);
+int32_t octave_frequencyOf(int32_t voltage);
 
-float octave_voltageOf(float frequency);
+int32_t octave_voltageOf(int32_t frequency);
 
 #endif

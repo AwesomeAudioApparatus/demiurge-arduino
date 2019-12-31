@@ -37,11 +37,11 @@ void Mixer::configure(int number, Signal *source, Signal *control) {
    _data.inputs[number - 1] = &v->_signal;
 }
 
-float IRAM_ATTR mixer_read(signal_t *handle, uint64_t time) {
+int32_t IRAM_ATTR mixer_read(signal_t *handle, uint64_t time) {
    auto *mixer = (mixer_t *) handle->data;
    if( time > mixer->lastCalc ) {
       mixer->lastCalc = time;
-      float output = 0.0;
+      int32_t output = 0;
       for (auto inp : mixer->inputs) {
          if (inp != nullptr) {
             output = output + inp->read_fn(inp, time);

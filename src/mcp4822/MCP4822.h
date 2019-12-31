@@ -27,6 +27,8 @@ See the License for the specific language governing permissions and
 typedef struct {
    spi_device_handle_t _spi;
    spi_transaction_t _tx;
+   uint8_t *_rxdata;
+   uint8_t *_txdata;
 } mcp4822;
 
 void mcp4822_init( mcp4822 *handle, spi_device_handle_t spi );

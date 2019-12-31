@@ -25,10 +25,10 @@ typedef struct {
    signal_t *input;
    bool registered;
    uint64_t lastCalc;
-   float cached;
+   int32_t cached;
 } audio_out_port_t;
 
-float audiooutport_read(signal_t *handle, uint64_t time);
+int32_t audiooutport_read(signal_t *handle, uint64_t time);
 
 class AudioOutPort : public Signal{
 
@@ -38,7 +38,7 @@ public:
 
    void configure( Signal* input );
 
-   void configure( Signal* input, float scale, float offset );
+   void configure( Signal* input, int32_t scale, int32_t offset );
 
    audio_out_port_t _data{};
 private:

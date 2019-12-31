@@ -2,7 +2,7 @@
 // Created by niclas on 12/2/19.
 //
 
-#include "Sine.h"
+#include "sine.h"
 #include "esp_system.h"
 
 /// A sine approximation via a fourth-order cosine approx.

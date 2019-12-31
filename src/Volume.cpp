@@ -32,14 +32,14 @@ void Volume::configure(Signal *input, Signal *control) {
    _signal.data = &_data;
 }
 
-float IRAM_ATTR volume_read(signal_t *handle, uint64_t time) {
+int32_t  IRAM_ATTR volume_read(signal_t *handle, uint64_t time) {
    auto *vol = (volume_t *) handle->data;
    if( time > vol->lastCalc ){
       vol->lastCalc = time;
-      float control = vol->control->read_fn(vol->control, time);
-      float in = vol->control->read_fn(vol->control, time);
-      float factor = 0.05 * control + 0.5;
-      float result = in * factor;
+      int32_t  control = vol->control->read_fn(vol->control, time);
+      int32_t  in = vol->control->read_fn(vol->control, time);
+      int32_t  factor = 0.05 * control + 0.5;
+      int32_t  result = in * factor;
       vol->cached = result;
       return result;
    }

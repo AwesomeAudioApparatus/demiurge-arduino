@@ -31,7 +31,7 @@ void Inverter::configure(Signal *input) {
    _data.input = &input->_signal;
 }
 
-float IRAM_ATTR inverter_read(signal_t *handle, uint64_t time)
+int32_t IRAM_ATTR inverter_read(signal_t *handle, uint64_t time)
 {
    return 0.0;
 }

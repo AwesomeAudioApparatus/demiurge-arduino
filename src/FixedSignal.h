@@ -20,15 +20,15 @@ See the License for the specific language governing permissions and
 
 #include "Signal.h"
 typedef struct {
-   float value;
+   int32_t value;
 } fixed_signal_t;
 
-float fixedsignal_read(signal_t *handle, uint64_t time);
+int32_t fixedsignal_read(signal_t *handle, uint64_t time);
 
 class FixedSignal : public Signal {
 
 public:
-   explicit FixedSignal(float value);
+   explicit FixedSignal(int32_t value);
    ~FixedSignal() override;
 private:
    fixed_signal_t _data{};

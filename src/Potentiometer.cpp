@@ -28,12 +28,12 @@ Potentiometer::Potentiometer(int position) {
 
 Potentiometer::~Potentiometer() = default;
 
-float IRAM_ATTR potentiometer_read(signal_t *handle, uint64_t time) {
+int32_t IRAM_ATTR potentiometer_read(signal_t *handle, uint64_t time) {
    auto *port = (potentiometer_t *) handle->data;
    if( time > port->lastCalc )
    {
       port->lastCalc = time;
-      float result = Demiurge::runtime().inputs()[port->position];
+      int32_t result = Demiurge::runtime().inputs()[port->position];
       port->cached = result;
       return result;
    }

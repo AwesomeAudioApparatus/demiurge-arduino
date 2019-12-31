@@ -14,13 +14,16 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <stdint.h>
 #include "OctavePerVolt.h"
 
-float octave_frequencyOf(float voltage) {
-   return 440 / pow(2, 2.75) * pow(2, voltage);
+int32_t octave_frequencyOf(int32_t voltage) {
+   // TODO:
+//   return 440 / pow(2, 2.75) * pow(2, voltage);
+   return 440;
 }
 
-float octave_voltageOf(float frequency) {
+int32_t octave_voltageOf(int32_t frequency) {
    // TODO:
-   return 1.0;
+   return 1;
 }
