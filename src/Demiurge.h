@@ -80,6 +80,8 @@ static const char *const TAG = "Demiurge";
 #include "mcp4822/MCP4822.h"
 #include "Timing.h"
 
+void inc_value();
+
 class Demiurge {
 
 //   Demiurge(Demiurge const &) = delete;
@@ -116,8 +118,6 @@ public:
 
    int32_t *outputs();
 
-   void setDAC(int channel, int32_t voltage);
-
    bool gpio(int i);
 
    void printReport();
@@ -137,10 +137,6 @@ private:
 
    ~Demiurge();
 
-   void initializeDacSpi();
-
-   void initializeAdcSpi();
-
    void initializeConcurrency();
    void initializeHardware();
 
@@ -152,10 +148,6 @@ private:
    bool _started;
    uint32_t _gpios;
    int32_t _inputs[8];
-   int32_t _output1;
-   int32_t _output2;
-   uint16_t _dac1;
-   uint16_t _dac2;
 
    int32_t _outputs[2];
    uint64_t _startTime;
@@ -178,7 +170,7 @@ private:
    spi_bus_config_t _vspiBusConfig;
    spi_device_interface_config_t _vspiDeviceIntfConfig;
 
-   mcp4822 _dac;
+   MCP4822 *_dac;
    adc128s102 _adc;
 
    void readGpio();

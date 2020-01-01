@@ -21,18 +21,19 @@ See the License for the specific language governing permissions and
 
 #define MCP4822_CHANNEL_A 0x00
 #define MCP4822_CHANNEL_B 0x80
-#define MCP4822_GAIN 0x20
 #define MCP4822_ACTIVE 0x10
 
-typedef struct {
-   spi_device_handle_t _spi;
-   spi_transaction_t _tx;
-   uint8_t *_rxdata;
-   uint8_t *_txdata;
-} mcp4822;
+class MCP4822
+{
+public:
+   MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin);
+   virtual ~MCP4822();
 
-void mcp4822_init( mcp4822 *handle, spi_device_handle_t spi );
+   void setOutput(int channel, uint16_t output);
 
-void mcp4822_dacOutput(mcp4822 *handle, uint16_t outputA, uint16_t outputB);
+private:
+   lldesc_t *descs;
+};
+
 
 #endif

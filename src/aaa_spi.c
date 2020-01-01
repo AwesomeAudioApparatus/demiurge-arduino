@@ -8,11 +8,11 @@
 #include <driver/spi_common.h>
 #include <driver/gpio.h>
 #include <esp_log.h>
-#include "my_spi.h"
+#include "aaa_spi.h"
 
 static const uint8_t InvalidIndex = (uint8_t) -1;
 
-spi_dev_t *myspi_get_hw_for_host(
+spi_dev_t *aaa_spi_get_hw_for_host(
       spi_host_device_t host
 ) {
    switch (host) {
@@ -57,16 +57,42 @@ static uint8_t getSpidInByHost(spi_host_device_t host) {
    }
 }
 
+static uint8_t getSpiClkOutByHost(spi_host_device_t host) {
+   switch (host) {
+      case SPI_HOST:
+         return SPICLK_OUT_IDX;
+      case HSPI_HOST:
+         return HSPICLK_OUT_IDX;
+      case VSPI_HOST:
+         return VSPICLK_OUT_IDX;
+      default:
+         return InvalidIndex;
+   }
+}
 
-esp_err_t myspi_prepare_circular_buffer(
+static uint8_t getSpiClkInByHost(spi_host_device_t host) {
+   switch (host) {
+      case SPI_HOST:
+         return SPICLK_IN_IDX;
+      case HSPI_HOST:
+         return HSPICLK_IN_IDX;
+      case VSPI_HOST:
+         return VSPICLK_IN_IDX;
+      default:
+         return InvalidIndex;
+   }
+}
+
+
+esp_err_t aaa_spi_prepare_circular_buffer(
       const spi_host_device_t spiHostDevice,
       const int dma_chan,
       const lldesc_t *lldescs,
       const long dmaClockSpeedInHz,
       const gpio_num_t mosi_gpio_num,
+      const gpio_num_t sclk_gpio_num,
       const int waitCycle) {
 
-   ESP_LOGE("MY_SPI", "Initializing DMA:%d, clock:%ld, gpio:%d, wait:%d\n", dma_chan, dmaClockSpeedInHz, mosi_gpio_num, waitCycle);
    const bool spi_periph_claimed = spicommon_periph_claim(spiHostDevice);
    if (!spi_periph_claimed) {
       return MY_ESP_ERR_SPI_HOST_ALREADY_IN_USE;
@@ -78,15 +104,22 @@ esp_err_t myspi_prepare_circular_buffer(
       return MY_ESP_ERR_SPI_DMA_ALREADY_IN_USE;
    }
 
-   spi_dev_t *const spiHw = myspi_get_hw_for_host(spiHostDevice);
+   spi_dev_t *const spiHw = aaa_spi_get_hw_for_host(spiHostDevice);
    const int Cs = 0;
    const int CsMask = 1 << Cs;
 
    //Use GPIO
    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[mosi_gpio_num], PIN_FUNC_GPIO);
+   PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[sclk_gpio_num], PIN_FUNC_GPIO);
+
    gpio_set_direction(mosi_gpio_num, GPIO_MODE_INPUT_OUTPUT);
+   gpio_set_direction(sclk_gpio_num, GPIO_MODE_INPUT_OUTPUT);
+
    gpio_matrix_out(mosi_gpio_num, getSpidOutByHost(spiHostDevice), false, false);
    gpio_matrix_in(mosi_gpio_num, getSpidInByHost(spiHostDevice), false);
+
+   gpio_matrix_out(sclk_gpio_num, getSpiClkOutByHost(spiHostDevice), false, false);
+   gpio_matrix_in(sclk_gpio_num, getSpiClkInByHost(spiHostDevice), false);
 
    //Select DMA channel.
    DPORT_SET_PERI_REG_BITS(DPORT_SPI_DMA_CHAN_SEL_REG, 3, dma_chan, (spiHostDevice * 2));
@@ -227,22 +260,22 @@ esp_err_t myspi_prepare_circular_buffer(
    //      > yes, in SPI DMA mode, SPI will alway transmit and receive
    //      > data when you set the SPI_DMA_CONTINUE(BIT16) of SPI_DMA_CONF_REG.
 
-   spiHw->dma_conf.dma_tx_stop		= 1;	// Stop SPI DMA
-   spiHw->ctrl2.val           		= 0;	// Reset timing
-   spiHw->dma_conf.dma_tx_stop		= 0;	// Disable stop
-   spiHw->dma_conf.dma_continue	= 1;	// Set contiguous mode
-   spiHw->dma_out_link.start		= 1;	// Start SPI DMA transfer (1)
+   spiHw->dma_conf.dma_tx_stop = 1;   // Stop SPI DMA
+   spiHw->ctrl2.val = 0;   // Reset timing
+   spiHw->dma_conf.dma_tx_stop = 0;   // Disable stop
+   spiHw->dma_conf.dma_continue = 1;   // Set contiguous mode
+   spiHw->dma_out_link.start = 1;   // Start SPI DMA transfer (1)
 
-   spiHw->cmd.usr					= 1;	// SPI: Start SPI DMA transfer
+   spiHw->cmd.usr = 1;   // SPI: Start SPI DMA transfer
    ESP_LOGE("MY_SPI", "DMA/SPI initialized.\n");
    return ESP_OK;
 }
 
 
-esp_err_t myspi_release_circular_buffer(
-      const spi_host_device_t spiHostDevice, const int dma_chan, const gpio_num_t mosi_gpio_num
-) {
-   spi_dev_t *const spiHw = myspi_get_hw_for_host(spiHostDevice);
+esp_err_t aaa_spi_release_circular_buffer(
+      spi_host_device_t host, int dma_chan, gpio_num_t mosi_pin, gpio_num_t cs_pin) {
+
+   spi_dev_t *const spiHw = aaa_spi_get_hw_for_host(host);
 
    spiHw->dma_conf.dma_continue = 0;
    spiHw->dma_out_link.start = 0;
@@ -251,6 +284,6 @@ esp_err_t myspi_release_circular_buffer(
    // TODO : Reset GPIO Matrix
 
    spicommon_dma_chan_free(dma_chan);
-   spicommon_periph_free(spiHostDevice);
+   spicommon_periph_free(host);
    return ESP_OK;
 }

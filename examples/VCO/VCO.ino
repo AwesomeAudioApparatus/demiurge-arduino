@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 
 #include "Arduino.h"
 #include "Demiurge.h"
+#include <soc/mcpwm_reg.h>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
@@ -69,22 +70,11 @@ void setup() {
 }
 
 void loop() {
-
 //   Demiurge::runtime().printReport();
-//   uint16_t *inputs = Demiurge::runtime().rawAdc();
-//   for( int i=0; i < 8; i++ ) {
-//     Serial.print( inputs[i] );
-//     Serial.print( "    " );
-//   }
-//   Serial.println();
 //   
 //   Serial.print( Demiurge::runtime().output1() );
 //   Serial.print( "    " );
-//   Serial.print( Demiurge::runtime().dac1() );
-//   Serial.print( "    " );
 //   Serial.print( Demiurge::runtime().output2() );
-//   Serial.print( "    " );
-//   Serial.print( Demiurge::runtime().dac2() );
 //   Serial.println();
 //
 //   double value1 = ((oscillator_t *) vco1._signal.data)->cached;
@@ -97,5 +87,8 @@ void loop() {
 //   Serial.print( "    Out:" );
 //   Serial.print(value3);
 //   Serial.println();
-   delay(872);
+   auto reg = READ_PERI_REG(MCPWM_TIMER0_STATUS_REG(0));
+   Serial.println(reg);
+
+   delay(583);
 }

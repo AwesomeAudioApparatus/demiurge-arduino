@@ -63,8 +63,8 @@ add_library(
         src/Inverter.h
         src/Mixer.cpp
         src/Mixer.h
-        src/my_spi.c
-        src/my_spi.h
+        src/aaa_spi.c
+        src/aaa_spi.h
         src/OctavePerVolt.cpp
         src/OctavePerVolt.h
         src/Pan.cpp
