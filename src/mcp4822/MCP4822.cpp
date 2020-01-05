@@ -28,11 +28,12 @@ See the License for the specific language governing permissions and
 #include "../Demiurge.h"
 #include "../aaa_spi.h"
 
-static void timers(gpio_num_t pin_out ) {
+static void initialize(gpio_num_t pin_out) {
    ESP_LOGE(TAG, "Initializing DAC timer.");
 
    // We use MCPWM0 TIMER 0 for CS generation to DAC.
 
+   PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[pin_out], PIN_FUNC_GPIO);
    gpio_set_direction(pin_out, GPIO_MODE_INPUT_OUTPUT);
    gpio_matrix_out(pin_out, PWM0_OUT0A_IDX, false, false);
    periph_module_enable(PERIPH_PWM0_MODULE);
@@ -46,14 +47,13 @@ static void timers(gpio_num_t pin_out ) {
    WRITE_PERI_REG(MCPWM_TIMER0_CFG0_REG(0) , 15 << MCPWM_TIMER0_PRESCALE_S | 39 << MCPWM_TIMER0_PERIOD_S );    // Prescale=16, so timer is 10MHz, 40 clocks per cycle
    WRITE_PERI_REG(MCPWM_TIMER0_CFG1_REG(0) , (1 << MCPWM_TIMER0_MOD_S) | (2 << MCPWM_TIMER0_START_S) );        // Continuously running, decrease mode.
 
-   PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[pin_out], PIN_FUNC_GPIO);
 
    ESP_LOGE(TAG, "Initializing DAC timer....Done");
 }
 
 MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
    ESP_LOGE(TAG, "Initializing SPI.");
-   timers(cs_pin);
+   initialize(cs_pin);
 
    descs = static_cast<lldesc_t *>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
    memset((void *) descs, 0, sizeof(lldesc_t));
@@ -101,7 +101,6 @@ void MCP4822::setOutput(int channel, uint16_t output) {
 MCP4822::~MCP4822() {
    ESP_LOGE(TAG, "Destruction of MCP4822");
 
-
    // Stop hardware
    WRITE_PERI_REG(SPI_CMD_REG(3), READ_PERI_REG(SPI_CMD_REG(3)) & ~SPI_USR_M); // stop SPI transfer
    WRITE_PERI_REG(MCPWM_TIMER0_CFG1_REG(0), READ_PERI_REG(MCPWM_TIMER0_CFG1_REG(0)) & ~MCPWM_TIMER0_MOD_M); // stop timer 0
@@ -109,5 +108,4 @@ MCP4822::~MCP4822() {
 
    aaa_spi_release_circular_buffer(HSPI_HOST, 1, GPIO_NUM_13, GPIO_NUM_14);
    free( descs );
-
 }
