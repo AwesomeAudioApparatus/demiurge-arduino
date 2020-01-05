@@ -31,43 +31,22 @@ See the License for the specific language governing permissions and
 static void timers(gpio_num_t pin_out ) {
    ESP_LOGE(TAG, "Initializing DAC timer.");
 
-//   ledc_timer_config_t ledc_timer;
-//   ledc_timer.speed_mode = LEDC_HIGH_SPEED_MODE;  // timer mode
-//   ledc_timer.duty_resolution = LEDC_TIMER_8_BIT; // resolution of PWM duty
-//   ledc_timer.timer_num = LEDC_TIMER_0;           // timer index
-//   ledc_timer.freq_hz = 250000;                    // frequency of PWM signal
-////         .clk_cfg = LEDC_AUTO_CLK,            // Auto select the source clock
-//   ledc_timer_config(&ledc_timer);
-//
-//   ledc_channel_config_t ledc_channel {
-//         .gpio_num   = cs_pin,
-//         .speed_mode = LEDC_HIGH_SPEED_MODE,
-//         .channel    = LEDC_CHANNEL_0,
-//         .intr_type  = LEDC_INTR_DISABLE,
-//         .timer_sel  = LEDC_TIMER_0,
-//         .duty       = 51,
-//         .hpoint     = 0
-//   };
-//
-//   ledc_channel_config(&ledc_channel);
-
    // We use MCPWM0 TIMER 0 for CS generation to DAC.
-//   WRITE_PERI_REG(MCPWM_CLK_PRESCALE, 1); // 80MHz prescaler  (not allowed to write to it. Why?)
 
+   gpio_set_direction(pin_out, GPIO_MODE_INPUT_OUTPUT);
+   gpio_matrix_out(pin_out, PWM0_OUT0A_IDX, false, false);
    periph_module_enable(PERIPH_PWM0_MODULE);
 
    WRITE_PERI_REG(MCPWM_TIMER_SYNCI_CFG_REG(0) , (1 << MCPWM_TIMER0_SYNCISEL_S ));
    WRITE_PERI_REG(MCPWM_OPERATOR_TIMERSEL_REG(0), (0 << MCPWM_OPERATOR0_TIMERSEL));
 
-   WRITE_PERI_REG(MCPWM_TIMER0_CFG0_REG(0) , 8 << MCPWM_TIMER0_PRESCALE_S | 40 << MCPWM_TIMER0_PERIOD_S );    // Prescale=8, so timer is 10MHz, 40 clocks per cycle
+   WRITE_PERI_REG(MCPWM_GEN0_TSTMP_A_REG(0), 32);  // 32 cycles LOW after UTEZ.
+   WRITE_PERI_REG(MCPWM_GEN0_A_REG(0) , (1 << MCPWM_GEN0_A_UTEZ_S ) | (2 << MCPWM_GEN0_A_UTEA_S )); // UTEZ= set PWM0A low, UTEA=set PWM0A high
+
+   WRITE_PERI_REG(MCPWM_TIMER0_CFG0_REG(0) , 15 << MCPWM_TIMER0_PRESCALE_S | 39 << MCPWM_TIMER0_PERIOD_S );    // Prescale=16, so timer is 10MHz, 40 clocks per cycle
    WRITE_PERI_REG(MCPWM_TIMER0_CFG1_REG(0) , (1 << MCPWM_TIMER0_MOD_S) | (2 << MCPWM_TIMER0_START_S) );        // Continuously running, decrease mode.
 
-   WRITE_PERI_REG(MCPWM_TIMER0_SYNC_REG(0) , (1 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER1_SYNCO_SEL) | MCPWM_TIMER1_SYNCI_EN);
-
    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[pin_out], PIN_FUNC_GPIO);
-   gpio_set_direction(pin_out, GPIO_MODE_INPUT_OUTPUT);
-   gpio_matrix_out(pin_out, PWM0_OUT0A_IDX, false, false);
-//   gpio_matrix_in(pin_out, PWM0_OUT0A_IDX, false);
 
    ESP_LOGE(TAG, "Initializing DAC timer....Done");
 }
@@ -94,21 +73,16 @@ MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
    esp_err_t error = aaa_spi_prepare_circular_buffer(HSPI_HOST, 1, descs, 10000000, mosi_pin, sclk_pin, 13);
 
    // this bit of code makes sure both timers and SPI transfer are started as close together as possible
-//   portENTER_CRITICAL(&timer_mux);  // crashes for unknown reason.
+   portDISABLE_INTERRUPTS();
    auto s0 = 1 << SPI_USR_S;
+   auto s1 = (1 << MCPWM_TIMER0_MOD_S) | (2 << MCPWM_TIMER0_START_S);
+   auto s3 = (16 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER1_SYNCO_SEL) | (1 << MCPWM_TIMER1_SYNC_SW_S);
+
+   WRITE_PERI_REG( MCPWM_TIMER0_CFG1_REG(0), s1 ); // start timer 0
    WRITE_PERI_REG(SPI_CMD_REG(3), s0); // start SPI transfer
-//   WRITE_PERI_REG(MCPWM_TIMER0_CFG1_REG(0), (1 << MCPWM_TIMER0_MOD_S) | (2 << MCPWM_TIMER0_START_S)); // start timer 0
 
-//   auto reg = READ_PERI_REG(MCPWM_TIMER0_SYNC_REG(0));
-//   WRITE_PERI_REG(MCPWM_TIMER0_SYNC_REG(0), reg | MCPWM_TIMER1_SYNC_SW_M); // sync
-
-//   MCPWM0.timer[0].sync.timer_phase = 8; // phase compensation to align timer 0 waveform
-//   MCPWM0.timer[0].sync.sync_sw ^= 1; // update phase
-//   MCPWM0.timer[1].sync.timer_phase = 10; // phase compensation to align timer 1 waveform
-//   MCPWM0.timer[1].sync.sync_sw ^= 1; // update phase
-
-//   portEXIT_CRITICAL(&timer_mux);
-
+   WRITE_PERI_REG(MCPWM_TIMER0_SYNC_REG(0), s3);
+   portENABLE_INTERRUPTS();
 
    ESP_ERROR_CHECK(error)
    ESP_LOGE(TAG, "Initializing SPI.....Done");
