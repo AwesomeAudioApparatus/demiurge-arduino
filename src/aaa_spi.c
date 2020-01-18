@@ -95,13 +95,13 @@ esp_err_t aaa_spi_prepare_circular_buffer(
 
    const bool spi_periph_claimed = spicommon_periph_claim(spiHostDevice);
    if (!spi_periph_claimed) {
-      return MY_ESP_ERR_SPI_HOST_ALREADY_IN_USE;
+      return DEMIURGE_ESP_ERR_SPI_HOST_ALREADY_IN_USE;
    }
 
    const bool dma_chan_claimed = spicommon_dma_chan_claim(dma_chan);
    if (!dma_chan_claimed) {
       spicommon_periph_free(spiHostDevice);
-      return MY_ESP_ERR_SPI_DMA_ALREADY_IN_USE;
+      return DEMIURGE_ESP_ERR_SPI_DMA_ALREADY_IN_USE;
    }
 
    spi_dev_t *const spiHw = aaa_spi_get_hw_for_host(spiHostDevice);
@@ -190,7 +190,7 @@ esp_err_t aaa_spi_prepare_circular_buffer(
 
    //Configure bit order
    spiHw->ctrl.rd_bit_order = 0;    // MSB first
-   spiHw->ctrl.wr_bit_order = 1;    // LSB first
+   spiHw->ctrl.wr_bit_order = 0;    // LSB first
 
    spiHw->pin.ck_dis = 0;
 
@@ -267,7 +267,7 @@ esp_err_t aaa_spi_prepare_circular_buffer(
    spiHw->dma_out_link.start = 1;   // Start SPI DMA transfer (1)
 
    spiHw->cmd.usr = 1;   // SPI: Start SPI DMA transfer
-   ESP_LOGE("MY_SPI", "DMA/SPI initialized.\n");
+   ESP_LOGE("_DEMIURGE_SPI", "DMA/SPI initialized.\n");
    return ESP_OK;
 }
 

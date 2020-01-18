@@ -74,11 +74,9 @@ static const char *const TAG = "Demiurge";
 #include "Signal.h"
 #include <stdint.h>
 #include "Threshold.h"
-#include "Timing.h"
 #include "Oscillator.h"
 #include "adc128s102/ADC128S102.h"
 #include "mcp4822/MCP4822.h"
-#include "Timing.h"
 
 void inc_value();
 
@@ -127,9 +125,11 @@ public:
    int32_t output2();
    uint16_t *rawAdc();
 
-   Timing *timing[5];
-
    void initialize();
+
+   MCP4822 *_dac;
+   adc128s102 _adc;
+
 
 private:
 
@@ -137,7 +137,6 @@ private:
 
    ~Demiurge();
 
-   void initializeConcurrency();
    void initializeHardware();
 
    void initializeSinks();
@@ -169,9 +168,6 @@ private:
    spi_device_handle_t _vspi;
    spi_bus_config_t _vspiBusConfig;
    spi_device_interface_config_t _vspiDeviceIntfConfig;
-
-   MCP4822 *_dac;
-   adc128s102 _adc;
 
    void readGpio();
 };

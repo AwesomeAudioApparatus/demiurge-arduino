@@ -22,6 +22,7 @@ See the License for the specific language governing permissions and
 #define MCP4822_CHANNEL_A 0x00
 #define MCP4822_CHANNEL_B 0x80
 #define MCP4822_ACTIVE 0x10
+#define MCP4822_GAIN 0x20
 
 class MCP4822
 {
@@ -29,10 +30,10 @@ public:
    MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin);
    virtual ~MCP4822();
 
-   void setOutput(int channel, uint16_t output);
+   void setOutput(uint16_t output1, uint16_t output2);
 
-private:
    lldesc_t *descs;
+private:
 };
 
 

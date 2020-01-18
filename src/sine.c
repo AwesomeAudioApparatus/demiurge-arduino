@@ -2,6 +2,8 @@
 // Created by niclas on 12/2/19.
 //
 
+#include <stdlib.h>
+#include <math.h>
 #include "sine.h"
 #include "esp_system.h"
 
@@ -24,3 +26,4 @@ int32_t IRAM_ATTR isin(int32_t x) {
 
    return c >= 0 ? y : -y;
 }
+

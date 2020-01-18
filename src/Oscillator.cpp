@@ -18,6 +18,8 @@ See the License for the specific language governing permissions and
 #include <esp_task.h>
 #include "Demiurge.h"
 #include "sine.h"
+#include "Cordic.h"
+
 
 Oscillator::Oscillator(int mode) {
    _signal.read_fn = oscillator_read;
@@ -55,27 +57,34 @@ void Oscillator::configureTrig(Signal *trigControl) {
    _data.trigger = &trigControl->_signal;
 }
 
-int32_t IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time) {
+int32_t IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time_in_us) {
+   // time in microseconds
    auto *osc = (oscillator_t *) handle->data;
-   if( time > osc->lastCalc ) {
-      osc->lastCalc = time;
-      int32_t freq;
+   if (time_in_us > osc->lastCalc) {
+      osc->lastCalc = time_in_us;
+      int32_t freq = 2;
       signal_t *freqControl = osc->frequency;
-      if (freqControl == nullptr) {
-         freq = 440;
-      } else {
-         freq = octave_frequencyOf(freqControl->read_fn(freqControl, time));
+      if (freqControl != nullptr) {
+//         freq = octave_frequencyOf(freqControl->read_fn(freqControl, time_in_us));
       }
+      int32_t period_in_us = 1000000 / freq;
 
-      int32_t amplitude;
-      if (osc->amplitude == nullptr)
-         amplitude = 10.0f;
-      else
-         amplitude = osc->amplitude->read_fn(osc->amplitude, time);
+      float amplitude = 1.0f;
+      if (osc->amplitude != nullptr) {
+//         amplitude = (float) osc->amplitude->read_fn(osc->amplitude, time_in_us) / 4096.0f;
+      }
 
       switch (osc->mode) {
          case DEMIURGE_SINE: {
-            int32_t result = (((float) isin(freq * (time - osc->lastTrig) / 3.2767)) / 4096) * amplitude;
+//            int32_t result = (((float) isin(freq * (time - osc->lastTrig) / 3.2767)) / 4096) * amplitude;
+
+            // time - osc->lastTrig is nanoseconds since last trig.
+            double x = freq * (time_in_us - osc->lastTrig);
+            osc->x = x;
+            double out = 0;
+            Cordic::sin_values(osc->n_data, x, out);
+            auto result = (int32_t) (out * amplitude);
+            osc->y = out;
             osc->cached = result;
             return result;
          }
@@ -88,11 +97,17 @@ int32_t IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time) {
             break;
          }
          case DEMIURGE_SAW: {
-            // TODO
-            break;
+            uint64_t x = time_in_us % period_in_us;
+            osc->x = amplitude;
+            auto out = (int32_t) ((((float) x) * 4095 / period_in_us) * amplitude);
+            osc->y = out;
+            osc->cached = out;
+            return out;
          }
       }
       return 0.0;
    }
+
+
    return osc->cached;
 }

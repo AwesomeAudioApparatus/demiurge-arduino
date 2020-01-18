@@ -51,6 +51,8 @@ add_library(
         src/AudioOutPort.h
         src/ControlPair.cpp
         src/ControlPair.h
+        src/Cordic.h
+        src/Cordic.cpp
         src/CvInPort.cpp
         src/CvInPort.h
         src/Demiurge.cpp
@@ -81,8 +83,6 @@ add_library(
         src/sine.h
         src/Threshold.cpp
         src/Threshold.h
-        src/Timing.cpp
-        src/Timing.h
         src/Oscillator.cpp
         src/Oscillator.h
         src/Volume.cpp

@@ -15,7 +15,6 @@ See the License for the specific language governing permissions and
 */
 
 #include "driver/timer.h"
-#include "driver/spi_master.h"
 #include "driver/mcpwm.h"
 #include "driver/ledc.h"
 #include <esp_log.h>
@@ -24,7 +23,6 @@ See the License for the specific language governing permissions and
 #include "esp_types.h"
 #include <rom/lldesc.h>
 #include <soc/soc.h>
-#include <soc/spi_struct.h>
 #include <soc/mcpwm_reg.h>
 #include <soc/mcpwm_struct.h>
 #include <soc/dport_access.h>
@@ -45,22 +43,21 @@ See the License for the specific language governing permissions and
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 
 void IRAM_ATTR startInfiniteTask(void *parameter) {
-   ESP_LOGD(TAG, "Starting CORE 1.");
+   ESP_LOGI("MAIN", "Starting audio algorithm in Core %d", xTaskGetAffinity(nullptr));
+   auto *demiurge = static_cast<Demiurge *>(parameter);
+   demiurge->initialize();
    esp_err_t error = timer_start(DEMIURGE_TIMER_GROUP, DEMIURGE_TIMER);
    ESP_ERROR_CHECK(error);
    uint64_t counter = 0;
    uint64_t next = 0;
 
    while (true) {
-//      while (counter < next)
+      while (counter < next)
       {
          timer_get_counter_value(DEMIURGE_TIMER_GROUP, DEMIURGE_TIMER, &counter);
       } // WAIT
-//      if (Demiurge::runtime().timing[0]->start()) {
-      Demiurge::runtime().tick();
-//         Demiurge::runtime().timing[0]->stop();
-//      }
-//      next = counter + 50000;
+      next = counter + 2000;     // 20,000 tick() per second or there about
+      demiurge->tick();
    }
 
 }
@@ -72,30 +69,23 @@ void IRAM_ATTR startInfiniteTask(void *parameter) {
 
 Demiurge::Demiurge() {
    ESP_LOGI(TAG, "Starting Demiurge...\n");
-   _dac = new MCP4822(GPIO_NUM_13, GPIO_NUM_14, GPIO_NUM_15);
+};
 
+void Demiurge::initialize(){
+   _dac = new MCP4822(GPIO_NUM_13, GPIO_NUM_14, GPIO_NUM_15);
 //   adc128s102_init(&_adc, _vspi);
    initializeSinks();
-//   pwm_high_init();
-};
+}
 
 void Demiurge::startRuntime() {
    if (_started)
       return;
    _started = true;
-   timing[0] = new Timing("tick");
-   timing[1] = new Timing("processing");
-   timing[2] = nullptr;
-   timing[3] = nullptr;
-   timing[4] = nullptr;
-   initializeConcurrency();
-}
-
-void Demiurge::initializeConcurrency() {
-
+   // Move to CORE
    TaskHandle_t idleTask = xTaskGetIdleTaskHandle();
    esp_task_wdt_delete(idleTask);
-   xTaskCreatePinnedToCore(startInfiniteTask, "Audio", 8192, nullptr, 7, &_taskHandle, 0);
+   ESP_LOGI("MAIN", "Executing in Core %d", xTaskGetAffinity(nullptr));
+   xTaskCreatePinnedToCore(startInfiniteTask, "Audio", 8192, this, 7, &_taskHandle, 0);
 }
 
 void Demiurge::initializeSinks() {
@@ -134,31 +124,22 @@ void Demiurge::unregisterSink(signal_t *processor) {
 }
 
 void IRAM_ATTR Demiurge::tick() {
-//   gpio_set_level(GPIO_NUM_21, 0);
    readGpio();
    readADC();
-   timerCounter = timerCounter + 50;
+   timerCounter = timerCounter + 50; // pass along number of microseconds.
 
    for (int i = 0; i < DEMIURGE_MAX_SINKS; i++) {
       signal_t *sink = _sinks[i];
       if (sink != nullptr) {
-//         gpio_set_level(GPIO_NUM_26, 0);
-         int32_t voltage = audiooutport_read(sink, timerCounter);
-//         gpio_set_level(GPIO_NUM_26, 1);
+//         int32_t output12bits = audiooutport_read(sink, timerCounter);
+//         _dac->setOutput(i, timerCounter & 0xFFF);
+//         _dac->setOutput(i, output12bits);
+//         _outputs[i] = output12bits;
 
-         // Convert to 12 bit DAC levels. -10V -> 0, 0 -> 2048, +10V -> 4095
-         // x1 = 10
-         // x2 = -10
-         // y1 = 4095
-         // y2 = 0
-         // k = 4095 / 20 = 204.75
-         // m = 4095 - k*10 = 2048
-         auto output = (uint16_t) (voltage * 204.75 + 2048.0);
-         _dac->setOutput(i, output);
-         _outputs[i] = output;
       }
    }
-//   gpio_set_level(GPIO_NUM_21, 1);
+   int32_t out = timerCounter % 4096;
+   _dac->setOutput(out, out);
 }
 
 
@@ -197,13 +178,6 @@ int32_t IRAM_ATTR *Demiurge::outputs() {
 
 bool IRAM_ATTR Demiurge::gpio(int pin) {
    return (_gpios & (1 << pin)) != 0;
-}
-
-void Demiurge::printReport() {
-   for (auto &t : timing) {
-      if (t != nullptr)
-         t->report();
-   }
 }
 
 int32_t Demiurge::output1() {

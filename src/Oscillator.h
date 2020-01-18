@@ -18,9 +18,9 @@ See the License for the specific language governing permissions and
 #define _DEMIURGE_VCO_H_
 
 #define DEMIURGE_SINE 1
-#define  DEMIURGE_SQUARE 2
-#define  DEMIURGE_TRIANGLE 3
-#define  DEMIURGE_SAW 4
+#define DEMIURGE_SQUARE 2
+#define DEMIURGE_TRIANGLE 3
+#define DEMIURGE_SAW 4
 
 #include "Signal.h"
 
@@ -34,9 +34,12 @@ typedef struct {
    volatile int32_t output;
    uint64_t lastCalc;
    int32_t cached;
+   int32_t n_data;
+   double x;
+   double y;
 } oscillator_t;
 
-int32_t oscillator_read(signal_t *handle, uint64_t time);
+int32_t oscillator_read(signal_t *handle, uint64_t time_in_us);
 
 class Oscillator : public Signal {
 

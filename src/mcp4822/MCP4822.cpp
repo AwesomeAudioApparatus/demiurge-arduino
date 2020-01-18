@@ -41,10 +41,10 @@ static void initialize(gpio_num_t pin_out) {
    WRITE_PERI_REG(MCPWM_TIMER_SYNCI_CFG_REG(0) , (1 << MCPWM_TIMER0_SYNCISEL_S ));
    WRITE_PERI_REG(MCPWM_OPERATOR_TIMERSEL_REG(0), (0 << MCPWM_OPERATOR0_TIMERSEL));
 
-   WRITE_PERI_REG(MCPWM_GEN0_TSTMP_A_REG(0), 32);  // 32 cycles LOW after UTEZ.
+   WRITE_PERI_REG(MCPWM_GEN0_TSTMP_A_REG(0), 16);  // 32 cycles LOW after UTEZ.
    WRITE_PERI_REG(MCPWM_GEN0_A_REG(0) , (1 << MCPWM_GEN0_A_UTEZ_S ) | (2 << MCPWM_GEN0_A_UTEA_S )); // UTEZ= set PWM0A low, UTEA=set PWM0A high
 
-   WRITE_PERI_REG(MCPWM_TIMER0_CFG0_REG(0) , 15 << MCPWM_TIMER0_PRESCALE_S | 39 << MCPWM_TIMER0_PERIOD_S );    // Prescale=16, so timer is 10MHz, 40 clocks per cycle
+   WRITE_PERI_REG(MCPWM_TIMER0_CFG0_REG(0) , 15 << MCPWM_TIMER0_PRESCALE_S | 23 << MCPWM_TIMER0_PERIOD_S );    // Prescale=16, so timer is 10MHz, 40 clocks per cycle
    WRITE_PERI_REG(MCPWM_TIMER0_CFG1_REG(0) , (1 << MCPWM_TIMER0_MOD_S) | (2 << MCPWM_TIMER0_START_S) );        // Continuously running, decrease mode.
 
 
@@ -57,8 +57,8 @@ MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
 
    descs = static_cast<lldesc_t *>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
    memset((void *) descs, 0, sizeof(lldesc_t));
-   descs->size = 5;
-   descs->length = 5;
+   descs->size = 6;
+   descs->length = 6;
    descs->offset = 0;
    descs->sosf = 0;
    descs->eof = 0;
@@ -67,16 +67,25 @@ MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
    descs->buf = static_cast<uint8_t *>(heap_caps_malloc(16, MALLOC_CAP_DMA));
    descs->buf[0] = 0x00;
    descs->buf[1] = 0x00;
-   descs->buf[2] = 0x00;
+   descs->buf[2] = 0x55;
    descs->buf[3] = 0x00;
-   descs->buf[4] = 0x55;
+   descs->buf[4] = 0x00;
+   descs->buf[5] = 0x55;
+   ESP_LOGE(TAG, "Buffer address: %x", ((void *)descs->buf) );
+
    esp_err_t error = aaa_spi_prepare_circular_buffer(HSPI_HOST, 1, descs, 10000000, mosi_pin, sclk_pin, 13);
 
-   // this bit of code makes sure both timers and SPI transfer are started as close together as possible
-   portDISABLE_INTERRUPTS();
+
+   // Values to be written during time critical stage
    auto s0 = 1 << SPI_USR_S;
    auto s1 = (1 << MCPWM_TIMER0_MOD_S) | (2 << MCPWM_TIMER0_START_S);
-   auto s3 = (16 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER1_SYNCO_SEL) | (1 << MCPWM_TIMER1_SYNC_SW_S);
+   auto s3 = (12 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER1_SYNCO_SEL) | (1 << MCPWM_TIMER1_SYNC_SW_S);
+
+   // this bit of code makes sure both timers and SPI transfer are started as close together as possible
+   portDISABLE_INTERRUPTS();  // No interference in timing.
+   // --- sync to known prescaled cycle.
+   auto reg = READ_PERI_REG(MCPWM_TIMER0_STATUS_REG(0));
+   while( reg == READ_PERI_REG(MCPWM_TIMER0_STATUS_REG(0)));
 
    WRITE_PERI_REG( MCPWM_TIMER0_CFG1_REG(0), s1 ); // start timer 0
    WRITE_PERI_REG(SPI_CMD_REG(3), s0); // start SPI transfer
@@ -88,14 +97,11 @@ MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
    ESP_LOGE(TAG, "Initializing SPI.....Done");
 }
 
-void MCP4822::setOutput(int channel, uint16_t output) {
-   if (channel == 1) {
-      descs->buf[0] = MCP4822_CHANNEL_A | MCP4822_ACTIVE | ((output >> 8) & 0x0F);
-      descs->buf[1] = output & 0xFF;
-   } else {
-      descs->buf[2] = MCP4822_CHANNEL_B | MCP4822_ACTIVE | ((output >> 8) & 0x0F);
-      descs->buf[3] = output & 0xFF;
-   }
+void MCP4822::setOutput(uint16_t out1, uint16_t out2) {
+   descs->buf[0] = MCP4822_CHANNEL_B | MCP4822_ACTIVE | MCP4822_GAIN | ((out1 >> 8) & 0x0F);
+   descs->buf[1] = out1 & 0xFF;
+   descs->buf[3] = MCP4822_CHANNEL_A | MCP4822_ACTIVE | MCP4822_GAIN| ((out2 >> 8) & 0x0F);
+   descs->buf[4] = out2 & 0xFF;
 }
 
 MCP4822::~MCP4822() {
