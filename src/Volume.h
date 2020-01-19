@@ -24,9 +24,11 @@ typedef struct {
    signal_t *me;
    signal_t *input;
    signal_t *control;
+   uint64_t lastCalc;
+   int32_t cached;
 } volume_t;
 
-float volume_read(void *handle, uint64_t time);
+int32_t volume_read(signal_t *handle, uint64_t time);
 
 class Volume : public Signal {
 

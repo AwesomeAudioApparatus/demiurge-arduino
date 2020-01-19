@@ -14,17 +14,28 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+
+#include <esp_log.h>
 #include "Demiurge.h"
 
 
 Potentiometer::Potentiometer(int position) {
    configASSERT(position > 0 && position <= 4 )
    _data.position = position + DEMIEURGE_POTENTIOMETER_OFFSET;
+   _signal.data = &_data;
+   _signal.read_fn = potentiometer_read;
 }
 
 Potentiometer::~Potentiometer() = default;
 
-float IRAM_ATTR potentiometer_read(void *handle, uint64_t time) {
-   auto *port = (audio_in_port_t *) handle;
-   return Demiurge::runtime().inputs()[port->position];
+int32_t IRAM_ATTR potentiometer_read(signal_t *handle, uint64_t time) {
+   auto *port = (potentiometer_t *) handle->data;
+   if( time > port->lastCalc )
+   {
+      port->lastCalc = time;
+      int32_t result = Demiurge::runtime().inputs()[port->position];
+      port->cached = result;
+      return result;
+   }
+   return port->cached;
 }

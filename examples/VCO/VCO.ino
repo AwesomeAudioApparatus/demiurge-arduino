@@ -16,22 +16,23 @@ See the License for the specific language governing permissions and
 
 #include "Arduino.h"
 #include "Demiurge.h"
+#include <soc/mcpwm_reg.h>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include "esp_log.h"
 
-CvInPort cv1(1);
-CvInPort cv2(2);
-CvInPort cv3(3);
-CvInPort cv4(4);
+ControlPair pair1(1);
+ControlPair pair2(2);
+ControlPair pair3(3);
+ControlPair pair4(4);
 
-GatePort gate(1);
+GateInPort gate(1);
 
 AudioOutPort out1(1);
 AudioOutPort out2(2);
 
-Oscillator vco1(DEMIURGE_SINE);
+Oscillator vco1(DEMIURGE_SAW);
 
 Mixer mixer;
 FixedSignal fixed(1.0);
@@ -43,48 +44,51 @@ Pan pan;
 #define ADC_MOSI 23
 
 void setup() {
+  disableCore0WDT();
   Serial.begin(115200);
-
   pinMode(ADC_CS, OUTPUT); digitalWrite(ADC_CS, HIGH);
   pinMode(ADC_MOSI, OUTPUT); digitalWrite(ADC_MOSI, LOW);
   pinMode(ADC_MISO, INPUT);
   pinMode(ADC_CLK, OUTPUT); digitalWrite(ADC_CLK, LOW);
 
-   Serial.println("setting up mixer");
-   mixer.configure(2, &cv1, &fixed);
-   mixer.configure(1, &cv2, &fixed);
+  Serial.println("setting up mixer");
+  mixer.configure(2, &pair1, &fixed);
+  mixer.configure(1, &pair2, &fixed);
 
-   Serial.println("setting up vco");
-   vco1.configureFrequency(&mixer);
-//   vco1.configureAmplitude(&cv3);
+  Serial.println("setting up vco");
+  vco1.configureFrequency(&mixer);
+  vco1.configureAmplitude(&pair3);
 
-   Serial.println("setting up pan");
-   pan.configure(&vco1, &cv4);
+  Serial.println("setting up pan");
+  pan.configure(&vco1, &mixer);
 
-   Serial.println("setting up output ports");
-   out1.configure(pan.outputLeft());
-   out2.configure(pan.outputRight());
+  Serial.println("setting up output ports");
+//  out1.configure(pan.outputLeft());
+//  out2.configure(pan.outputRight());
+  out1.configure(&vco1);
+  out2.configure(&vco1);
+  Demiurge::begin();
+  delay(100);
 }
 
 void loop() {
-   Demiurge::runtime().printReport();
-   uint16_t *inputs = Demiurge::runtime().rawAdc();
-   for( int i=0; i < 8; i++ ) {
-     Serial.print( inputs[i] );
-     Serial.print( "    " );
-   }
-   Serial.println();
-   
-   Serial.print( Demiurge::runtime().output1() );
-   Serial.print( "    " );
-   Serial.print( Demiurge::runtime().dac1() );
-   Serial.print( "    " );
-   Serial.print( Demiurge::runtime().output2() );
-   Serial.print( "    " );
-   Serial.print( Demiurge::runtime().dac2() );
-   Serial.println();
+  auto &demiurge = Demiurge::runtime();   
 
-   double value1 = vco1._data.output;
-   Serial.println(value1);
-   delay(872);
+  double value1a = ((oscillator_t *) vco1._signal.data)->cached;
+//  double value2 = ((panchannel_t *) pan.outputLeft()->_signal.data)->cached;
+//  double value3 = ((audio_out_port_t *) out1._signal.data)->cached;
+  Serial.print( "VCO: " );
+  Serial.print(value1a);
+  Serial.print( ", " );
+  Serial.print(demiurge._dac->out->buf[0]);
+  Serial.print( ", " );
+  Serial.print(demiurge._dac->out->buf[1]);
+
+  for( int i=0; i<8; i++ ) {
+    Serial.print( ", " );
+    Serial.print(demiurge._adc->read_input(i) );
+  }
+
+  Serial.println();
+  delay(1000);
 }

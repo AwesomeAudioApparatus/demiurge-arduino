@@ -4,6 +4,17 @@
 
 #include "stdint.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int32_t isin(int32_t x);
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif

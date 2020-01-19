@@ -14,29 +14,35 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#ifndef _DEMIURGE_TIMING_H_
-#define _DEMIURGE_TIMING_H_
+#ifndef _DEMIURGE_GATEPORT_H_
+#define _DEMIURGE_GATEPORT_H_
 
-#include <stdint.h>
+#ifndef DEMIURGE_GATE_HIGH
+#define DEMIURGE_GATE_HIGH 0x00400000  // 0x4000 in audio bits
+#endif
 
-class Timing {
+#ifndef DEMIURGE_GATE_LOW
+#define DEMIURGE_GATE_LOW 0x007FFF00   // 0x7FFF in audio bits
+#endif
+
+#include "Signal.h"
+
+typedef struct {
+   int position;
+   uint64_t lastCalc;
+   int32_t cached;
+} gate_in_port_t;
+
+int32_t gateinport_read(signal_t *handle, uint64_t time);
+
+class GateInPort : public Signal {
 
 public:
-   Timing(const char *name);
-   bool started();
-   bool start();
-   void stop();
-   uint64_t lastInterval();
-   void report();
+   explicit GateInPort(int position);
 
+   ~GateInPort() override;
 private:
-   const char *_name;
-   bool _started;
-   uint64_t _startedAt;
-   uint64_t _stoppedAt;
-
-   uint64_t _lastInterval;
-   int _overruns;
+   gate_in_port_t _data{};
 };
 
 

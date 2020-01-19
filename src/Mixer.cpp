@@ -17,13 +17,15 @@ See the License for the specific language governing permissions and
 #include <malloc.h>
 #include <esp_system.h>
 #include <esp_task.h>
-#include "Mixer.h"
+#include <esp_log.h>
+#include "Demiurge.h"
 
 
 Mixer::Mixer() {
    for (auto &input : _data.inputs)
       input = nullptr;
    _signal.read_fn = mixer_read;
+   _signal.data = &_data;
 }
 
 Mixer::~Mixer() = default;
@@ -35,13 +37,18 @@ void Mixer::configure(int number, Signal *source, Signal *control) {
    _data.inputs[number - 1] = &v->_signal;
 }
 
-float IRAM_ATTR mixer_read(void *handle, uint64_t time) {
-   auto *mixer = (mixer_t *) handle;
-   float output = 0.0;
-   for (auto inp : mixer->inputs) {
-      if (inp != nullptr) {
-         output = output + inp->read_fn(inp, time);
+int32_t IRAM_ATTR mixer_read(signal_t *handle, uint64_t time) {
+   auto *mixer = (mixer_t *) handle->data;
+   if( time > mixer->lastCalc ) {
+      mixer->lastCalc = time;
+      int32_t output = 0;
+      for (auto inp : mixer->inputs) {
+         if (inp != nullptr) {
+            output = output + inp->read_fn(inp, time);
+         }
       }
+      mixer->cached = output;
+      return output;
    }
-   return output;
+   return mixer->cached;
 }

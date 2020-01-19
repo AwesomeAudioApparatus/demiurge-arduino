@@ -23,9 +23,11 @@ See the License for the specific language governing permissions and
 typedef struct {
    signal_t *me;
    signal_t *input;
+   uint64_t lastCalc;
+   int32_t cached;
 } passthru_t;
 
-float passthru_read(void *handle, uint64_t time);
+int32_t passthru_read(signal_t *handle, uint64_t time);
 
 class Passthru : public Signal {
 

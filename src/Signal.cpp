@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <driver/gpio.h>
 #include "Signal.h"
 
 Signal::Signal() noexcept {
@@ -25,15 +26,15 @@ Signal::Signal() noexcept {
 
 Signal::~Signal() {}
 
-float Signal::scale() {
+int32_t Signal::scale() {
    return _scale;
 }
 
-float Signal::offset() {
+int32_t Signal::offset() {
    return _offset;
 }
 
-void Signal::setScale(float scale) {
+void Signal::setScale(int32_t scale) {
    _scale = scale;
    if (_scale == 1.0 && _offset == 0.0)
       _noRecalc = true;
@@ -41,10 +42,17 @@ void Signal::setScale(float scale) {
    _signal.noRecalc = _noRecalc;
 }
 
-void Signal::setOffset(float offset) {
+void Signal::setOffset(int32_t offset) {
    _offset = offset;
    if (_scale == 1.0 && _offset == 0.0)
       _noRecalc = true;
    _signal.offset = offset;
    _signal.noRecalc = _noRecalc;
+}
+
+int32_t scale_output(int32_t value, int32_t scale, int32_t offset) {
+   if (scale == 0) {
+      return value + offset;
+   }
+   return ((value * (scale >> 8)) >> 8) + offset;
 }

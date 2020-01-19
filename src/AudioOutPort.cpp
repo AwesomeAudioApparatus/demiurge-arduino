@@ -18,36 +18,49 @@ See the License for the specific language governing permissions and
 
 AudioOutPort::AudioOutPort(int position) {
    configASSERT(position > 0 && position <= 2)
-   _position = position;
+   _data.me = &_signal;
+   _data.position = position;
    _signal.read_fn = audiooutport_read;
+   _signal.data = &_data;
 }
 
 AudioOutPort::~AudioOutPort() {
-   if (_registered)
-      Demiurge::runtime().unregisterSink((audio_out_port_t *)(&_signal));
+   if (_data.registered){
+      Demiurge::runtime().unregisterSink(&_signal);
+      _data.registered = false;
+   }
 };
 
 void AudioOutPort::configure(Signal *input) {
-   if (!_registered)
-      Demiurge::runtime().registerSink((audio_out_port_t *)(&_signal));
+   if (!_data.registered){
+      Demiurge::runtime().registerSink(&_signal);
+      _data.registered = true;
+   }
    _input = input;
    _data.input = &input->_signal;
+   _signal.data = &_data;
 }
 
-void AudioOutPort::configure(Signal *input, float scale, float offset) {
+void AudioOutPort::configure(Signal *input, int32_t scale, int32_t offset) {
    configure(input);
    setScale(scale);
    setOffset(offset);
 }
 
-float IRAM_ATTR audiooutport_read(void *handle, uint64_t time) {
-   auto *port = (audio_out_port_t *) handle;
-   signal_t *upstream = port->input;
-   signal_fn fn = upstream->read_fn;
-   float input = fn(upstream, time);
-   signal_t *data = port->me;
-   if (data->noRecalc)
-      return input;
-   return input * data->scale + data->offset;
+int32_t IRAM_ATTR audiooutport_read(signal_t *handle, uint64_t time) {
+   auto *port = (audio_out_port_t *) handle->data;
+   if( time > port->lastCalc ) {
+      port->lastCalc = time;
+      signal_t *upstream = port->input;
+      signal_fn fn = upstream->read_fn;
+      int32_t input = fn(upstream, time);
+      signal_t *data = port->me;
+      if (data->noRecalc)
+         return input;
+      int32_t result = input * data->scale + data->offset;
+      port->cached = result;
+      return result;
+   }
+   return port->cached;
 }
 

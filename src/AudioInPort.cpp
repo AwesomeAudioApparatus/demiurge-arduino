@@ -22,16 +22,23 @@ AudioInPort::AudioInPort(int position) {
    configASSERT(position > 0 && position <= 2)
    _data.position = position;
    _signal.read_fn = audioinport_read;
+   _signal.data = &_data;
 }
 
 AudioInPort::~AudioInPort() = default;
 
-void AudioInPort::configure(float scale, float offset) {
+void AudioInPort::configure(int32_t scale, int32_t offset) {
    setScale(scale);
    setOffset(offset);
 }
 
-float IRAM_ATTR audioinport_read(void *handle, uint64_t time) {
-   auto *port = (audio_in_port_t *) handle;
-   return Demiurge::runtime().inputs()[port->position];
+int32_t IRAM_ATTR audioinport_read(signal_t *handle, uint64_t time) {
+   auto *port = (audio_in_port_t *) handle->data;
+   if( time > port->lastCalc ) {
+      port->lastCalc = time;
+      int32_t result = Demiurge::runtime().inputs()[port->position];
+      port->cached = result;
+      return result;
+   }
+   return port->cached;
 }

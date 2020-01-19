@@ -25,9 +25,11 @@ See the License for the specific language governing permissions and
 
 typedef struct {
    int position;
+   uint64_t lastCalc;
+   int32_t cached;
 } cv_in_port_t;
 
-float cvinport_read(void *handle, uint64_t time);
+int32_t cvinport_read(signal_t *handle, uint64_t time);
 
 class CvInPort : public Signal {
 

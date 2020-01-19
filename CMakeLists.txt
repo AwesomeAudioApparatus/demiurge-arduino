@@ -16,6 +16,7 @@
 
 cmake_minimum_required(VERSION 3.14)
 project(demiurge)
+
 set(CMAKE_CXX_STANDARD 14)
 
 if ("!$ENV{ESP_INCLUDES}" STREQUAL "!")
@@ -29,6 +30,7 @@ INCLUDE_DIRECTORIES(
         ${ESP_INCLUDES}/driver
         ${ESP_INCLUDES}/esp32
         ${ESP_INCLUDES}/freertos
+        ${ESP_INCLUDES}/hal
         ${ESP_INCLUDES}/heap
         ${ESP_INCLUDES}/log
         ${ESP_INCLUDES}/newlib
@@ -49,18 +51,22 @@ add_library(
         src/AudioOutPort.h
         src/ControlPair.cpp
         src/ControlPair.h
+        src/Cordic.h
+        src/Cordic.cpp
         src/CvInPort.cpp
         src/CvInPort.h
         src/Demiurge.cpp
         src/Demiurge.h
         src/FixedSignal.cpp
         src/FixedSignal.h
-        src/GatePort.cpp
-        src/GatePort.h
+        src/GateInPort.cpp
+        src/GateInPort.h
         src/Inverter.cpp
         src/Inverter.h
         src/Mixer.cpp
         src/Mixer.h
+        src/aaa_spi.c
+        src/aaa_spi.h
         src/OctavePerVolt.cpp
         src/OctavePerVolt.h
         src/Pan.cpp
@@ -73,12 +79,10 @@ add_library(
         src/PushButton.h
         src/Signal.cpp
         src/Signal.h
-        src/Sine.cpp
-        src/Sine.h
+        src/sine.c
+        src/sine.h
         src/Threshold.cpp
         src/Threshold.h
-        src/Timing.cpp
-        src/Timing.h
         src/Oscillator.cpp
         src/Oscillator.h
         src/Volume.cpp

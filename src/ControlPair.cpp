@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_log.h>
 #include "Demiurge.h"
 
 ControlPair::ControlPair(int position) {
@@ -22,6 +23,10 @@ ControlPair::ControlPair(int position) {
    _cvIn = new CvInPort(position);
    _potentiometerScale = 1.0;
    _cvScale = 1.0;
+   _signal.read_fn = controlpair_read;
+   _signal.data = &_data;
+   _data.potentiometer = &_potentiometer->_signal;
+   _data.cv = &_cvIn->_signal;
 }
 
 ControlPair::~ControlPair() {
@@ -29,17 +34,27 @@ ControlPair::~ControlPair() {
    delete _cvIn;
 }
 
-void ControlPair::setPotentiometerScale(float scale) {
+void ControlPair::setPotentiometerScale(int32_t scale) {
    _potentiometerScale = scale;
 }
 
-void ControlPair::setCvScale(float scale) {
+void ControlPair::setCvScale(int32_t scale) {
    _cvScale = scale;
 }
 
-float IRAM_ATTR controlpair_read(void *handle, uint64_t time) {
-   auto *control = (control_pair_t *) handle;
-   float potIn = control->potentiometer->read_fn(control->potentiometer, time);
-   float cvIn = control->cv->read_fn(control->cv, time);
-   return potIn + cvIn;
+int32_t IRAM_ATTR controlpair_read(signal_t *handle, uint64_t time) {
+   auto *control = (control_pair_t *) handle->data;
+   if( time > control->lastCalc ) {
+      control->lastCalc = time;
+
+      signal_t *pot = control->potentiometer;
+      int32_t potIn = pot->read_fn(pot, time);
+
+      signal_t *cv = control->cv;
+      int32_t cvIn = cv->read_fn(cv, time);
+      int32_t result = potIn + cvIn;
+      control->cached = result;
+      return result;
+   }
+   return control->cached;
 }
