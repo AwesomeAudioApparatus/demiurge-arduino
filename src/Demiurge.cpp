@@ -29,34 +29,47 @@ See the License for the specific language governing permissions and
 #include <soc/dport_reg.h>
 #include <soc/ledc_struct.h>
 #include <soc/ledc_reg.h>
+#include <soc/timer_group_reg.h>
 #include <sys/time.h>
 #include "string.h"
 
 #include "Demiurge.h"
 #include "aaa_spi.h"
 
-#define LDAC_MASK 0x10  // GPIO4
-#define DEMIURGE_TIMER_GROUP TIMER_GROUP_1
-#define DEMIURGE_TIMER TIMER_0
+#define DEMIURGE_TIMER_GROUP 0
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 
+static void IRAM_ATTR initialize_tick_timer() {
+   WRITE_PERI_REG(TIMG_T0CONFIG_REG(DEMIURGE_TIMER_GROUP),
+                  (1 << TIMG_T0_DIVIDER_S ) | TIMG_T0_EN | TIMG_T0_AUTORELOAD | TIMG_T0_INCREASE | TIMG_T0_ALARM_EN);
+
+   WRITE_PERI_REG(TIMG_T0LOADHI_REG(DEMIURGE_TIMER_GROUP), 0);
+   WRITE_PERI_REG(TIMG_T0LOADLO_REG(DEMIURGE_TIMER_GROUP), 0);
+   WRITE_PERI_REG(TIMG_T0ALARMHI_REG(DEMIURGE_TIMER_GROUP), 0);
+   WRITE_PERI_REG(TIMG_T0ALARMLO_REG(DEMIURGE_TIMER_GROUP), 400);
+
+   WRITE_PERI_REG(TIMG_T0LOAD_REG(DEMIURGE_TIMER_GROUP), 1);
+}
+
+static bool toggle = false;
+
+static void IRAM_ATTR wait_timer_alarm() {
+   gpio_set_level(GPIO_NUM_21, toggle);
+   toggle = !toggle;
+   while (READ_PERI_REG(TIMG_T0CONFIG_REG(DEMIURGE_TIMER_GROUP)) & TIMG_T0_ALARM_EN);
+   WRITE_PERI_REG(TIMG_T0CONFIG_REG(DEMIURGE_TIMER_GROUP),
+                  (1 << TIMG_T0_DIVIDER_S ) | TIMG_T0_EN | TIMG_T0_AUTORELOAD | TIMG_T0_INCREASE | TIMG_T0_ALARM_EN);
+}
+
 void IRAM_ATTR startInfiniteTask(void *parameter) {
-   ESP_LOGI("MAIN", "Starting audio algorithm in Core %d", xTaskGetAffinity(nullptr));
+   ESP_LOGE("MAIN", "Starting audio algorithm in Core %d", xTaskGetAffinity(nullptr));
    auto *demiurge = static_cast<Demiurge *>(parameter);
    demiurge->initialize();
-   esp_err_t error = timer_start(DEMIURGE_TIMER_GROUP, DEMIURGE_TIMER);
-   ESP_ERROR_CHECK(error);
-   uint64_t counter = 0;
-   uint64_t next = 0;
-
+   initialize_tick_timer();
    while (true) {
-      while (counter < next)
-      {
-         timer_get_counter_value(DEMIURGE_TIMER_GROUP, DEMIURGE_TIMER, &counter);
-      } // WAIT
-      next = counter + 2000;     // 20,000 tick() per second or there about
+      wait_timer_alarm();
       demiurge->tick();
    }
 
@@ -69,12 +82,18 @@ void IRAM_ATTR startInfiniteTask(void *parameter) {
 
 Demiurge::Demiurge() {
    ESP_LOGI(TAG, "Starting Demiurge...\n");
+   initializeSinks();
 };
 
-void Demiurge::initialize(){
+void Demiurge::initialize() {
+   // Initialize LEDs
+   gpio_set_direction(GPIO_NUM_21, GPIO_MODE_OUTPUT);
+   gpio_set_direction(GPIO_NUM_22, GPIO_MODE_OUTPUT);
+   gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
+   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
+
    _dac = new MCP4822(GPIO_NUM_13, GPIO_NUM_14, GPIO_NUM_15);
 //   adc128s102_init(&_adc, _vspi);
-   initializeSinks();
 }
 
 void Demiurge::startRuntime() {
@@ -108,14 +127,17 @@ Demiurge::~Demiurge() {
 }
 
 void Demiurge::registerSink(signal_t *processor) {
+   ESP_LOGI("MAIN", "Registering Sink: %x", processor);
    configASSERT(processor != nullptr)
    auto *port = (audio_out_port_t *) processor->data;
    configASSERT(port != nullptr)
    configASSERT(port->position > 0 && port->position <= DEMIURGE_MAX_SINKS)
    _sinks[port->position - 1] = processor;
+   ESP_LOGE("MAIN", "Registering Sink: %d", port->position);
 }
 
 void Demiurge::unregisterSink(signal_t *processor) {
+   ESP_LOGI("MAIN", "Unregistering Sink: %x", processor);
    configASSERT(processor != nullptr)
    auto *port = (audio_out_port_t *) processor->data;
    configASSERT(port != nullptr)
@@ -126,20 +148,20 @@ void Demiurge::unregisterSink(signal_t *processor) {
 void IRAM_ATTR Demiurge::tick() {
    readGpio();
    readADC();
-   timerCounter = timerCounter + 50; // pass along number of microseconds.
+   timerCounter = timerCounter + 10; // pass along number of microseconds.
 
-   for (int i = 0; i < DEMIURGE_MAX_SINKS; i++) {
-      signal_t *sink = _sinks[i];
-      if (sink != nullptr) {
-//         int32_t output12bits = audiooutport_read(sink, timerCounter);
-//         _dac->setOutput(i, timerCounter & 0xFFF);
-//         _dac->setOutput(i, output12bits);
-//         _outputs[i] = output12bits;
-
-      }
+   uint32_t out1;
+   signal_t *sink1 = _sinks[0];
+   if (sink1 != nullptr) {
+      out1 = audiooutport_read(sink1, timerCounter);
    }
-   int32_t out = timerCounter % 4096;
-   _dac->setOutput(out, out);
+
+   uint32_t out2;
+   signal_t *sink2 = _sinks[1];
+   if (sink2 != nullptr) {
+      out2 = audiooutport_read(sink2, timerCounter);
+   }
+   _dac->setOutput(out1, out2);
 }
 
 

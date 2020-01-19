@@ -35,8 +35,8 @@ typedef struct {
    uint64_t lastCalc;
    int32_t cached;
    int32_t n_data;
-   double x;
-   double y;
+   int32_t hist[1000];
+   int idx;
 } oscillator_t;
 
 int32_t oscillator_read(signal_t *handle, uint64_t time_in_us);

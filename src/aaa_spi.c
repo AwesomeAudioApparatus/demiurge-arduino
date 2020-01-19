@@ -264,10 +264,10 @@ esp_err_t aaa_spi_prepare_circular_buffer(
    spiHw->ctrl2.val = 0;   // Reset timing
    spiHw->dma_conf.dma_tx_stop = 0;   // Disable stop
    spiHw->dma_conf.dma_continue = 1;   // Set contiguous mode
-   spiHw->dma_out_link.start = 1;   // Start SPI DMA transfer (1)
-
-   spiHw->cmd.usr = 1;   // SPI: Start SPI DMA transfer
-   ESP_LOGE("_DEMIURGE_SPI", "DMA/SPI initialized.\n");
+//   spiHw->dma_out_link.start = 1;   // Start SPI DMA transfer (1)
+//
+//   spiHw->cmd.usr = 1;   // SPI: Start SPI DMA transfer
+   ESP_LOGI("SPI", "DMA/SPI initialized.\n");
    return ESP_OK;
 }
 

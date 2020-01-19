@@ -62,16 +62,16 @@ int32_t IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time_in_us) {
    auto *osc = (oscillator_t *) handle->data;
    if (time_in_us > osc->lastCalc) {
       osc->lastCalc = time_in_us;
-      int32_t freq = 2;
+      int32_t freq = 20000;
       signal_t *freqControl = osc->frequency;
       if (freqControl != nullptr) {
-//         freq = octave_frequencyOf(freqControl->read_fn(freqControl, time_in_us));
+         freq = octave_frequencyOf(freqControl->read_fn(freqControl, time_in_us));
       }
       int32_t period_in_us = 1000000 / freq;
 
       float amplitude = 1.0f;
       if (osc->amplitude != nullptr) {
-//         amplitude = (float) osc->amplitude->read_fn(osc->amplitude, time_in_us) / 4096.0f;
+         amplitude = (float) osc->amplitude->read_fn(osc->amplitude, time_in_us) / 4096.0f;
       }
 
       switch (osc->mode) {
@@ -80,11 +80,9 @@ int32_t IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time_in_us) {
 
             // time - osc->lastTrig is nanoseconds since last trig.
             double x = freq * (time_in_us - osc->lastTrig);
-            osc->x = x;
-            double out = 0;
+            double out;
             Cordic::sin_values(osc->n_data, x, out);
             auto result = (int32_t) (out * amplitude);
-            osc->y = out;
             osc->cached = result;
             return result;
          }
@@ -98,9 +96,8 @@ int32_t IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time_in_us) {
          }
          case DEMIURGE_SAW: {
             uint64_t x = time_in_us % period_in_us;
-            osc->x = amplitude;
-            auto out = (int32_t) ((((float) x) * 4095 / period_in_us) * amplitude);
-            osc->y = out;
+            double slope = 4095.0 / period_in_us;
+            auto out = (int32_t) ((slope * x) * amplitude);
             osc->cached = out;
             return out;
          }
