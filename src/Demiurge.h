@@ -17,43 +17,6 @@ See the License for the specific language governing permissions and
 #ifndef _DEMIURGE_DEMIURGE_H_
 #define _DEMIURGE_DEMIURGE_H_
 
-#ifndef DEMIURGE_MAX_SINKS
-#define DEMIURGE_MAX_SINKS 2
-#endif
-
-#ifndef DEMIURGE_VMOSI_PIN
-#define DEMIURGE_VMOSI_PIN 23
-#endif
-
-#ifndef DEMIURGE_VMISO_PIN
-#define DEMIURGE_VMISO_PIN 19
-#endif
-
-#ifndef DEMIURGE_VCLK_PIN
-#define DEMIURGE_VCLK_PIN 18
-#endif
-
-#ifndef DEMIURGE_VCS_PIN
-#define DEMIURGE_VCS_PIN 5
-#endif
-
-#ifndef DEMIURGE_HMISO_PIN
-#define DEMIURGE_HMISO_PIN 12
-#endif
-
-#ifndef DEMIURGE_HMOSI_PIN
-#define DEMIURGE_HMOSI_PIN 13
-#endif
-
-#ifndef DEMIURGE_HCLK_PIN
-#define DEMIURGE_HCLK_PIN 14
-#endif
-
-#ifndef DEMIURGE_HCS_PIN
-#define DEMIURGE_HCS_PIN 15
-static const char *const TAG = "Demiurge";
-#endif
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -78,7 +41,7 @@ static const char *const TAG = "Demiurge";
 #include "adc128s102/ADC128S102.h"
 #include "mcp4822/MCP4822.h"
 
-void inc_value();
+#define DEMIURGE_MAX_SINKS 2
 
 class Demiurge {
 
@@ -118,17 +81,10 @@ public:
 
    bool gpio(int i);
 
-   void printReport();
-   uint16_t dac1();
-   uint16_t dac2();
-   int32_t output1();
-   int32_t output2();
-   uint16_t *rawAdc();
-
    void initialize();
 
    MCP4822 *_dac;
-   adc128s102 _adc;
+   ADC128S102 *_adc;
 
 
 private:
@@ -136,8 +92,6 @@ private:
    Demiurge();
 
    ~Demiurge();
-
-   void initializeHardware();
 
    void initializeSinks();
 
@@ -149,25 +103,12 @@ private:
    int32_t _inputs[8];
 
    int32_t _outputs[2];
-   uint64_t _startTime;
-   uint64_t _lastMeasure;
-   volatile bool _enterred;
-   volatile uint32_t _timerruns;
-   volatile uint32_t _overruns;
    TaskHandle_t _taskHandle;
 
    uint64_t timerCounter;         // in microseconds, increments 50 at a time.
 
    esp_timer_create_args_t *_config;
    esp_timer_handle_t _timer;
-
-   spi_device_handle_t _hspi;
-   spi_bus_config_t _hspiBusConfig;
-   spi_device_interface_config_t _hspiDeviceIntfConfig;
-
-   spi_device_handle_t _vspi;
-   spi_bus_config_t _vspiBusConfig;
-   spi_device_interface_config_t _vspiDeviceIntfConfig;
 
    void readGpio();
 };

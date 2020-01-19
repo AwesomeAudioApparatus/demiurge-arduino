@@ -36,6 +36,7 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 #include "aaa_spi.h"
 
+#define TAG "DEMI"
 #define DEMIURGE_TIMER_GROUP 0
 
 #pragma clang diagnostic push
@@ -93,7 +94,7 @@ void Demiurge::initialize() {
    gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
 
    _dac = new MCP4822(GPIO_NUM_13, GPIO_NUM_14, GPIO_NUM_15);
-//   adc128s102_init(&_adc, _vspi);
+   _adc = new ADC128S102(GPIO_NUM_23,GPIO_NUM_19,GPIO_NUM_18,GPIO_NUM_5);
 }
 
 void Demiurge::startRuntime() {
@@ -118,8 +119,7 @@ void Demiurge::initializeSinks() {
 Demiurge::~Demiurge() {
 
    delete _dac;
-   spi_bus_remove_device(_vspi);
-   spi_bus_remove_device(_hspi);
+   delete _adc;
 
    esp_timer_stop(_timer);
    esp_timer_delete(_timer);
@@ -170,24 +170,7 @@ void IRAM_ATTR Demiurge::readGpio() {
 }
 
 void IRAM_ATTR Demiurge::readADC() {
-//   adc128s102_read(&_adc); // get the previous cycle's data.
-//   adc128s102_queue(&_adc);  // start new conversion.
-//   adc128s102_sync_read(&_adc);
 
-//   uint16_t *channels = _adc._channels;
-//   int32_t k = 20 / 4095;
-//   for (int i = 0; i < 8; i++) {
-//      // k = (y1-y2) / (x1-x2)
-//      // k = (10- -10) / (4095 - 0)
-//      // k = 20 / 4095
-//
-//      // m = y1 - k * x1;
-//      // m = 10 - k * 4095;
-//      _inputs[i] = k * channels[i] - 10;
-//   }
-//   for( int i=0; i < 8 ; i++ ){
-//      _inputs[i] = (_adc._rxdata[i] << 8) + _adc._rxdata[i+1];
-//   }
 }
 
 int32_t IRAM_ATTR *Demiurge::inputs() {
@@ -202,11 +185,4 @@ bool IRAM_ATTR Demiurge::gpio(int pin) {
    return (_gpios & (1 << pin)) != 0;
 }
 
-int32_t Demiurge::output1() {
-   return _outputs[0];
-}
-
-int32_t Demiurge::output2() {
-   return _outputs[1];
-}
-
+#undef TAG

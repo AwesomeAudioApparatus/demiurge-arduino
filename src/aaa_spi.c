@@ -84,14 +84,11 @@ static uint8_t getSpiClkInByHost(spi_host_device_t host) {
 }
 
 
-esp_err_t aaa_spi_prepare_circular_buffer(
-      const spi_host_device_t spiHostDevice,
-      const int dma_chan,
-      const lldesc_t *lldescs,
-      const long dmaClockSpeedInHz,
-      const gpio_num_t mosi_gpio_num,
-      const gpio_num_t sclk_gpio_num,
-      const int waitCycle) {
+esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const int dma_chan,
+                                   const lldesc_t *lldescs_out, const lldesc_t *lldescs_in,
+                                   const long dmaClockSpeedInHz, const gpio_num_t mosi_gpio_num,
+                                   const gpio_num_t miso_gpio_num, const gpio_num_t sclk_gpio_num,
+                                   const int waitCycle) {
 
    const bool spi_periph_claimed = spicommon_periph_claim(spiHostDevice);
    if (!spi_periph_claimed) {
@@ -204,7 +201,6 @@ esp_err_t aaa_spi_prepare_circular_buffer(
    spiHw->user1.usr_dummy_cyclelen = 0;
 
    //Configure misc stuff
-   spiHw->user.doutdin = 0;
    spiHw->user.sio = 0;
 
    spiHw->ctrl2.setup_time = 0;
@@ -247,10 +243,19 @@ esp_err_t aaa_spi_prepare_circular_buffer(
    spiHw->user.usr_mosi_highpart = 0;
    spiHw->user2.usr_command_value = 0;
    spiHw->addr = 0;
-   spiHw->user.usr_mosi = 1;        // Enable MOSI
-   spiHw->user.usr_miso = 0;
+   spiHw->dma_out_link.addr = (uint64_t) (lldescs_out) & 0xFFFFF;
+   if (miso_gpio_num == GPIO_NUM_MAX) {
+      // Half-duplex mode with only MOSI.
+      spiHw->user.doutdin = 0;
+      spiHw->user.usr_mosi = 1;        // Enable MOSI
+      spiHw->user.usr_miso = 0;
+   } else {
+      spiHw->user.usr_mosi = 1;
+      spiHw->user.usr_miso = 1;
+      spiHw->user.doutdin = 1;
 
-   spiHw->dma_out_link.addr = (uint64_t) (lldescs) & 0xFFFFF;
+      spiHw->dma_in_link.addr = (uint64_t) (lldescs_in) & 0xFFFFF;
+   }
 
    spiHw->mosi_dlen.usr_mosi_dbitlen = 0;      // works great! (there's no glitch in 5 hours)
    spiHw->miso_dlen.usr_miso_dbitlen = 0;
@@ -264,8 +269,9 @@ esp_err_t aaa_spi_prepare_circular_buffer(
    spiHw->ctrl2.val = 0;   // Reset timing
    spiHw->dma_conf.dma_tx_stop = 0;   // Disable stop
    spiHw->dma_conf.dma_continue = 1;   // Set contiguous mode
-//   spiHw->dma_out_link.start = 1;   // Start SPI DMA transfer (1)
-//
+
+   // These two are moved into the critical timing section in MCP4822 and the not timing critical ADS128S102
+//   spiHw->dma_out_link.start = 1;   // Start SPI DMA transfer (1)  M
 //   spiHw->cmd.usr = 1;   // SPI: Start SPI DMA transfer
    ESP_LOGI("SPI", "DMA/SPI initialized.\n");
    return ESP_OK;
@@ -273,7 +279,7 @@ esp_err_t aaa_spi_prepare_circular_buffer(
 
 
 esp_err_t aaa_spi_release_circular_buffer(
-      spi_host_device_t host, int dma_chan, gpio_num_t mosi_pin, gpio_num_t cs_pin) {
+      spi_host_device_t host, int dma_chan) {
 
    spi_dev_t *const spiHw = aaa_spi_get_hw_for_host(host);
 

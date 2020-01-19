@@ -15,62 +15,82 @@ See the License for the specific language governing permissions and
 */
 
 #include <string.h>
+#include <esp_log.h>
 #include "ADC128S102.h"
+#include "../aaa_spi.h"
 
+#define TAG "ADX128S102"
 
-void adc128s102_init(adc128s102 *handle, spi_device_handle_t spi)
+ADC128S102::ADC128S102(gpio_num_t mosi_pin, gpio_num_t miso_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin)
 {
-   handle->_spi = spi;
-   memset(&handle->_tx, 0, sizeof(handle->_tx));       //Zero out the transaction
+   ESP_LOGE(TAG, "Initializing SPI.");
 
-   handle->_txdata = static_cast<uint8_t *>(heap_caps_malloc(8, MALLOC_CAP_DMA));
-   handle->_rxdata= static_cast<uint8_t *>(heap_caps_malloc(8, MALLOC_CAP_DMA));
+   out = static_cast<lldesc_t *>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
+   in = static_cast<lldesc_t *>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
 
-   handle->_tx.length = 128;
-   handle->_tx.rxlength = 0;
-   handle->_tx.tx_buffer = handle->_txdata;
-   handle->_tx.rx_buffer = handle->_rxdata;
-   handle->_rx = nullptr;
-   for (int i = 0; i < 7; i++) {
-      handle->_txdata[2*i+1] = 0;
-      handle->_txdata[2*i] = ((i+1) << 3);
-   }
-   //start endless transfer.
-   esp_err_t err = spi_device_queue_trans(handle->_spi, &handle->_tx, 10); // 10 ticks is probably very long.
+   memset((void *) out, 0, sizeof(lldesc_t));
+   memset((void *) in, 0, sizeof(lldesc_t));
+   out->size = 16;
+   out->length = 16;
+   out->offset = 0;
+   out->sosf = 0;
+   out->eof = 0;
+   out->owner = 1;
+   out->qe.stqe_next = out;
+   out->buf = static_cast<uint8_t *>(heap_caps_malloc(16, MALLOC_CAP_DMA));
+   out->buf[0] = 1 << 3;
+   out->buf[1] = 0;
+   out->buf[2] = 2 << 3;
+   out->buf[3] = 0;
+   out->buf[4] = 3 << 3;
+   out->buf[5] = 0;
+   out->buf[6] = 4 << 3;
+   out->buf[7] = 0;
+   out->buf[8] = 5 << 3;
+   out->buf[9] = 0;
+   out->buf[10] = 6 << 3;
+   out->buf[11] = 0;
+   out->buf[12] = 7 << 3;
+   out->buf[13] = 0;
+   out->buf[14] = 0 << 3;
+   out->buf[15] = 0;
+
+   in->buf = static_cast<uint8_t *>(heap_caps_malloc(16, MALLOC_CAP_DMA));
+   in->size = 16;
+   in->length = 16;
+   in->offset = 0;
+   in->sosf = 0;
+   in->eof = 0;
+   in->owner = 1;
+   in->qe.stqe_next = in;
+   in->buf = static_cast<uint8_t *>(heap_caps_malloc(16, MALLOC_CAP_DMA));
+
+   ESP_LOGE(TAG, "Buffer address: %x", ((void *) out->buf));
+
+   esp_err_t error = aaa_spi_prepare_circular(VSPI_HOST, 2, out, in, 10000000, mosi_pin, miso_pin, sclk_pin, 0);
+   ESP_ERROR_CHECK(error)
+
+   gpio_set_direction(cs_pin, GPIO_MODE_OUTPUT);
+   gpio_set_level(cs_pin, 0);
+   spi_dev_t *const spiHw = aaa_spi_get_hw_for_host(VSPI_HOST);
+   spiHw->dma_in_link.start = 1;   // Start SPI DMA transfer (1)  M
+   spiHw->dma_out_link.start = 1;   // Start SPI DMA transfer (1)  M
+   spiHw->cmd.usr = 1;   // SPI: Start SPI DMA transfer
 }
 
-void adc128s102_sync_read(adc128s102 *handle){
-//   gpio_set_level(GPIO_NUM_25, 0);
-//   esp_err_t err = spi_device_polling_transmit(handle->_spi, &handle->_tx); // 10 ticks is probably very long.
-//   ESP_ERROR_CHECK(err)
-
-   for (int i = 0; i < 8; i++) {
-      uint8_t *d = handle->_rxdata;
-      uint16_t high = d[i * 2];
-      uint16_t low = d[i * 2 + 1];
-      handle->_channels[i] = low + (high << 8);
-   }
-//   gpio_set_level(GPIO_NUM_25, 1);
-}
-
-void adc128s102_queue(adc128s102 *handle)
+ADC128S102::~ADC128S102()
 {
-//   gpio_set_level(GPIO_NUM_25, 0);
-//   esp_err_t err = spi_device_queue_trans(handle->_spi, &handle->_tx, 10); // 10 ticks is probably very long.
-//   ESP_ERROR_CHECK(err)
-//   gpio_set_level(GPIO_NUM_25, 1);
+   // Stop hardware
+   spi_dev_t *const spiHw = aaa_spi_get_hw_for_host(VSPI_HOST);
+   spiHw->cmd.usr = 0;   // SPI: Stop SPI DMA transfer
+   aaa_spi_release_circular_buffer(VSPI_HOST, 1);
+   free(out);
+   free(in);
 }
 
-void adc128s102_read(adc128s102 *handle)
+uint16_t ADC128S102::read_input(int index)
 {
-//   gpio_set_level(GPIO_NUM_25, 0);
-//   esp_err_t err = spi_device_get_trans_result(handle->_spi, &handle->_rx, 10);
-//   ESP_ERROR_CHECK(err)
-   for (int i = 0; i < 8; i++) {
-      uint8_t *d = handle->_rxdata;
-      uint16_t high = d[i * 2];
-      uint16_t low = d[i * 2 + 1];
-      handle->_channels[i] = low + (high << 8);
-   }
-//   gpio_set_level(GPIO_NUM_25, 1);
+   return (in->buf[2*index] << 8) + in->buf[2*index + 1];
 }
+
+#undef TAG

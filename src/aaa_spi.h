@@ -22,17 +22,13 @@ extern "C" {
 #define DEMIURGE_ESP_ERR_SPI_HOST_ALREADY_IN_USE      MY_ESP_ERR_SPI(4)
 #define DEMIURGE_ESP_ERR_SPI_DMA_ALREADY_IN_USE       MY_ESP_ERR_SPI(5)
 
-esp_err_t aaa_spi_prepare_circular_buffer(
-      const spi_host_device_t host,    // HSPI_HOST or VSPI_HOST
-      const int dma_chan,              //
-      const lldesc_t *lldesc,          // lldesc_t which makes circular buffer
-      const long clock_speed_hz,       // SPI speed in Hz
-      const gpio_num_t mosi_gpio_num,  // GPIO MOSI
-      const gpio_num_t sclk_gpio_num,  // GPIO SCLK
-      const int wait_cycle             // Number of wait cycle before actual transmission (1 cycle means SPI DMA's single cycle)
-);
+esp_err_t
+aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const int dma_chan,
+                         const lldesc_t *lldescs_out, const lldesc_t *lldescs_in,
+                         const long dmaClockSpeedInHz, const gpio_num_t mosi_gpio_num,
+                         const gpio_num_t miso_gpio_num, const gpio_num_t sclk_gpio_num, const int waitCycle);
 
-esp_err_t aaa_spi_release_circular_buffer(spi_host_device_t host, int dma_chan, gpio_num_t mosi_pin, gpio_num_t cs_pin);
+esp_err_t aaa_spi_release_circular_buffer(spi_host_device_t host, int dma_chan);
 
 spi_dev_t *aaa_spi_get_hw_for_host(spi_host_device_t host);
 

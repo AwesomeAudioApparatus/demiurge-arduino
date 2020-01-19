@@ -32,7 +32,7 @@ public:
 
    void setOutput(uint16_t output1, uint16_t output2);
 
-   lldesc_t *descs;
+   lldesc_t *out;
 private:
 };
 

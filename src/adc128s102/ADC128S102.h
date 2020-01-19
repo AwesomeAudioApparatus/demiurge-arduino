@@ -19,23 +19,16 @@ See the License for the specific language governing permissions and
 
 #include "driver/spi_master.h"
 
-typedef struct {
-   spi_device_handle_t _spi;
-   spi_transaction_t _tx;
-   spi_transaction_t *_rx;
+class ADC128S102
+{
+public:
+   ADC128S102(gpio_num_t mosi_pin, gpio_num_t miso_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin);
+   virtual ~ADC128S102();
 
-   uint8_t *_txdata;
-   uint8_t *_rxdata;
+   uint16_t read_input(int index);
 
-   uint16_t _channels[8];
-} adc128s102;
-
-void adc128s102_init(adc128s102 *handle, spi_device_handle_t spi);
-
-void adc128s102_sync_read(adc128s102 *handle);
-
-void adc128s102_read(adc128s102 *handle);
-
-void adc128s102_queue(adc128s102 *handle);
+   lldesc_t *out;
+   lldesc_t *in;
+};
 
 #endif
