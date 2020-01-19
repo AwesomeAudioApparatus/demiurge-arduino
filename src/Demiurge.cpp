@@ -14,27 +14,11 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#include "driver/timer.h"
-#include "driver/mcpwm.h"
-#include "driver/ledc.h"
 #include <esp_log.h>
 #include <esp_task_wdt.h>
-#include "esp_timer.h"
-#include "esp_types.h"
-#include <rom/lldesc.h>
-#include <soc/soc.h>
-#include <soc/mcpwm_reg.h>
-#include <soc/mcpwm_struct.h>
-#include <soc/dport_access.h>
-#include <soc/dport_reg.h>
-#include <soc/ledc_struct.h>
-#include <soc/ledc_reg.h>
 #include <soc/timer_group_reg.h>
-#include <sys/time.h>
-#include "string.h"
 
 #include "Demiurge.h"
-#include "aaa_spi.h"
 
 #define TAG "DEMI"
 #define DEMIURGE_TIMER_GROUP 0
@@ -54,11 +38,11 @@ static void IRAM_ATTR initialize_tick_timer() {
    WRITE_PERI_REG(TIMG_T0LOAD_REG(DEMIURGE_TIMER_GROUP), 1);
 }
 
-static bool toggle = false;
+//static bool toggle = false;
 
 static void IRAM_ATTR wait_timer_alarm() {
-   gpio_set_level(GPIO_NUM_21, toggle);
-   toggle = !toggle;
+//   gpio_set_level(GPIO_NUM_21, toggle);
+//   toggle = !toggle;
    while (READ_PERI_REG(TIMG_T0CONFIG_REG(DEMIURGE_TIMER_GROUP)) & TIMG_T0_ALARM_EN);
    WRITE_PERI_REG(TIMG_T0CONFIG_REG(DEMIURGE_TIMER_GROUP),
                   (1 << TIMG_T0_DIVIDER_S ) | TIMG_T0_EN | TIMG_T0_AUTORELOAD | TIMG_T0_INCREASE | TIMG_T0_ALARM_EN);
@@ -92,6 +76,10 @@ void Demiurge::initialize() {
    gpio_set_direction(GPIO_NUM_22, GPIO_MODE_OUTPUT);
    gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
    gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
+   gpio_set_level(GPIO_NUM_21, 1);
+   gpio_set_level(GPIO_NUM_22, 1);
+   gpio_set_level(GPIO_NUM_25, 1);
+   gpio_set_level(GPIO_NUM_26, 1);
 
    _dac = new MCP4822(GPIO_NUM_13, GPIO_NUM_14, GPIO_NUM_15);
    _adc = new ADC128S102(GPIO_NUM_23,GPIO_NUM_19,GPIO_NUM_18,GPIO_NUM_5);
@@ -101,7 +89,7 @@ void Demiurge::startRuntime() {
    if (_started)
       return;
    _started = true;
-   // Move to CORE
+
    TaskHandle_t idleTask = xTaskGetIdleTaskHandle();
    esp_task_wdt_delete(idleTask);
    ESP_LOGI("MAIN", "Executing in Core %d", xTaskGetAffinity(nullptr));

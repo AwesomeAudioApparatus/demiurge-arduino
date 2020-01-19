@@ -26,10 +26,8 @@ ADC128S102::ADC128S102(gpio_num_t mosi_pin, gpio_num_t miso_pin, gpio_num_t sclk
    ESP_LOGE(TAG, "Initializing SPI.");
 
    out = static_cast<lldesc_t *>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
-   in = static_cast<lldesc_t *>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
 
    memset((void *) out, 0, sizeof(lldesc_t));
-   memset((void *) in, 0, sizeof(lldesc_t));
    out->size = 16;
    out->length = 16;
    out->offset = 0;
@@ -55,6 +53,8 @@ ADC128S102::ADC128S102(gpio_num_t mosi_pin, gpio_num_t miso_pin, gpio_num_t sclk
    out->buf[14] = 0 << 3;
    out->buf[15] = 0;
 
+   in = static_cast<lldesc_t *>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
+   memset((void *) in, 0, sizeof(lldesc_t));
    in->buf = static_cast<uint8_t *>(heap_caps_malloc(16, MALLOC_CAP_DMA));
    in->size = 16;
    in->length = 16;
@@ -64,8 +64,6 @@ ADC128S102::ADC128S102(gpio_num_t mosi_pin, gpio_num_t miso_pin, gpio_num_t sclk
    in->owner = 1;
    in->qe.stqe_next = in;
    in->buf = static_cast<uint8_t *>(heap_caps_malloc(16, MALLOC_CAP_DMA));
-
-   ESP_LOGE(TAG, "Buffer address: %x", ((void *) out->buf));
 
    esp_err_t error = aaa_spi_prepare_circular(VSPI_HOST, 2, out, in, 10000000, mosi_pin, miso_pin, sclk_pin, 0);
    ESP_ERROR_CHECK(error)

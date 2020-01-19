@@ -27,6 +27,7 @@ public:
 
    uint16_t read_input(int index);
 
+private:
    lldesc_t *out;
    lldesc_t *in;
 };

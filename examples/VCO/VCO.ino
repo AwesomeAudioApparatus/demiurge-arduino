@@ -83,39 +83,11 @@ void loop() {
   Serial.print(demiurge._dac->out->buf[0]);
   Serial.print( ", " );
   Serial.print(demiurge._dac->out->buf[1]);
-  
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[0]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[1]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[2]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[3]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[4]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[5]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[6]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[7]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[8]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[9]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[10]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[11]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[12]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[13]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[14]);
-  Serial.print( ", " );
-  Serial.print(demiurge._adc->in->buf[15]);
+
+  for( int i=0; i<8; i++ ) {
+    Serial.print( ", " );
+    Serial.print(demiurge._adc->read_input(i) );
+  }
 
   Serial.println();
   delay(1000);
