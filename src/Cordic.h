@@ -58,4 +58,4 @@ public:
 };
 
 
-#endif //DEMIURGE_CORDIC_H
+#endif

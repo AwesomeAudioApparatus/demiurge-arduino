@@ -29,11 +29,9 @@ See the License for the specific language governing permissions and
 
 typedef struct {
    int position;
-   uint64_t lastCalc;
-   int32_t cached;
 } gate_in_port_t;
 
-int32_t gateinport_read(signal_t *handle, uint64_t time);
+float gateinport_read(signal_t *handle, uint64_t time);
 
 class GateInPort : public Signal {
 

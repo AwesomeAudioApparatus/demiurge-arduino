@@ -27,12 +27,12 @@ GateInPort::GateInPort(int position) {
 
 GateInPort::~GateInPort() = default;
 
-int32_t IRAM_ATTR gateinport_read(signal_t *handle, uint64_t time){
+float IRAM_ATTR gateinport_read(signal_t *handle, uint64_t time){
    auto *gate = (gate_in_port_t *) handle->data;
-   if( time > gate->lastCalc ) {
-      gate->lastCalc = time;
+   if( time > handle->last_calc ) {
+      handle->last_calc = time;
       bool state = Demiurge::runtime().gpio(DEMIURGE_GATE_GPIO[gate->position]);
-      gate->cached = state ? DEMIURGE_GATE_HIGH : DEMIURGE_GATE_LOW;
+      handle->cached = state ? DEMIURGE_GATE_HIGH : DEMIURGE_GATE_LOW;
    }
-   return gate->cached;
+   return handle->cached;
 }

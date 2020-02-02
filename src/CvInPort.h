@@ -18,27 +18,27 @@ See the License for the specific language governing permissions and
 #define _DEMIURGE_CVPORT_H_
 
 #ifndef DEMIURGE_CVINPUT_OFFSET
-#define DEMIURGE_CVINPUT_OFFSET -1
+#define DEMIURGE_CVINPUT_OFFSET 0
 #endif
 
 #include "Signal.h"
 
 typedef struct {
    int position;
-   uint64_t lastCalc;
-   int32_t cached;
 } cv_in_port_t;
 
-int32_t cvinport_read(signal_t *handle, uint64_t time);
+float cvinport_read(signal_t *handle, uint64_t time);
 
 class CvInPort : public Signal {
 
 public:
    explicit CvInPort(int position);
 
+   void configureFilter( float factor );
+
    ~CvInPort() override;
-private:
    cv_in_port_t _data;
+private:
 };
 
 

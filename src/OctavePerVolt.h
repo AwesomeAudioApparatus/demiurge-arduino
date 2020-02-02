@@ -19,8 +19,10 @@ See the License for the specific language governing permissions and
 
 #include <math.h>
 
-int32_t octave_frequencyOf(int32_t voltage);
+#define TWO_POWER_OF_2_75 6.7271713
 
-int32_t octave_voltageOf(int32_t frequency);
+float octave_frequencyOf(float voltage);
+
+float octave_voltageOf(float frequency);
 
 #endif

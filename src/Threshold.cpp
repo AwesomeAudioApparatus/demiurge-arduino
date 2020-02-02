@@ -17,15 +17,15 @@ See the License for the specific language governing permissions and
 #include "Threshold.h"
 
 
-void threshold_init(threshold_t *data, int32_t setp, int32_t hyst) {
+void threshold_init(threshold_t *data, float setp, float hyst) {
    data->setpoint = setp;
    data->hysteresis = hyst;
    data->output = false;
 }
 
-bool threshold_compute(threshold_t *data, int32_t input) {
-   int32_t setpoint = data->setpoint;
-   int32_t hysteresis = data->hysteresis;
+bool threshold_compute(threshold_t *data, float input) {
+   float setpoint = data->setpoint;
+   float hysteresis = data->hysteresis;
    bool out;
    if (data->output) {
       out = input < setpoint - hysteresis;

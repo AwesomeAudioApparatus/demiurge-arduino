@@ -24,11 +24,9 @@ typedef struct {
    signal_t *input;
    signal_t *scale;
    signal_t *midpoint;
-   uint64_t lastCalc;
-   int32_t cached;
 } inverter_t;
 
-int32_t inverter_read(signal_t *handle, uint64_t time);
+float inverter_read(signal_t *handle, uint64_t time);
 
 class Inverter : public Signal {
 

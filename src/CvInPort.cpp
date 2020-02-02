@@ -14,24 +14,33 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_log.h>
 #include "Demiurge.h"
+#include "CvInPort.h"
+
 
 CvInPort::CvInPort(int position) {
    configASSERT(position > 0 && position <= 4)
+   ESP_LOGE("CvInPort", "Constructor: %x", (void *) this);
    _data.position = position + DEMIURGE_CVINPUT_OFFSET;
    _signal.read_fn = cvinport_read;
    _signal.data = &_data;
+   ESP_LOGE("CvInPort", "_signal: %x", this->_signal);
 }
 
-CvInPort::~CvInPort() = default;
+CvInPort::~CvInPort() {
+   ESP_LOGE("CvInPort", "Destructor: %x", (void *) this);
 
-int32_t IRAM_ATTR cvinport_read(signal_t *handle, uint64_t time) {
+}
+
+float IRAM_ATTR cvinport_read(signal_t *handle, uint64_t time) {
    auto *cv = (cv_in_port_t *) handle->data;
-   if (time > cv->lastCalc) {
-      cv->lastCalc = time;
-      int32_t result = Demiurge::runtime().inputs()[cv->position];
-      cv->cached = result;
-      return result;
+   if (time > handle->last_calc) {
+      handle->last_calc = time;
+      float input = Demiurge::runtime().input(cv->position);
+      float out = input;
+      handle->cached = out;
+      return out;
    }
-   return cv->cached;
+   return handle->cached;
 }

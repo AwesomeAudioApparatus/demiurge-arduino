@@ -49,7 +49,7 @@ Signal *Pan::outputRight() {
    return _right;
 }
 
-PanChannel::PanChannel(Pan *host, int32_t factor) {
+PanChannel::PanChannel(Pan *host, float factor) {
    _host = host;
    _signal.read_fn = panchannel_read;
    _signal.data = &_data;
@@ -59,25 +59,19 @@ PanChannel::PanChannel(Pan *host, int32_t factor) {
 
 PanChannel::~PanChannel() = default;
 
-int32_t IRAM_ATTR panchannel_read(signal_t *handle, uint64_t time) {
+float IRAM_ATTR panchannel_read(signal_t *handle, uint64_t time) {
    auto *panchannel = (panchannel_t *) handle->data;
-   if (time > panchannel->lastCalc) {
-      panchannel->lastCalc = time;
+   if (time > handle->last_calc) {
+      handle->last_calc = time;
       signal_t *panControl = panchannel->control;
-      int32_t control = panControl->read_fn(panControl, time);
+      float control = panControl->read_fn(panControl, time);
       signal_t *hostInput = panchannel->hostInput;
-      int32_t input = hostInput->read_fn(hostInput, time);
+      float input = hostInput->read_fn(hostInput, time);
       input = input * control;
       signal_t *data = panchannel->me;
-      if (data->noRecalc) {
-         int32_t result = input * panchannel->factor;
-         panchannel->cached = result;
-         return result;
-      }
-      int32_t result = scale_output(input, panchannel->factor, 0);
-      result = scale_output(result, data->scale, data->offset);
-      panchannel->cached = result;
+      float result = input * panchannel->factor;
+      handle->cached = result;
       return result;
    }
-   return panchannel->cached;
+   return handle->cached;
 }

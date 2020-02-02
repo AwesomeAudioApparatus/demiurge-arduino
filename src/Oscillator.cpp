@@ -16,12 +16,22 @@ See the License for the specific language governing permissions and
 
 #include <math.h>
 #include <esp_task.h>
+#include <esp_log.h>
 #include "Demiurge.h"
-#include "sine.h"
 #include "Cordic.h"
 
+static bool sine_wave_initialized = false;
+static float sine_wave[SINEWAVE_SAMPLES];
 
 Oscillator::Oscillator(int mode) {
+   ESP_LOGE("Oscillator", "Constructor: %x", (void *) this );
+   if( ! sine_wave_initialized )
+   {
+      for(int i=0; i < SINEWAVE_SAMPLES; i++){
+         double radians = ((double) i/360) * M_TWOPI;
+         sine_wave[i] = sin(radians);
+      }
+   }
    _signal.read_fn = oscillator_read;
    _data.mode = mode;
    _triggerControl = nullptr;
@@ -41,14 +51,19 @@ void Oscillator::configure(Signal *freqControl, Signal *amplitudeControl, Signal
 
 void Oscillator::configureFrequency(Signal *freqControl) {
    configASSERT(freqControl != nullptr)
+   ESP_LOGE("Oscillator", "Configure frequency control: %x for %x", freqControl, (void *) this );
+
    _frequencyControl = freqControl;
    _data.frequency = &freqControl->_signal;
+   ESP_LOGE("Oscillator", "frequency controller: %x", freqControl->_signal );
 }
 
 void Oscillator::configureAmplitude(Signal *amplitudeControl) {
    configASSERT(amplitudeControl != nullptr)
+   ESP_LOGE("Oscillator", "Configure amplitude control: %x for %x", amplitudeControl, (void *) this );
    _amplitudeControl = amplitudeControl;
    _data.amplitude = &amplitudeControl->_signal;
+   ESP_LOGE("Oscillator", "amplitude controller: %x", amplitudeControl->_signal );
 }
 
 void Oscillator::configureTrig(Signal *trigControl) {
@@ -57,38 +72,44 @@ void Oscillator::configureTrig(Signal *trigControl) {
    _data.trigger = &trigControl->_signal;
 }
 
-int32_t IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time_in_us) {
+float IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time_in_us) {
    // time in microseconds
    auto *osc = (oscillator_t *) handle->data;
-   if (time_in_us > osc->lastCalc) {
-      osc->lastCalc = time_in_us;
-      int32_t freq = 20000;
+   if (time_in_us > handle->last_calc) {
+      handle->last_calc = time_in_us;
       signal_t *freqControl = osc->frequency;
+      float freq=440;
       if (freqControl != nullptr) {
-         freq = octave_frequencyOf(freqControl->read_fn(freqControl, time_in_us));
+         float voltage = freqControl->read_fn(freqControl, time_in_us);
+         freq = octave_frequencyOf(voltage);
+         handle->extra1 = voltage;
+         handle->extra2 = freq;
       }
-      int32_t period_in_us = 1000000 / freq;
+      uint32_t period_in_us = 1000000 / freq;
 
       float amplitude = 1.0f;
       if (osc->amplitude != nullptr) {
-         amplitude = (float) osc->amplitude->read_fn(osc->amplitude, time_in_us) / 4096.0f;
+//         amplitude = (float) osc->amplitude->read_fn(osc->amplitude, time_in_us);
       }
 
       switch (osc->mode) {
          case DEMIURGE_SINE: {
-//            int32_t result = (((float) isin(freq * (time - osc->lastTrig) / 3.2767)) / 4096) * amplitude;
-
-            // time - osc->lastTrig is nanoseconds since last trig.
-            double x = freq * (time_in_us - osc->lastTrig);
-            double out;
-            Cordic::sin_values(osc->n_data, x, out);
-            auto result = (int32_t) (out * amplitude);
-            osc->cached = result;
-            return result;
+            uint32_t x = time_in_us % period_in_us;  // gives the index within a period, as microseconds.
+            double percentage_of_cycle = ((double) x) / period_in_us;
+            uint16_t index = SINEWAVE_SAMPLES * percentage_of_cycle;
+            double out = sine_wave[index] * amplitude;
+            handle->cached = out;
+            return out;
          }
          case DEMIURGE_SQUARE: {
-            // TODO
-            break;
+            uint64_t x = time_in_us % period_in_us;
+            double out;
+            if( x > period_in_us / 2)
+               out = amplitude;
+            else
+               out = -amplitude;
+            handle->cached = out;
+            return out;
          }
          case DEMIURGE_TRIANGLE: {
             // TODO
@@ -96,15 +117,13 @@ int32_t IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time_in_us) {
          }
          case DEMIURGE_SAW: {
             uint64_t x = time_in_us % period_in_us;
-            double slope = 4095.0 / period_in_us;
-            auto out = (int32_t) ((slope * x) * amplitude);
-            osc->cached = out;
+            double slope = 1.0 / period_in_us;
+            auto out = (float) ((slope * x) ) * amplitude;
+            handle->cached = out;
             return out;
          }
       }
       return 0.0;
    }
-
-
-   return osc->cached;
+   return handle->cached;
 }

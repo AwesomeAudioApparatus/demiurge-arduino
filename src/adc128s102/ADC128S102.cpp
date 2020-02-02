@@ -17,9 +17,9 @@ See the License for the specific language governing permissions and
 #include <string.h>
 #include <esp_log.h>
 #include "ADC128S102.h"
-#include "../aaa_spi.h"
+#include "../spi/aaa_spi.h"
 
-#define TAG "ADX128S102"
+#define TAG "ADC128S102"
 
 ADC128S102::ADC128S102(gpio_num_t mosi_pin, gpio_num_t miso_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin)
 {
@@ -65,7 +65,7 @@ ADC128S102::ADC128S102(gpio_num_t mosi_pin, gpio_num_t miso_pin, gpio_num_t sclk
    in->qe.stqe_next = in;
    in->buf = static_cast<uint8_t *>(heap_caps_malloc(16, MALLOC_CAP_DMA));
 
-   esp_err_t error = aaa_spi_prepare_circular(VSPI_HOST, 2, out, in, 10000000, mosi_pin, miso_pin, sclk_pin, 0);
+   esp_err_t error = aaa_spi_prepare_circular(VSPI_HOST, 2, out, in, 1500000, mosi_pin, miso_pin, sclk_pin, 0);
    ESP_ERROR_CHECK(error)
 
    gpio_set_direction(cs_pin, GPIO_MODE_OUTPUT);

@@ -31,15 +31,12 @@ typedef struct {
    signal_t *amplitude;
    signal_t *trigger;
    int mode;
-   volatile int32_t output;
-   uint64_t lastCalc;
-   int32_t cached;
-   int32_t n_data;
-   int32_t hist[1000];
    int idx;
 } oscillator_t;
 
-int32_t oscillator_read(signal_t *handle, uint64_t time_in_us);
+static const int SINEWAVE_SAMPLES = 3600;
+
+float oscillator_read(signal_t *handle, uint64_t time_in_us);
 
 class Oscillator : public Signal {
 

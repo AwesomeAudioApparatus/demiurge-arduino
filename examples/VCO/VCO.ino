@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#define DEMIURGE_TYPE FLOAT
+
 #include "Arduino.h"
 #include "Demiurge.h"
-#include <soc/mcpwm_reg.h>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
@@ -38,18 +39,9 @@ Mixer mixer;
 FixedSignal fixed(1.0);
 Pan pan;
 
-#define ADC_CS 5
-#define ADC_CLK 18
-#define ADC_MISO 19
-#define ADC_MOSI 23
-
 void setup() {
   disableCore0WDT();
   Serial.begin(115200);
-  pinMode(ADC_CS, OUTPUT); digitalWrite(ADC_CS, HIGH);
-  pinMode(ADC_MOSI, OUTPUT); digitalWrite(ADC_MOSI, LOW);
-  pinMode(ADC_MISO, INPUT);
-  pinMode(ADC_CLK, OUTPUT); digitalWrite(ADC_CLK, LOW);
 
   Serial.println("setting up mixer");
   mixer.configure(2, &pair1, &fixed);
@@ -63,10 +55,8 @@ void setup() {
   pan.configure(&vco1, &mixer);
 
   Serial.println("setting up output ports");
-//  out1.configure(pan.outputLeft());
-//  out2.configure(pan.outputRight());
-  out1.configure(&vco1);
-  out2.configure(&vco1);
+  out1.configure(pan.outputLeft());
+  out2.configure(pan.outputRight());
   Demiurge::begin();
   delay(100);
 }
@@ -74,19 +64,17 @@ void setup() {
 void loop() {
   auto &demiurge = Demiurge::runtime();   
 
-  double value1a = ((oscillator_t *) vco1._signal.data)->cached;
-//  double value2 = ((panchannel_t *) pan.outputLeft()->_signal.data)->cached;
-//  double value3 = ((audio_out_port_t *) out1._signal.data)->cached;
+  double value1a = vco1._signal.cached;
+//  double value2 = pan.outputLeft()->_signal.cached;
+//  double value3 = out1._signal.cached;
   Serial.print( "VCO: " );
+  Serial.print(millis());
+  Serial.print(", ");
   Serial.print(value1a);
-  Serial.print( ", " );
-  Serial.print(demiurge._dac->out->buf[0]);
-  Serial.print( ", " );
-  Serial.print(demiurge._dac->out->buf[1]);
 
   for( int i=0; i<8; i++ ) {
     Serial.print( ", " );
-    Serial.print(demiurge._adc->read_input(i) );
+    Serial.print(demiurge.input(i));
   }
 
   Serial.println();

@@ -41,6 +41,8 @@ add_library(
         demiurge
         src/adc128s102/ADC128S102.cpp
         src/adc128s102/ADC128S102.h
+        src/LED.h
+        src/LED.cpp
         src/mcp4822/MCP4822.cpp
         src/mcp4822/MCP4822.h
         src/Adsr.cpp
@@ -65,8 +67,6 @@ add_library(
         src/Inverter.h
         src/Mixer.cpp
         src/Mixer.h
-        src/aaa_spi.c
-        src/aaa_spi.h
         src/OctavePerVolt.cpp
         src/OctavePerVolt.h
         src/Pan.cpp
@@ -79,12 +79,12 @@ add_library(
         src/PushButton.h
         src/Signal.cpp
         src/Signal.h
-        src/sine.c
-        src/sine.h
         src/Threshold.cpp
         src/Threshold.h
         src/Oscillator.cpp
         src/Oscillator.h
         src/Volume.cpp
         src/Volume.h
+        src/spi/aaa_spi.c
+        src/spi/aaa_spi.h
 )

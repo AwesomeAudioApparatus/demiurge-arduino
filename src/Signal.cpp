@@ -19,40 +19,23 @@ See the License for the specific language governing permissions and
 
 Signal::Signal() noexcept {
    _signal.read_fn = nullptr;
-   _signal.noRecalc = true;
-   _signal.scale = 1.0f;
-   _signal.offset = 0.0f;
 }
 
-Signal::~Signal() {}
+Signal::~Signal() = default;
 
-int32_t Signal::scale() {
-   return _scale;
-}
+float Signal::extra1() {
+   return _signal.extra1;
+};
 
-int32_t Signal::offset() {
-   return _offset;
-}
+float Signal::extra2() {
+   return _signal.extra2;
+};
 
-void Signal::setScale(int32_t scale) {
-   _scale = scale;
-   if (_scale == 1.0 && _offset == 0.0)
-      _noRecalc = true;
-   _signal.scale = scale;
-   _signal.noRecalc = _noRecalc;
-}
+float Signal::extra3() {
+   return _signal.extra3;
+};
 
-void Signal::setOffset(int32_t offset) {
-   _offset = offset;
-   if (_scale == 1.0 && _offset == 0.0)
-      _noRecalc = true;
-   _signal.offset = offset;
-   _signal.noRecalc = _noRecalc;
-}
+float Signal::extra4() {
+   return _signal.extra4;
+};
 
-int32_t scale_output(int32_t value, int32_t scale, int32_t offset) {
-   if (scale == 0) {
-      return value + offset;
-   }
-   return ((value * (scale >> 8)) >> 8) + offset;
-}

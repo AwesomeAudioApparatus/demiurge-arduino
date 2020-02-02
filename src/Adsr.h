@@ -29,18 +29,16 @@ typedef struct {
    signal_t *gate;
    signal_t *trig;
    int stateMachine = 0;
-   int32_t doneAt = 0.0;
-   int32_t startedAt = 0.0;
+   int64_t doneAt = 0.0;
+   int64_t startedAt = 0.0;
    bool currentTrig;
    bool currentGate;
    threshold_t gateThreshold;
    threshold_t trigThreshold;
-   uint64_t lastCalc;
-   int32_t cached;
 } adsr_t;
 
-int32_t adsr_read(signal_t *handle, uint64_t time);
-int32_t adsr_slopeTime(int32_t voltage);
+float adsr_read(signal_t *handle, uint64_t time);
+float adsr_slopeTime(float voltage);
 
 class Adsr : public Signal {
 

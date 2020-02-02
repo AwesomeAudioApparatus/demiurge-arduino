@@ -20,15 +20,13 @@ See the License for the specific language governing permissions and
 #include "Signal.h"
 
 typedef struct {
-   int32_t factor;
+   float factor;
    signal_t *me;
    signal_t *control;
    signal_t *hostInput;
-   uint64_t lastCalc;
-   int32_t cached;
 } panchannel_t;
 
-int32_t IRAM_ATTR panchannel_read(signal_t *handle, uint64_t time);
+float IRAM_ATTR panchannel_read(signal_t *handle, uint64_t time);
 
 class PanChannel;
 
@@ -57,7 +55,7 @@ private :
 class PanChannel : public Signal {
 
 public:
-   PanChannel(Pan *host, int32_t factor);
+   PanChannel(Pan *host, float factor);
 
    ~PanChannel() override;
 

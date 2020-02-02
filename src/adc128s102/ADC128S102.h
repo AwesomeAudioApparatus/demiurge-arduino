@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#ifndef DEMIURGE_ADC128S102_H
-#define DEMIURGE_ADC128S102_H
+#ifndef _DEMIURGE_ADC128S102_H_
+#define _DEMIURGE_ADC128S102_H_
 
 #include "driver/spi_master.h"
 

@@ -14,34 +14,50 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#ifndef _DEMIURGE_AUDIOOUTPORT_H_
-#define _DEMIURGE_AUDIOOUTPORT_H_
+#ifndef _DEMIURGE_LED_H_
+#define _DEMIURGE_LED_H_
 
+
+#include <driver/gpio.h>
+#include <driver/ledc.h>
 #include "Signal.h"
+
+const int LED_GPIO[] = {GPIO_NUM_21, GPIO_NUM_22, GPIO_NUM_25, GPIO_NUM_26};
+const ledc_timer_t LED_TIMER[] = {LEDC_TIMER_0, LEDC_TIMER_1, LEDC_TIMER_2, LEDC_TIMER_3};
+const ledc_channel_t LED_CHANNEL[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNEL_2, LEDC_CHANNEL_3};
 
 typedef struct {
    int position;
    signal_t *me;
    signal_t *input;
+   int fade_time_ms;
    bool registered;
-} audio_out_port_t;
+   ledc_channel_t channel;
+   uint32_t duty;
+} led_t;
 
-float audiooutport_read(signal_t *handle, uint64_t time);
+float led_read(signal_t *handle, uint64_t time);
 
-class AudioOutPort : public Signal{
+class LED : public Signal {
 
 public:
-   explicit AudioOutPort(int position);
-   ~AudioOutPort() override;
+   explicit LED(int position);
 
-   void configure( Signal* input );
+   ~LED() override;
 
-   void configure( Signal* input, float scale, float offset );
+   void configure(Signal *input);
 
-   audio_out_port_t _data{};
+   void configure_fade( int fade_in_ms );
+
+   led_t _data{};
+
+   void set(uint32_t duty);
+
+   uint32_t get();
+
 private:
+
    Signal *_input{};
 };
-
 
 #endif

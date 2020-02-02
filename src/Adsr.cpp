@@ -54,10 +54,11 @@ void Adsr::configureTrig(Signal *trig) {
 }
 
 // TODO: without floating point, this code becomes VERY different, so let's postpone that/
-int32_t IRAM_ATTR adsr_read(signal_t *handle, uint64_t time){
+float IRAM_ATTR adsr_read(signal_t *handle, uint64_t time){
    auto *adsr = (adsr_t *)handle->data;
-   if( time > adsr->lastCalc) {
-      int32_t output;
+   if( time > handle->last_calc) {
+      handle->last_calc = time;
+      float output;
 
       bool trigIn = threshold_compute(&adsr->trigThreshold, adsr->trig->read_fn(adsr->trig, time));
       bool gateIn = threshold_compute(&adsr->gateThreshold, adsr->gate->read_fn(adsr->gate, time));
@@ -74,9 +75,9 @@ int32_t IRAM_ATTR adsr_read(signal_t *handle, uint64_t time){
          switch (adsr->stateMachine) {
             case 1:  // Attack
             {
-               int32_t attackIn = adsr->attack->read_fn(adsr->attack, time);
-               int32_t k = 20.0 / adsr_slopeTime(attackIn);
-               int32_t m = -10.0;
+               float attackIn = adsr->attack->read_fn(adsr->attack, time);
+               float k = 20.0 / adsr_slopeTime(attackIn);
+               float m = -10.0;
                output = (time - adsr->startedAt) * k + m;
                if (output >= 10.0) {
                   adsr->startedAt = time;
@@ -86,10 +87,10 @@ int32_t IRAM_ATTR adsr_read(signal_t *handle, uint64_t time){
             }
             case 2:  // Decay
             {
-               int32_t sustainIn = adsr->sustain->read_fn(adsr->sustain, time);
-               int32_t decayIn = adsr->decay->read_fn(adsr->decay, time);
-               int32_t k = -(10 - sustainIn) / adsr_slopeTime(decayIn);
-               int32_t m = 10;
+               float sustainIn = adsr->sustain->read_fn(adsr->sustain, time);
+               float decayIn = adsr->decay->read_fn(adsr->decay, time);
+               float k = -(10 - sustainIn) / adsr_slopeTime(decayIn);
+               float m = 10;
                output = (time - adsr->startedAt) * k + m;
                if (output >= 10.0) {
                   adsr->startedAt = time;
@@ -106,10 +107,10 @@ int32_t IRAM_ATTR adsr_read(signal_t *handle, uint64_t time){
                output = -10;
          }
       } else {
-         int32_t releaseIn = adsr->release->read_fn(adsr->release, time);
-         int32_t sustainIn = adsr->sustain->read_fn(adsr->sustain, time);
-         int32_t k = -sustainIn / adsr_slopeTime(releaseIn);
-         int32_t m = sustainIn;
+         float releaseIn = adsr->release->read_fn(adsr->release, time);
+         float sustainIn = adsr->sustain->read_fn(adsr->sustain, time);
+         float k = -sustainIn / adsr_slopeTime(releaseIn);
+         float m = sustainIn;
          output = (time - adsr->startedAt) * k + m;
          if (gateIn) {
             // Start new cycle
@@ -118,17 +119,17 @@ int32_t IRAM_ATTR adsr_read(signal_t *handle, uint64_t time){
       }
       adsr->currentGate = gateIn;
 
-      int32_t result = Demiurge::clip(output);
-      adsr->cached = result;
+      float result = Demiurge::clipAudio(output);
+      handle->cached = result;
       return result;
    }
-   return adsr->cached;
+   return handle->cached;
 }
 
-int32_t IRAM_ATTR adsr_slopeTime(int32_t voltage) {
+float IRAM_ATTR adsr_slopeTime(float voltage) {
    // Logarithmic response, so that;
    // -10V = 1 microsecond, 0V = 1 millisecond, +10V = 1 second
    // TODO:
-   int32_t millis = pow10(voltage / 3.33333);
+   float millis = pow10(voltage / 3.33333);
    return millis * 1000;
 }

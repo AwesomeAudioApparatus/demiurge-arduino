@@ -25,8 +25,7 @@ See the License for the specific language governing permissions and
 #include "driver/spi_master.h"
 
 #include "MCP4822.h"
-#include "../Demiurge.h"
-#include "../aaa_spi.h"
+#include "../spi/aaa_spi.h"
 
 #define TAG "MCP4822"
 
@@ -86,7 +85,7 @@ MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
    // Values to be written during time critical stage
    auto s0 = 1 << SPI_USR_S;
    auto s1 = (1 << MCPWM_TIMER0_MOD_S) | (2 << MCPWM_TIMER0_START_S);
-   auto s3 = (1 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER1_SYNCO_SEL) | (1 << MCPWM_TIMER1_SYNC_SW_S);
+   auto s3 = (9 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER1_SYNCO_SEL) | (1 << MCPWM_TIMER1_SYNC_SW_S);
 
    // this bit of code makes sure both timers and SPI transfer are started as close together as possible
    for (int i = 0; i < 2; i++) {  // Make sure SPI Flash fetches doesn't interfere

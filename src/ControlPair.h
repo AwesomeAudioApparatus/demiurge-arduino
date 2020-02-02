@@ -24,11 +24,9 @@ See the License for the specific language governing permissions and
 typedef struct {
    signal_t *cv;
    signal_t *potentiometer;
-   uint64_t lastCalc;
-   int32_t cached;
 } control_pair_t;
 
-int32_t controlpair_read(signal_t *handle, uint64_t time);
+float controlpair_read(signal_t *handle, uint64_t time);
 
 class ControlPair : public Signal {
 
@@ -37,16 +35,16 @@ public:
 
    ~ControlPair() override;
 
-   void setPotentiometerScale(int32_t scale);
+   void setPotentiometerScale(float scale);
 
-   void setCvScale(int32_t scale);
+   void setCvScale(float scale);
 
 private:
    control_pair_t _data;
    Potentiometer *_potentiometer;
    CvInPort *_cvIn;
-   int32_t _cvScale;
-   int32_t _potentiometerScale;
+   float _cvScale;
+   float _potentiometerScale;
 };
 
 

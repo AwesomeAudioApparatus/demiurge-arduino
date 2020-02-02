@@ -18,7 +18,7 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 
 ControlPair::ControlPair(int position) {
-   configASSERT(position > 0 && position <= 8)
+   configASSERT(position > 0 && position <= 4)
    _potentiometer = new Potentiometer(position);
    _cvIn = new CvInPort(position);
    _potentiometerScale = 1.0;
@@ -34,27 +34,27 @@ ControlPair::~ControlPair() {
    delete _cvIn;
 }
 
-void ControlPair::setPotentiometerScale(int32_t scale) {
+void ControlPair::setPotentiometerScale(float scale) {
    _potentiometerScale = scale;
 }
 
-void ControlPair::setCvScale(int32_t scale) {
+void ControlPair::setCvScale(float scale) {
    _cvScale = scale;
 }
 
-int32_t IRAM_ATTR controlpair_read(signal_t *handle, uint64_t time) {
+float IRAM_ATTR controlpair_read(signal_t *handle, uint64_t time) {
    auto *control = (control_pair_t *) handle->data;
-   if( time > control->lastCalc ) {
-      control->lastCalc = time;
+   if( time > handle->last_calc ) {
+      handle->last_calc = time;
 
       signal_t *pot = control->potentiometer;
-      int32_t potIn = pot->read_fn(pot, time);
+      float potIn = pot->read_fn(pot, time);
 
       signal_t *cv = control->cv;
-      int32_t cvIn = cv->read_fn(cv, time);
-      int32_t result = potIn + cvIn;
-      control->cached = result;
+      float cvIn = cv->read_fn(cv, time);
+      float result = (potIn + cvIn) / 2;
+      handle->cached = result;
       return result;
    }
-   return control->cached;
+   return handle->cached;
 }

@@ -20,47 +20,41 @@ See the License for the specific language governing permissions and
 
 #include <stdint.h>
 
-// All signals uses int32_t for representation, where the middle 16 bits represent the audio,
-// and the 4 LSB of those are clipped in the 12 bit DAC.
-//
-// For all scaling operations,
-//    positive scale ==> amplify signal by (scale >> 16 )
-//    negative scale ==> attenuate signal by (-scale >> 16 )
+// All signals uses float for representation.
+// Audio = -10.0 to 10.0
+// CV = -5.0 to 5.0
+// Gate = 0V or >=1V
 typedef struct signal_t signal_t;
 
-typedef int32_t (*signal_fn)(signal_t *, uint64_t);
-
-int32_t scale_output(int32_t value, int32_t scale, int32_t offset);
+typedef float (*signal_fn)(signal_t *, uint64_t);
 
 typedef struct signal_t {
    void *data;
-   int32_t scale;
-   int32_t offset;
+   float extra1;
+   float extra2;
+   float extra3;
+   float extra4;
    signal_fn read_fn;
-   bool noRecalc;
+   uint64_t last_calc;
+   float cached;
 } signal_t;
 
-class Signal  {
+class Signal {
 
 public:
    Signal() noexcept;
 
-   virtual ~Signal() = 0;
-
-   int32_t  scale();
-
-   int32_t  offset();
-
-   void setScale(int32_t  scale);
-
-   void setOffset(int32_t  offset);
+   virtual ~Signal();
 
    signal_t _signal{};
 
-private:
-   int32_t  _scale = 0;
-   int32_t  _offset = 0;
-   int32_t  _noRecalc = true;
+   float extra1();
+
+   float extra2();
+
+   float extra3();
+
+   float extra4();
 };
 
 #endif

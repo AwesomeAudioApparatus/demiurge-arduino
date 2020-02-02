@@ -20,14 +20,14 @@ See the License for the specific language governing permissions and
 #include <stdint.h>
 
 typedef struct {
-   int32_t  setpoint = 0x2000;   // ~2.5V
-   int32_t  hysteresis = 0x800;  // ~0.625V
+   float  setpoint = 0x2000;   // ~2.5V
+   float  hysteresis = 0x800;  // ~0.625V
    bool output = false;
 } threshold_t;
 
-void threshold_init(threshold_t *data, int32_t  setp, int32_t  hyst);
+void threshold_init(threshold_t *data, float  setp, float  hyst);
 
-bool threshold_compute(threshold_t *data, int32_t  input);
+bool threshold_compute(threshold_t *data, float  input);
 
 
 #endif

@@ -21,19 +21,15 @@ See the License for the specific language governing permissions and
 
 typedef struct {
    int position;
-   uint64_t lastCalc;
-   int32_t cached;
 } audio_in_port_t;
 
-int32_t audioinport_read(signal_t *handle, uint64_t time);
+float audioinport_read(signal_t *handle, uint64_t time);
 
 class AudioInPort : public Signal {
 
 public:
    explicit AudioInPort(int position);
    ~AudioInPort() override;
-
-   void configure( int32_t scale, int32_t offset );
 
 private:
    audio_in_port_t _data{};

@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 
 
 AudioInPort::AudioInPort(int position) {
-   configASSERT(position > 0 && position <= 2)
+   configASSERT(position > 0 && position <= 4)
    _data.position = position;
    _signal.read_fn = audioinport_read;
    _signal.data = &_data;
@@ -27,18 +27,13 @@ AudioInPort::AudioInPort(int position) {
 
 AudioInPort::~AudioInPort() = default;
 
-void AudioInPort::configure(int32_t scale, int32_t offset) {
-   setScale(scale);
-   setOffset(offset);
-}
-
-int32_t IRAM_ATTR audioinport_read(signal_t *handle, uint64_t time) {
+float IRAM_ATTR audioinport_read(signal_t *handle, uint64_t time) {
    auto *port = (audio_in_port_t *) handle->data;
-   if( time > port->lastCalc ) {
-      port->lastCalc = time;
-      int32_t result = Demiurge::runtime().inputs()[port->position];
-      port->cached = result;
+   if (time > handle->last_calc) {
+      handle->last_calc = time;
+      float result = Demiurge::runtime().input(port->position);
+      handle->cached = result;
       return result;
    }
-   return port->cached;
+   return handle->cached;
 }
