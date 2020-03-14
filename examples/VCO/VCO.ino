@@ -33,50 +33,57 @@ GateInPort gate(1);
 AudioOutPort out1(1);
 AudioOutPort out2(2);
 
-Oscillator vco1(DEMIURGE_SAW);
+Oscillator vco1(DEMIURGE_SQUARE);
 
 Mixer mixer;
 FixedSignal fixed(1.0);
 Pan pan;
 
 void setup() {
-  disableCore0WDT();
-  Serial.begin(115200);
+   disableCore0WDT();
+   Serial.begin(115200);
 
-  Serial.println("setting up mixer");
-  mixer.configure(2, &pair1, &fixed);
-  mixer.configure(1, &pair2, &fixed);
+   Serial.println("setting up mixer");
+   mixer.configure(2, &pair2, &fixed);
+   mixer.configure(1, &pair3, &fixed);
 
-  Serial.println("setting up vco");
-  vco1.configureFrequency(&mixer);
-  vco1.configureAmplitude(&pair3);
+   Serial.println("setting up vco");
+   vco1.configureFrequency(&mixer);
+   vco1.configureAmplitude(&pair4);
 
-  Serial.println("setting up pan");
-  pan.configure(&vco1, &mixer);
+   Serial.println("setting up pan");
+   pan.configure(&vco1, &pair1);
 
-  Serial.println("setting up output ports");
-  out1.configure(pan.outputLeft());
-  out2.configure(pan.outputRight());
-  Demiurge::begin();
-  delay(100);
+   Serial.println("setting up output ports");
+   out1.configure(pan.outputLeft());
+   out2.configure(pan.outputRight());
+   Demiurge::begin();
+   delay(100);
 }
 
 void loop() {
-  auto &demiurge = Demiurge::runtime();   
+   auto &demiurge = Demiurge::runtime();
 
-  double value1a = vco1._signal.cached;
-//  double value2 = pan.outputLeft()->_signal.cached;
-//  double value3 = out1._signal.cached;
-  Serial.print( "VCO: " );
-  Serial.print(millis());
-  Serial.print(", ");
-  Serial.print(value1a);
+   double value1 = vco1._signal.extra1;
+   double value2 = vco1._signal.extra2;
+   double value3 = vco1._signal.extra3;
+   double value4 = vco1._signal.extra4;
+   Serial.print( "VCO: " );
+   Serial.print(millis());
+   Serial.print(", ");
+   Serial.print(value1);
+   Serial.print(", ");
+   Serial.print(value2);
+   Serial.print(", ");
+   Serial.print(value3);
+   Serial.print(", ");
+   Serial.print(value4);
 
-  for( int i=0; i<8; i++ ) {
-    Serial.print( ", " );
-    Serial.print(demiurge.input(i));
-  }
+   for( int i=1; i<=8; i++ ) {
+      Serial.print( ", " );
+      Serial.print(demiurge.input(i));
+   }
 
-  Serial.println();
-  delay(1000);
+   Serial.println();
+   delay(1021);
 }
