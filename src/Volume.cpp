@@ -15,9 +15,11 @@ See the License for the specific language governing permissions and
 */
 
 #include <esp_task.h>
+#include <esp_log.h>
 #include "Demiurge.h"
 
 Volume::Volume() {
+   ESP_LOGE("Volume", "Constructor: %x", (void *) this );
    _signal.read_fn = volume_read;
 }
 
@@ -37,7 +39,7 @@ float  IRAM_ATTR volume_read(signal_t *handle, uint64_t time) {
    if( time > handle->last_calc ){
       handle->last_calc = time;
       float  control = vol->control->read_fn(vol->control, time);
-      float  in = vol->control->read_fn(vol->control, time);
+      float  in = vol->input->read_fn(vol->input, time);
       float  factor = 0.05 * control + 0.5;
       float  result = in * factor;
       handle->cached = result;

@@ -32,6 +32,10 @@ typedef struct {
    signal_t *trigger;
    int mode;
    int idx;
+   uint64_t t0;
+   uint32_t period_in_us;
+   float slope;
+   float scale;
 } oscillator_t;
 
 static const int SINEWAVE_SAMPLES = 3600;

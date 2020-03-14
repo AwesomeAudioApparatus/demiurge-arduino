@@ -63,6 +63,7 @@ void IRAM_ATTR startInfiniteTask(void *parameter) {
    }
 
 }
+
 #pragma clang diagnostic pop
 
 
@@ -75,14 +76,14 @@ Demiurge::Demiurge() {
 
 void Demiurge::initialize() {
    // Initialize LEDs
-//   gpio_set_direction(GPIO_NUM_21, GPIO_MODE_OUTPUT);
-//   gpio_set_direction(GPIO_NUM_22, GPIO_MODE_OUTPUT);
-//   gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
-//   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
-//   gpio_set_level(GPIO_NUM_21, 0);
-//   gpio_set_level(GPIO_NUM_22, 0);
-//   gpio_set_level(GPIO_NUM_25, 0);
-//   gpio_set_level(GPIO_NUM_26, 0);
+   gpio_set_direction(GPIO_NUM_21, GPIO_MODE_OUTPUT);
+   gpio_set_direction(GPIO_NUM_22, GPIO_MODE_OUTPUT);
+   gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
+   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
+   gpio_set_level(GPIO_NUM_21, 0);
+   gpio_set_level(GPIO_NUM_22, 0);
+   gpio_set_level(GPIO_NUM_25, 0);
+   gpio_set_level(GPIO_NUM_26, 0);
 
    _dac = new MCP4822(GPIO_NUM_13, GPIO_NUM_14, GPIO_NUM_15);
    _adc = new ADC128S102(GPIO_NUM_23, GPIO_NUM_19, GPIO_NUM_18, GPIO_NUM_5);
@@ -132,11 +133,13 @@ void Demiurge::unregisterSink(signal_t *processor) {
 }
 
 void IRAM_ATTR Demiurge::tick() {
+   gpio_set_level(GPIO_NUM_21, 0);
+   // approx. 28uSec
    readGpio();
    readADC();
    timerCounter = timerCounter + 10; // pass along number of microseconds.
+   // end uSec
 
-//   gpio_set_level(GPIO_NUM_22, 0);
    float out1 = 0.0;
    signal_t *sink1 = _sinks[0];
    if (sink1 != nullptr) {
@@ -148,20 +151,22 @@ void IRAM_ATTR Demiurge::tick() {
    if (sink2 != nullptr) {
       out2 = audiooutport_read(sink2, timerCounter);
    }
-//   gpio_set_level(GPIO_NUM_22, 1);
-   _dac->setOutput((uint16_t) ((10-out1) * 204.8), (uint16_t) ((10 - out2) * 204.8));
+   // approx, 1.9uSec
+   _dac->setOutput((uint16_t) ((10.0f - out1) * 204.8f), (uint16_t) ((10.0f - out2) * 204.8f));
    _outputs[0] = out1;
    _outputs[1] = out2;
+   // end uSec
+   gpio_set_level(GPIO_NUM_21, 1);
 }
 
 
 void IRAM_ATTR Demiurge::readADC() {
    // Scale inputs and put in the right order. 0-3=Jacks, 4-7=Pots, in Volts.
    for (int i = 0; i < 4; i++) {
-      _inputs[3-i] = -(_adc->read_input(i) / 204.8 - 10);
+      _inputs[3-i] = -(_adc->read_input(i) / 204.8f - 10.0f);
    }
    for (int i = 4; i < 8; i++) {
-      _inputs[11-i] = -(_adc->read_input(i) / 204.8 - 10);
+      _inputs[11-i] = -(_adc->read_input(i) / 204.8f - 10.0f);
    }
 }
 

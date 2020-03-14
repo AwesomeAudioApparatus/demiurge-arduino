@@ -35,7 +35,7 @@ typedef struct signal_t {
    float extra3;
    float extra4;
    signal_fn read_fn;
-   uint64_t last_calc;
+   uint64_t last_calc = 0;
    float cached;
 } signal_t;
 

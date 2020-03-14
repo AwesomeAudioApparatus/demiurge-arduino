@@ -18,6 +18,7 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 
 ControlPair::ControlPair(int position) {
+   ESP_LOGE("ControlPair", "Constructor: %x at position %d", (void *) this, position );
    configASSERT(position > 0 && position <= 4)
    _potentiometer = new Potentiometer(position);
    _cvIn = new CvInPort(position);

@@ -16,8 +16,10 @@ See the License for the specific language governing permissions and
 
 #include "Passthru.h"
 #include <esp_system.h>
+#include <esp_log.h>
 
 Passthru::Passthru() {
+   ESP_LOGE("Passthru", "Constructor: %x", (void *) this );
    _signal.read_fn = passthru_read;
 }
 

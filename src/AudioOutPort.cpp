@@ -14,9 +14,11 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_log.h>
 #include "Demiurge.h"
 
 AudioOutPort::AudioOutPort(int position) {
+   ESP_LOGE("AudioOutPort", "Constructor: %x at position %d", (void *) this, position );
    configASSERT(position > 0 && position <= 2)
    _data.me = &_signal;
    _data.position = position;

@@ -14,12 +14,14 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_log.h>
 #include "Demiurge.h"
 #include "driver/gpio.h"
 
 static const int DEMIURGE_GATE_GPIO[1] = {27};
 
 GateInPort::GateInPort(int position) {
+   ESP_LOGE("GateInPort", "Constructor: %x at position %d", (void *) this, position );
    configASSERT(position > 0 && position <= 1 )
    _data.position = position-1;
    _signal.data = &_data;

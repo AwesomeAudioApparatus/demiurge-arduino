@@ -15,9 +15,11 @@ See the License for the specific language governing permissions and
 */
 
 #include <math.h>
+#include <esp_log.h>
 #include "Demiurge.h"
 
 Adsr::Adsr() {
+   ESP_LOGE("Adsr", "Constructor: %x", (void *) this );
    _signal.read_fn = adsr_read;
 }
 

@@ -1,6 +1,3 @@
-//
-// Created by niclas on 2019-12-31.
-//
 
 #include <soc/spi_reg.h>
 #include <soc/dport_reg.h>
@@ -278,8 +275,7 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
 }
 
 
-esp_err_t aaa_spi_release_circular_buffer(
-      spi_host_device_t host, int dma_chan) {
+esp_err_t aaa_spi_release_circular_buffer(spi_host_device_t host, int dma_chan) {
 
    spi_dev_t *const spiHw = aaa_spi_get_hw_for_host(host);
 

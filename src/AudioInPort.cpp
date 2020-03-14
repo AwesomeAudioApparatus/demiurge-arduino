@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_log.h>
 #include "Demiurge.h"
 #include "AudioInPort.h"
 
 
 AudioInPort::AudioInPort(int position) {
+   ESP_LOGE("AudioInPort", "Constructor: %x at position %d", (void *) this, position );
    configASSERT(position > 0 && position <= 4)
    _data.position = position;
    _signal.read_fn = audioinport_read;

@@ -53,8 +53,8 @@ add_library(
         src/AudioOutPort.h
         src/ControlPair.cpp
         src/ControlPair.h
-        src/Cordic.h
-        src/Cordic.cpp
+#        src/Cordic.h
+#        src/Cordic.cpp
         src/CvInPort.cpp
         src/CvInPort.h
         src/Demiurge.cpp

@@ -40,7 +40,7 @@ static void initialize(gpio_num_t pin_out) {
    periph_module_enable(PERIPH_PWM0_MODULE);
 
    WRITE_PERI_REG(MCPWM_TIMER_SYNCI_CFG_REG(0), (1 << MCPWM_TIMER0_SYNCISEL_S));
-   WRITE_PERI_REG(MCPWM_OPERATOR_TIMERSEL_REG(0), (0 << MCPWM_OPERATOR0_TIMERSEL));
+   WRITE_PERI_REG(MCPWM_OPERATOR_TIMERSEL_REG(0), (0 << MCPWM_OPERATOR0_TIMERSEL_S));
 
    WRITE_PERI_REG(MCPWM_GEN0_TSTMP_A_REG(0), 16);  // 32 cycles LOW after UTEZ.
    WRITE_PERI_REG(MCPWM_GEN0_A_REG(0),
@@ -85,7 +85,7 @@ MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
    // Values to be written during time critical stage
    auto s0 = 1 << SPI_USR_S;
    auto s1 = (1 << MCPWM_TIMER0_MOD_S) | (2 << MCPWM_TIMER0_START_S);
-   auto s3 = (9 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER1_SYNCO_SEL) | (1 << MCPWM_TIMER1_SYNC_SW_S);
+   auto s3 = (9 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER0_SYNCO_SEL_S) | (1 << MCPWM_TIMER0_SYNC_SW_S);
 
    // this bit of code makes sure both timers and SPI transfer are started as close together as possible
    for (int i = 0; i < 2; i++) {  // Make sure SPI Flash fetches doesn't interfere
@@ -121,11 +121,10 @@ MCP4822::~MCP4822() {
    ESP_LOGI(TAG, "Destruction of MCP4822");
 
    // Stop hardware
-   WRITE_PERI_REG(SPI_CMD_REG(3), READ_PERI_REG(SPI_CMD_REG(3)) & ~SPI_USR_M); // stop SPI transfer
+// TODO: Is this actually correct? Take away for now.
+//   WRITE_PERI_REG(SPI_CMD_REG(3), READ_PERI_REG(SPI_CMD_REG(3)) & ~SPI_USR_M); // stop SPI transfer
    WRITE_PERI_REG(MCPWM_TIMER0_CFG1_REG(0),
                   READ_PERI_REG(MCPWM_TIMER0_CFG1_REG(0)) & ~MCPWM_TIMER0_MOD_M); // stop timer 0
-   WRITE_PERI_REG(MCPWM_TIMER1_CFG1_REG(0),
-                  READ_PERI_REG(MCPWM_TIMER1_CFG1_REG(0)) & ~MCPWM_TIMER1_MOD_M); // stop timer 1
 
    aaa_spi_release_circular_buffer(HSPI_HOST, 1);
    free(out);

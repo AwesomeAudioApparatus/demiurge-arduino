@@ -21,6 +21,7 @@ See the License for the specific language governing permissions and
 #include <esp_log.h>
 
 LED::LED(int position) {
+   ESP_LOGE("LED", "Constructor: %x", (void *) this);
    configASSERT(position > 0 && position <= 4)
    _data.me = &_signal;
    _data.position = position;

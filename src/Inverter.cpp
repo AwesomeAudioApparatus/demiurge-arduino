@@ -14,29 +14,49 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_log.h>
 #include "Inverter.h"
 #include "esp_system.h"
 
 
 // TODO:
-Inverter::Inverter(Signal *midpoint, Signal *scale) {
-   _data.midpoint = &midpoint->_signal;
-   _data.scale = &scale->_signal;
+Inverter::Inverter() {
+   ESP_LOGE("Inverter", "Constructor: %x", (void *) this);
    _signal.data = &_data;
+   _data.midpoint = nullptr;
+   _data.scale = nullptr;
 }
 
 Inverter::~Inverter() = default;
+
+void Inverter::configureMidPoint(Signal *midpoint) {
+   _data.midpoint = &midpoint->_signal;
+}
+
+void Inverter::configureScale(Signal *scale) {
+   _data.scale = &scale->_signal;
+}
 
 void Inverter::configure(Signal *input) {
    _data.input = &input->_signal;
 }
 
-float IRAM_ATTR inverter_read(signal_t *handle, uint64_t time)
-{
+float IRAM_ATTR inverter_read(signal_t *handle, uint64_t time) {
    auto *inverter = (inverter_t *) handle->data;
-   if( time > handle->last_calc ) {
+   if (time > handle->last_calc) {
       handle->last_calc = time;
-      float out = -handle->read_fn(inverter->input, time);
+      float out;
+      signal_t *midpointSignal = inverter->midpoint;
+      signal_t *scaleSignal = inverter->scale;
+      if (midpointSignal == nullptr) {
+         out = 0 - handle->read_fn(inverter->input, time);
+      } else {
+         float midpoint = midpointSignal->read_fn(midpointSignal, time);
+         out = midpoint - handle->read_fn(inverter->input, time);
+      }
+      if (scaleSignal != nullptr) {
+         out = out * scaleSignal->read_fn(scaleSignal, time);
+      }
       handle->cached = out;
       return out;
    }

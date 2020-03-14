@@ -1,7 +1,3 @@
-//
-// Created by niclas on 2019-12-31.
-//
-
 #ifndef _DEMIURGE_MY_SPI_H_
 #define _DEMIURGE_MY_SPI_H_
 

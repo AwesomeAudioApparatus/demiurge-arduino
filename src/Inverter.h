@@ -31,14 +31,17 @@ float inverter_read(signal_t *handle, uint64_t time);
 class Inverter : public Signal {
 
 public:
-   Inverter(Signal *midpoint, Signal *scale);
+   Inverter();
    ~Inverter() override;
 
    void configure(Signal *input);
+   void configureMidPoint(Signal *midpoint);
+   void configureScale(Signal *scale);
 
 private:
    inverter_t _data;
    Signal* _input{};
+
 };
 
 

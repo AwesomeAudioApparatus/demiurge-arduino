@@ -43,7 +43,7 @@ See the License for the specific language governing permissions and
 #include "mcp4822/MCP4822.h"
 
 #ifndef DEMIURGE_SAMPLE_TIME
-#define DEMIURGE_SAMPLE_TIME 10     // Number of microseconds per tick(), a.k.a sample time
+#define DEMIURGE_SAMPLE_TIME 20     // Number of microseconds per tick(), a.k.a sample time
 #endif
 #define DEMIURGE_MAX_SINKS 2
 
