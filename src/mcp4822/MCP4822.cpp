@@ -32,22 +32,21 @@ See the License for the specific language governing permissions and
 static void initialize(gpio_num_t pin_out) {
    ESP_LOGI(TAG, "Initializing DAC timer.");
 
-   // We use MCPWM0 TIMER 0 for CS generation to DAC.
+   // We use MCPWM0 TIMER 0 Operator 0 for CS generation to DAC.
 
    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[pin_out], PIN_FUNC_GPIO);
    gpio_set_direction(pin_out, GPIO_MODE_INPUT_OUTPUT);
-   gpio_matrix_out(pin_out, PWM0_OUT0A_IDX, false, false);
+   gpio_matrix_out(pin_out, PWM0_OUT0A_IDX, false, false);  // PWM0 operator 0 output A
    periph_module_enable(PERIPH_PWM0_MODULE);
 
    WRITE_PERI_REG(MCPWM_TIMER_SYNCI_CFG_REG(0), (1 << MCPWM_TIMER0_SYNCISEL_S));
    WRITE_PERI_REG(MCPWM_OPERATOR_TIMERSEL_REG(0), (0 << MCPWM_OPERATOR0_TIMERSEL_S));
 
-   WRITE_PERI_REG(MCPWM_GEN0_TSTMP_A_REG(0), 16);  // 32 cycles LOW after UTEZ.
+   WRITE_PERI_REG(MCPWM_GEN0_TSTMP_A_REG(0), 32);  // 32 cycles LOW after UTEZ.
    WRITE_PERI_REG(MCPWM_GEN0_A_REG(0),
                   (1 << MCPWM_GEN0_A_UTEZ_S) | (2 << MCPWM_GEN0_A_UTEA_S)); // UTEZ= set PWM0A low, UTEA=set PWM0A high
 
-   WRITE_PERI_REG(MCPWM_TIMER0_CFG0_REG(0), 15 << MCPWM_TIMER0_PRESCALE_S | 23
-         << MCPWM_TIMER0_PERIOD_S);    // Prescale=16, so timer is 10MHz, 40 clocks per cycle
+   WRITE_PERI_REG(MCPWM_TIMER0_CFG0_REG(0), 7 << MCPWM_TIMER0_PRESCALE_S | 47 << MCPWM_TIMER0_PERIOD_S);    // Prescale=16, so timer is 10MHz, 40 clocks per cycle
    WRITE_PERI_REG(MCPWM_TIMER0_CFG1_REG(0), (1 << MCPWM_TIMER0_MOD_S) |
                                             (2 << MCPWM_TIMER0_START_S));        // Continuously running, decrease mode.
 
@@ -56,7 +55,7 @@ static void initialize(gpio_num_t pin_out) {
 }
 
 MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
-   ESP_LOGI(TAG, "Initializing SPI.");
+   ESP_LOGI(TAG, "Initializing DAC SPI.");
    initialize(cs_pin);
 
    out = static_cast<lldesc_t *>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
@@ -71,10 +70,10 @@ MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
    out->buf = static_cast<uint8_t *>(heap_caps_malloc(16, MALLOC_CAP_DMA));
    out->buf[0] = 0x00;
    out->buf[1] = 0x00;
-   out->buf[2] = 0x55;
+   out->buf[2] = 0xFF;
    out->buf[3] = 0x00;
    out->buf[4] = 0x00;
-   out->buf[5] = 0x55;
+   out->buf[5] = 0xFF;
    ESP_LOGI(TAG, "Buffer address: %x", ((void *) out->buf));
 
    esp_err_t er = aaa_spi_prepare_circular(HSPI_HOST, 1, out, nullptr, 10000000, mosi_pin, GPIO_NUM_MAX, sclk_pin, 0);
@@ -85,7 +84,7 @@ MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
    // Values to be written during time critical stage
    auto s0 = 1 << SPI_USR_S;
    auto s1 = (1 << MCPWM_TIMER0_MOD_S) | (2 << MCPWM_TIMER0_START_S);
-   auto s3 = (9 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER0_SYNCO_SEL_S) | (1 << MCPWM_TIMER0_SYNC_SW_S);
+   auto s3 = (19 << MCPWM_TIMER0_PHASE_S) | (0 << MCPWM_TIMER0_SYNCO_SEL_S) | (1 << MCPWM_TIMER0_SYNC_SW_S);
 
    // this bit of code makes sure both timers and SPI transfer are started as close together as possible
    for (int i = 0; i < 2; i++) {  // Make sure SPI Flash fetches doesn't interfere
@@ -107,7 +106,7 @@ MCP4822::MCP4822(gpio_num_t mosi_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {
       portENABLE_INTERRUPTS();
    }
 
-   ESP_LOGI(TAG, "Initializing SPI.....Done");
+   ESP_LOGI(TAG, "Initializing DAC SPI.....Done");
 }
 
 void MCP4822::setOutput(uint16_t out1, uint16_t out2) {

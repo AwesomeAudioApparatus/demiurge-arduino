@@ -40,11 +40,7 @@ static void IRAM_ATTR initialize_tick_timer() {
    WRITE_PERI_REG(TIMG_T0LOAD_REG(DEMIURGE_TIMER_GROUP), 1);
 }
 
-//static bool toggle = false;
-
 static void IRAM_ATTR wait_timer_alarm() {
-//   gpio_set_level(GPIO_NUM_21, toggle);
-//   toggle = !toggle;
    while (READ_PERI_REG(TIMG_T0CONFIG_REG(DEMIURGE_TIMER_GROUP)) & TIMG_T0_ALARM_EN);
    WRITE_PERI_REG(TIMG_T0CONFIG_REG(DEMIURGE_TIMER_GROUP),
                   (1 << TIMG_T0_DIVIDER_S) | TIMG_T0_EN | TIMG_T0_AUTORELOAD | TIMG_T0_INCREASE | TIMG_T0_ALARM_EN);
@@ -133,12 +129,9 @@ void Demiurge::unregisterSink(signal_t *processor) {
 }
 
 void IRAM_ATTR Demiurge::tick() {
-   gpio_set_level(GPIO_NUM_21, 0);
-   // approx. 28uSec
    readGpio();
    readADC();
    timerCounter = timerCounter + 10; // pass along number of microseconds.
-   // end uSec
 
    float out1 = 0.0;
    signal_t *sink1 = _sinks[0];
@@ -151,23 +144,31 @@ void IRAM_ATTR Demiurge::tick() {
    if (sink2 != nullptr) {
       out2 = audiooutport_read(sink2, timerCounter);
    }
-   // approx, 1.9uSec
    _dac->setOutput((uint16_t) ((10.0f - out1) * 204.8f), (uint16_t) ((10.0f - out2) * 204.8f));
    _outputs[0] = out1;
    _outputs[1] = out2;
-   // end uSec
-   gpio_set_level(GPIO_NUM_21, 1);
 }
 
 
 void IRAM_ATTR Demiurge::readADC() {
    // Scale inputs and put in the right order. 0-3=Jacks, 4-7=Pots, in Volts.
-   for (int i = 0; i < 4; i++) {
-      _inputs[3-i] = -(_adc->read_input(i) / 204.8f - 10.0f);
-   }
-   for (int i = 4; i < 8; i++) {
-      _inputs[11-i] = -(_adc->read_input(i) / 204.8f - 10.0f);
-   }
+   uint8_t buf[20];
+   _adc->copy_buffer(buf);
+
+   _inputs[3] = -(((buf[0] << 8) + buf[1]) / 204.8f - 10.0f);
+   _inputs[2] = -(((buf[2] << 8) + buf[3]) / 204.8f - 10.0f);
+   _inputs[1] = -(((buf[4] << 8) + buf[5]) / 204.8f - 10.0f);
+   _inputs[0] = -(((buf[6] << 8) + buf[7]) / 204.8f - 10.0f);
+   _inputs[7] = -(((buf[8] << 8) + buf[9]) / 204.8f - 10.0f);
+   _inputs[6] = -(((buf[10] << 8) + buf[11]) / 204.8f - 10.0f);
+   _inputs[5] = -(((buf[12] << 8) + buf[13]) / 204.8f - 10.0f);
+   _inputs[4] = -(((buf[14] << 8) + buf[15]) / 204.8f - 10.0f);
+//   for (int i = 0; i < 4; i++) {
+//      _inputs[3 - i] = -(buf[i*2]+buf[i*2+1]) / 204.8f - 10.0f;
+//   }
+//   for (int i = 4; i < 8; i++) {
+//      _inputs[11 - i] = -(buf[i*2]+buf[i*2+1]) / 204.8f - 10.0f;
+//   }
 }
 
 void IRAM_ATTR Demiurge::readGpio() {
@@ -187,5 +188,10 @@ float IRAM_ATTR Demiurge::output(int number) {
 bool IRAM_ATTR Demiurge::gpio(int pin) {
    return (_gpios & (1 << pin)) != 0;
 }
+
+void IRAM_ATTR Demiurge::print_adc_buffer(void *dest) {
+   _adc->copy_buffer(dest);
+}
+
 
 #undef TAG

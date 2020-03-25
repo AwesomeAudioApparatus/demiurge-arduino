@@ -4,7 +4,6 @@
 #include <soc/spi_struct.h>
 #include <driver/spi_common.h>
 #include <driver/gpio.h>
-#include <esp_log.h>
 #include "aaa_spi.h"
 
 static const uint8_t InvalidIndex = (uint8_t) -1;
@@ -99,15 +98,16 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
    }
 
    spi_dev_t *const spiHw = aaa_spi_get_hw_for_host(spiHostDevice);
-   const int Cs = 0;
-   const int CsMask = 1 << Cs;
 
    //Use GPIO
    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[mosi_gpio_num], PIN_FUNC_GPIO);
    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[sclk_gpio_num], PIN_FUNC_GPIO);
+   PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[miso_gpio_num], PIN_FUNC_GPIO);
 
    gpio_set_direction(mosi_gpio_num, GPIO_MODE_INPUT_OUTPUT);
    gpio_set_direction(sclk_gpio_num, GPIO_MODE_INPUT_OUTPUT);
+   gpio_set_direction(miso_gpio_num, GPIO_MODE_INPUT);
+   gpio_set_pull_mode(miso_gpio_num, GPIO_PULLUP_ONLY);
 
    gpio_matrix_out(mosi_gpio_num, getSpidOutByHost(spiHostDevice), false, false);
    gpio_matrix_in(mosi_gpio_num, getSpidInByHost(spiHostDevice), false);
@@ -124,6 +124,9 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
    spiHw->dma_in_link.start = 0;
    spiHw->dma_conf.val &= ~(SPI_OUT_RST | SPI_IN_RST | SPI_AHBM_RST | SPI_AHBM_FIFO_RST);
 
+   spiHw->ctrl.val = 0;
+   spiHw->user.val = 0;
+
    //Reset timing
    spiHw->ctrl2.val = 0;
 
@@ -138,10 +141,6 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
    spiHw->slave.wr_sta_inten = 0;
    spiHw->slave.trans_inten = 0;
    spiHw->slave.trans_done = 0;
-
-   //Set CS pin, CS options
-   spiHw->pin.master_ck_sel &= ~CsMask;
-   spiHw->pin.master_cs_pol &= ~CsMask;
 
    // Set SPI Clock
    //  Register 7.7: SPI_CLOCK_REG (0x18)
@@ -184,7 +183,7 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
 
    //Configure bit order
    spiHw->ctrl.rd_bit_order = 0;    // MSB first
-   spiHw->ctrl.wr_bit_order = 0;    // LSB first
+   spiHw->ctrl.wr_bit_order = 0;    // MSB first
 
    spiHw->pin.ck_dis = 0;
 
@@ -206,9 +205,9 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
    spiHw->user.cs_hold = 0;
 
    //Configure CS pin
-   spiHw->pin.cs0_dis = (Cs == 0) ? 0 : 1;
-   spiHw->pin.cs1_dis = (Cs == 1) ? 0 : 1;
-   spiHw->pin.cs2_dis = (Cs == 2) ? 0 : 1;
+   spiHw->pin.cs0_dis = 1;
+   spiHw->pin.cs1_dis = 1;
+   spiHw->pin.cs2_dis = 1;
 
    //Reset SPI peripheral
    spiHw->dma_conf.val |= SPI_OUT_RST | SPI_IN_RST | SPI_AHBM_RST | SPI_AHBM_FIFO_RST;
@@ -217,18 +216,15 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
    spiHw->dma_conf.val &= ~(SPI_OUT_RST | SPI_IN_RST | SPI_AHBM_RST | SPI_AHBM_FIFO_RST);
    spiHw->dma_conf.out_data_burst_en = 1;
 
-   //Set up QIO/DIO if needed
-   spiHw->ctrl.val &= ~(SPI_FREAD_DUAL | SPI_FREAD_QUAD | SPI_FREAD_DIO | SPI_FREAD_QIO);
-   spiHw->user.val &= ~(SPI_FWRITE_DUAL | SPI_FWRITE_QUAD | SPI_FWRITE_DIO | SPI_FWRITE_QIO);
-
    //DMA temporary workaround: let RX DMA work somehow to avoid the issue in ESP32 v0/v1 silicon
-   spiHw->dma_in_link.addr = 0;
-   spiHw->dma_in_link.start = 1;
+//   spiHw->dma_in_link.addr = 0;
+//   spiHw->dma_in_link.start = 1;
 
-   spiHw->user1.usr_addr_bitlen = 0;
-   spiHw->user2.usr_command_bitlen = 0;
+//   spiHw->user1.usr_addr_bitlen = 0;
+//   spiHw->user2.usr_command_bitlen = 0;
    spiHw->user.usr_addr = 0;
    spiHw->user.usr_command = 0;
+
    if (waitCycle <= 0) {
       spiHw->user.usr_dummy = 0;
       spiHw->user1.usr_dummy_cyclelen = 0;
@@ -237,6 +233,7 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
       spiHw->user1.usr_dummy_cyclelen = (uint8_t) (waitCycle - 1);
    }
 
+   spiHw->user.sio = 0;
    spiHw->user.usr_mosi_highpart = 0;
    spiHw->user2.usr_command_value = 0;
    spiHw->addr = 0;
@@ -250,27 +247,27 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
       spiHw->user.usr_mosi = 1;
       spiHw->user.usr_miso = 1;
       spiHw->user.doutdin = 1;
-
       spiHw->dma_in_link.addr = (uint64_t) (lldescs_in) & 0xFFFFF;
    }
 
    spiHw->mosi_dlen.usr_mosi_dbitlen = 0;      // works great! (there's no glitch in 5 hours)
-   spiHw->miso_dlen.usr_miso_dbitlen = 0;
+   spiHw->miso_dlen.usr_miso_dbitlen = 160;
 
    // Set circular mode
    //      https://www.esp32.com/viewtopic.php?f=2&t=4011#p18107
    //      > yes, in SPI DMA mode, SPI will alway transmit and receive
    //      > data when you set the SPI_DMA_CONTINUE(BIT16) of SPI_DMA_CONF_REG.
 
-   spiHw->dma_conf.dma_tx_stop = 1;   // Stop SPI DMA
-   spiHw->ctrl2.val = 0;   // Reset timing
-   spiHw->dma_conf.dma_tx_stop = 0;   // Disable stop
+   spiHw->dma_conf.dma_tx_stop = 1;    // Stop SPI DMA
+   spiHw->dma_conf.dma_rx_stop = 1;    // Stop SPI DMA
+   spiHw->ctrl2.val = 0;               // Reset timing
+   spiHw->dma_conf.dma_tx_stop = 0;    // Disable stop
+   spiHw->dma_conf.dma_rx_stop = 0;    // Disable stop
    spiHw->dma_conf.dma_continue = 1;   // Set contiguous mode
 
-   // These two are moved into the critical timing section in MCP4822 and the not timing critical ADS128S102
+   // These two are moved into the critical timing section in MCP4822 and ADS128S102
 //   spiHw->dma_out_link.start = 1;   // Start SPI DMA transfer (1)  M
 //   spiHw->cmd.usr = 1;   // SPI: Start SPI DMA transfer
-   ESP_LOGI("SPI", "DMA/SPI initialized.\n");
    return ESP_OK;
 }
 

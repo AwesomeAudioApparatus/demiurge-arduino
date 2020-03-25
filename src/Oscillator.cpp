@@ -26,7 +26,7 @@ Oscillator::Oscillator(int mode) {
    ESP_LOGE("Oscillator", "Constructor: %x", (void *) this);
    if (!sine_wave_initialized) {
       for (int i = 0; i < SINEWAVE_SAMPLES; i++) {
-         double radians = ((double) i / 360) * M_TWOPI;
+         double radians = ((double) i / SINEWAVE_SAMPLES) * M_TWOPI;
          sine_wave[i] = sin(radians);
       }
       sine_wave_initialized = true;
@@ -113,9 +113,11 @@ float IRAM_ATTR oscillator_read(signal_t *handle, uint64_t time_in_us) {
       float out = 0.0;
       switch (osc->mode) {
          case DEMIURGE_SINE: {
-            double percentage_of_cycle = ((double) x) / osc->period_in_us;
+            float percentage_of_cycle = ((float) x) / osc->period_in_us;
             uint16_t index = SINEWAVE_SAMPLES * percentage_of_cycle;
             out = sine_wave[index] * scale(osc, time_in_us);
+            handle->extra3 = percentage_of_cycle;
+            handle->extra4 = index;
             break;
          }
          case DEMIURGE_SQUARE: {

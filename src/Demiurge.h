@@ -102,6 +102,8 @@ public:
    // evaluation to take less time.
    uint32_t overrun = 0;
 
+   void print_adc_buffer(void *dest);
+
 private:
 
    Demiurge();

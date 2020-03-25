@@ -26,9 +26,12 @@ public:
    virtual ~ADC128S102();
 
    uint16_t read_input(int index);
+   void copy_buffer(void *dest);
 
 private:
+
    lldesc_t *out;
+
    lldesc_t *in;
 };
 
