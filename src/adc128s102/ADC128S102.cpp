@@ -143,11 +143,13 @@ ADC128S102::ADC128S102(gpio_num_t mosi_pin, gpio_num_t miso_pin, gpio_num_t sclk
 }
 
 ADC128S102::~ADC128S102() {
-   // Stop hardware
-   WRITE_PERI_REG(MCPWM_TIMER1_CFG1_REG(0),
-                  READ_PERI_REG(MCPWM_TIMER1_CFG1_REG(0)) & ~MCPWM_TIMER1_MOD_M); // stop timer 1
 
-   aaa_spi_release_circular_buffer(VSPI_HOST, 1);
+   // stop timer 1
+   WRITE_PERI_REG(MCPWM_TIMER1_CFG1_REG(0), READ_PERI_REG(MCPWM_TIMER1_CFG1_REG(0)) & ~MCPWM_TIMER1_MOD_M);
+
+   // Stop SPI
+   aaa_spi_release_circular_buffer(VSPI_HOST, 2);
+
    free(out);
    free(in);
 }
