@@ -175,7 +175,7 @@ void ADC128S102::copy_buffer(void *dest) {
          memcpy(dest, (void *) &buf[3], 16);
    } else {
       // we have to segments to be copied.
-      for( int i=0; i < 20; i++){
+      for( int i=1; i < 19; i++){
          if( buf[i] == 255 && buf[i+1] == 255 ){
             // found the location
 
@@ -184,6 +184,7 @@ void ADC128S102::copy_buffer(void *dest) {
 
             // Copy the remaining from buffer, which sits at the beginning, into the end of the destination buffer.
             memcpy(((uint8_t *)dest)+17-i, (void *) buf, i-1);
+            break;
          }
       }
    }
