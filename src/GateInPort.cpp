@@ -18,8 +18,6 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 #include "driver/gpio.h"
 
-static const int DEMIURGE_GATE_GPIO[1] = {27};
-
 GateInPort::GateInPort(int position) {
    ESP_LOGE("GateInPort", "Constructor: %x at position %d", (void *) this, position );
    configASSERT(position > 0 && position <= 1 )
@@ -30,10 +28,9 @@ GateInPort::GateInPort(int position) {
 GateInPort::~GateInPort() = default;
 
 float IRAM_ATTR gateinport_read(signal_t *handle, uint64_t time){
-   auto *gate = (gate_in_port_t *) handle->data;
    if( time > handle->last_calc ) {
       handle->last_calc = time;
-      bool state = Demiurge::runtime().gpio(DEMIURGE_GATE_GPIO[gate->position]);
+      bool state = Demiurge::runtime().gpio(32);
       handle->cached = state ? DEMIURGE_GATE_HIGH : DEMIURGE_GATE_LOW;
    }
    return handle->cached;

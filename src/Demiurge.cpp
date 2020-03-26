@@ -182,7 +182,7 @@ void IRAM_ATTR Demiurge::readADC() {
 }
 
 void IRAM_ATTR Demiurge::readGpio() {
-   _gpios = gpio_input_get(); // get all 32 gpios
+   _gpios = gpio_input_get() | (((uint64_t ) gpio_input_get_high()) << 32);
 }
 
 float IRAM_ATTR Demiurge::input(int number) {

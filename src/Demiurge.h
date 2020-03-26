@@ -118,7 +118,7 @@ private:
 
    signal_t *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
    bool _started;
-   uint32_t _gpios;
+   uint64_t _gpios;
    float _inputs[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
    float _outputs[2] = {0.0f, 0.0f};
    TaskHandle_t _taskHandle = nullptr;
