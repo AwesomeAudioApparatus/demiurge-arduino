@@ -93,7 +93,6 @@ void LED::set(uint32_t duty) {
 float IRAM_ATTR led_read(signal_t *handle, uint64_t time) {
    auto *led = (led_t *) handle->data;
    if (time > handle->last_calc) {
-      ESP_LOGE("LED", "Updating");
       handle->last_calc = time;
       signal_t *upstream = led->input;
       float result = upstream->read_fn(upstream, time);

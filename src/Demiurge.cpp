@@ -72,14 +72,25 @@ Demiurge::Demiurge() {
 
 void Demiurge::initialize() {
    // Initialize LEDs
-   gpio_set_direction(GPIO_NUM_21, GPIO_MODE_OUTPUT);
-   gpio_set_direction(GPIO_NUM_22, GPIO_MODE_OUTPUT);
-   gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
-   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
+   gpio_set_direction(GPIO_NUM_21, GPIO_MODE_OUTPUT); // LED 1
    gpio_set_level(GPIO_NUM_21, 0);
+   gpio_set_direction(GPIO_NUM_22, GPIO_MODE_OUTPUT); // LED 2
    gpio_set_level(GPIO_NUM_22, 0);
+   gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT); // LED 3
    gpio_set_level(GPIO_NUM_25, 0);
+   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT); // LED 4
    gpio_set_level(GPIO_NUM_26, 0);
+
+   // Initialize Gate 1 port
+   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_INPUT);  // I/O
+   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT); // Direction
+   gpio_set_level(GPIO_NUM_33, 0);                    // Gate direction "input"
+
+   // Initialize Buttons
+   gpio_set_direction(GPIO_NUM_36, GPIO_MODE_INPUT);  // Button 1
+   gpio_set_direction(GPIO_NUM_37, GPIO_MODE_INPUT);  // Button 2
+   gpio_set_direction(GPIO_NUM_38, GPIO_MODE_INPUT);  // Button 3
+   gpio_set_direction(GPIO_NUM_39, GPIO_MODE_INPUT);  // Button 4
 
    _dac = new MCP4822(GPIO_NUM_13, GPIO_NUM_14, GPIO_NUM_15);
    _adc = new ADC128S102(GPIO_NUM_23, GPIO_NUM_19, GPIO_NUM_18, GPIO_NUM_5);
@@ -104,7 +115,6 @@ void Demiurge::initializeSinks() {
 }
 
 Demiurge::~Demiurge() {
-
    delete _dac;
    delete _adc;
 }
