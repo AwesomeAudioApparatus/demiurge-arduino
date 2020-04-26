@@ -46,7 +46,7 @@ void AudioOutPort::configure(Signal *input) {
 }
 
 float IRAM_ATTR audiooutport_read(signal_t *handle, uint64_t time) {
-   auto *port = (cv_out_port_t *) handle->data;
+   auto *port = (audio_out_port_t *) handle->data;
    if( time > handle->last_calc ) {
       handle->last_calc = time;
       signal_t *upstream = port->input;

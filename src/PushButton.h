@@ -17,14 +17,26 @@ See the License for the specific language governing permissions and
 #ifndef _DEMIURGE_PUSHBUTTON_H_
 #define _DEMIURGE_PUSHBUTTON_H_
 
-
 #include "Signal.h"
+
+#define DEMIURGE_PUSHBUTTON_OFFSET 36
+
+typedef struct {
+   int position;
+} pushbutton_t;
+
+float pushbutton_read(signal_t *handle, uint64_t time);
+
 
 class PushButton : public Signal {
 
 public:
    PushButton(int position);
+
    ~PushButton() override;
+
+private:
+   pushbutton_t _data{};
 };
 
 

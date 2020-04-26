@@ -47,7 +47,7 @@ void GateOutPort::configure(Signal *input) {
 
 float IRAM_ATTR gateoutport_read(signal_t *handle, uint64_t time) {
    if( time > handle->last_calc ) {
-      auto *port = (cv_out_port_t *) handle->data;
+      auto *port = (gate_out_port_t *) handle->data;
       handle->last_calc = time;
       signal_t *upstream = port->input;
       signal_fn fn = upstream->read_fn;

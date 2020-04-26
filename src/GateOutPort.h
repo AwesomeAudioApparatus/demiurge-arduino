@@ -24,7 +24,7 @@ typedef struct {
    signal_t *me;
    signal_t *input;
    bool registered;
-} cv_out_port_t;
+} gate_out_port_t;
 
 float gateoutport_read(signal_t *handle, uint64_t time);
 
@@ -37,7 +37,7 @@ public:
 
    void configure(Signal *input);
 
-   cv_out_port_t _data{};
+   gate_out_port_t _data{};
 private:
    Signal *_input{};
 };

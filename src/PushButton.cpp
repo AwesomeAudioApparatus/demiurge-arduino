@@ -14,4 +14,29 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <freertos/FreeRTOS.h>
+#include <esp_system.h>
+#include <esp_log.h>
 #include "PushButton.h"
+#include "Demiurge.h"
+
+PushButton::PushButton(int position) {
+   ESP_LOGD("Potentiometer", "Constructor: %llx at position %d", (uint64_t) this, position );
+   configASSERT(position > 0 && position <= 4 )
+   _data.position = position + DEMIURGE_PUSHBUTTON_OFFSET;
+   _signal.data = &_data;
+   _signal.read_fn = pushbutton_read;
+
+}
+
+PushButton::~PushButton() = default;
+
+float IRAM_ATTR pushbutton_read(signal_t *handle, uint64_t time) {
+   if( time > handle->last_calc ){
+      auto *button = (pushbutton_t *) handle->data;
+      float result = Demiurge::runtime().gpio(button->position);
+      handle->cached = result;
+      return result;
+   }
+   return handle->cached;
+}

@@ -17,8 +17,8 @@ See the License for the specific language governing permissions and
 #ifndef _DEMIURGE_POTENTIOMETER_H_
 #define _DEMIURGE_POTENTIOMETER_H_
 
-#ifndef DEMIEURGE_POTENTIOMETER_OFFSET
-#define DEMIEURGE_POTENTIOMETER_OFFSET 4
+#ifndef DEMIURGE_POTENTIOMETER_OFFSET
+#define DEMIURGE_POTENTIOMETER_OFFSET 4
 #endif
 
 #include "Signal.h"
