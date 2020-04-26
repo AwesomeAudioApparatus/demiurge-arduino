@@ -55,6 +55,8 @@ add_library(
         src/Averager.h
         src/Calculator.cpp
         src/Calculator.h
+        src/Clipping.cpp
+        src/Clipping.h
         src/ControlPair.cpp
         src/ControlPair.h
 #        src/Cordic.h
