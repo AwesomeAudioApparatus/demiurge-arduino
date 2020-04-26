@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 
 
 Pan::Pan() {
-   ESP_LOGE("Pan", "Constructor: %x", (void *) this );
+   ESP_LOGD("Pan", "Constructor: %x", (void *) this );
    _left = new PanChannel(this, 0.5);
    _right = new PanChannel(this, -0.5);
 };

@@ -21,7 +21,7 @@ See the License for the specific language governing permissions and
 
 // TODO:
 Inverter::Inverter() {
-   ESP_LOGE("Inverter", "Constructor: %x", (void *) this);
+   ESP_LOGD("Inverter", "Constructor: %x", (void *) this);
    _signal.data = &_data;
    _data.midpoint = nullptr;
    _data.scale = nullptr;

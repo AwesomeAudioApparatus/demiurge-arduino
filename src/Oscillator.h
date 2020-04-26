@@ -38,7 +38,7 @@ typedef struct {
    float scale;
 } oscillator_t;
 
-static const int SINEWAVE_SAMPLES = 3600;
+static const int SINEWAVE_SAMPLES = 1800;
 
 float oscillator_read(signal_t *handle, uint64_t time_in_us);
 

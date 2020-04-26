@@ -20,16 +20,16 @@ See the License for the specific language governing permissions and
 
 
 CvInPort::CvInPort(int position) {
-   ESP_LOGE("CvInPort", "Constructor: %x at position %d", (void *) this, position);
+   ESP_LOGD("CvInPort", "Constructor: %x at position %d", (void *) this, position);
    configASSERT(position > 0 && position <= 4)
    _data.position = position + DEMIURGE_CVINPUT_OFFSET;
    _signal.read_fn = cvinport_read;
    _signal.data = &_data;
-   ESP_LOGE("CvInPort", "_signal: %x", this->_signal);
+   ESP_LOGD("CvInPort", "_signal: %x", this->_signal);
 }
 
 CvInPort::~CvInPort() {
-   ESP_LOGE("CvInPort", "Destructor: %x", (void *) this);
+   ESP_LOGD("CvInPort", "Destructor: %x", (void *) this);
 
 }
 

@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 
 Volume::Volume() {
-   ESP_LOGE("Volume", "Constructor: %x", (void *) this );
+   ESP_LOGD("Volume", "Constructor: %x", (void *) this );
    _signal.read_fn = volume_read;
 }
 

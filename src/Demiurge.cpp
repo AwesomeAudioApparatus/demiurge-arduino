@@ -47,7 +47,7 @@ static void IRAM_ATTR wait_timer_alarm() {
 }
 
 void IRAM_ATTR startInfiniteTask(void *parameter) {
-   ESP_LOGE("MAIN", "Starting audio algorithm in Core %d", xTaskGetAffinity(nullptr));
+   ESP_LOGD("MAIN", "Starting audio algorithm in Core %d", xTaskGetAffinity(nullptr));
    auto *demiurge = static_cast<Demiurge *>(parameter);
    demiurge->initialize();
    initialize_tick_timer();
@@ -65,32 +65,30 @@ void IRAM_ATTR startInfiniteTask(void *parameter) {
 
 Demiurge::Demiurge() {
    ESP_LOGI(TAG, "Starting Demiurge...\n");
+
    _started = false;
    _gpios = 0;
    initializeSinks();
 };
 
+static gpio_num_t gpio_output[] = {GPIO_NUM_21, GPIO_NUM_22, GPIO_NUM_25, GPIO_NUM_26, GPIO_NUM_33};
+static uint32_t gpio_output_level[] = {1, 1, 1, 1, 0};
+static gpio_num_t gpio_input[] = {GPIO_NUM_32, GPIO_NUM_36, GPIO_NUM_37, GPIO_NUM_38, GPIO_NUM_39};
+
 void Demiurge::initialize() {
-   // Initialize LEDs
-   gpio_set_direction(GPIO_NUM_21, GPIO_MODE_OUTPUT); // LED 1
-   gpio_set_level(GPIO_NUM_21, 0);
-   gpio_set_direction(GPIO_NUM_22, GPIO_MODE_OUTPUT); // LED 2
-   gpio_set_level(GPIO_NUM_22, 0);
-   gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT); // LED 3
-   gpio_set_level(GPIO_NUM_25, 0);
-   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT); // LED 4
-   gpio_set_level(GPIO_NUM_26, 0);
+   for (int i = 0; i < sizeof(gpio_output) / sizeof(gpio_num_t); i++) {
+      ESP_LOGI("Demiurge", "Init GPIO%u", gpio_output[i]);
+      esp_err_t error = gpio_set_direction(gpio_output[i], GPIO_MODE_OUTPUT);
+      configASSERT(error == ESP_OK)
+      gpio_set_level(gpio_output[i], gpio_output_level[i]);
+   }
 
-   // Initialize Gate 1 port
-   gpio_set_direction(GPIO_NUM_32, GPIO_MODE_INPUT);  // I/O
-   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT); // Direction
-   gpio_set_level(GPIO_NUM_33, 0);                    // Gate direction "input"
-
-   // Initialize Buttons
-   gpio_set_direction(GPIO_NUM_36, GPIO_MODE_INPUT);  // Button 1
-   gpio_set_direction(GPIO_NUM_37, GPIO_MODE_INPUT);  // Button 2
-   gpio_set_direction(GPIO_NUM_38, GPIO_MODE_INPUT);  // Button 3
-   gpio_set_direction(GPIO_NUM_39, GPIO_MODE_INPUT);  // Button 4
+   for (int i = 0; i < sizeof(gpio_input) / sizeof(gpio_num_t); i++) {
+      ESP_LOGI("Demiurge", "Init GPIO%u", gpio_input[i]);
+      esp_err_t error = gpio_set_direction(gpio_input[i], GPIO_MODE_INPUT);
+      configASSERT(error == ESP_OK)
+   }
+   ESP_LOGI("Demiurge", "Initialized GPIO done");
 
    _dac = new MCP4822(GPIO_NUM_13, GPIO_NUM_14, GPIO_NUM_15);
    _adc = new ADC128S102(GPIO_NUM_23, GPIO_NUM_19, GPIO_NUM_18, GPIO_NUM_5);
@@ -108,7 +106,7 @@ void Demiurge::startRuntime() {
 }
 
 void Demiurge::initializeSinks() {
-   ESP_LOGE("MAIN", "Clearing all sinks!");
+   ESP_LOGI("MAIN", "Clearing all sinks!");
    for (auto &_sink : _sinks) {
       _sink = nullptr;
    }
@@ -126,7 +124,7 @@ void Demiurge::registerSink(signal_t *processor) {
    configASSERT(port != nullptr)
    configASSERT(port->position > 0 && port->position <= DEMIURGE_MAX_SINKS)
    _sinks[port->position - 1] = processor;
-   ESP_LOGE("MAIN", "Registering Sink: %d", port->position);
+   ESP_LOGI("MAIN", "Registering Sink: %d", port->position);
 }
 
 void Demiurge::unregisterSink(signal_t *processor) {
@@ -182,7 +180,7 @@ void IRAM_ATTR Demiurge::readADC() {
 }
 
 void IRAM_ATTR Demiurge::readGpio() {
-   _gpios = gpio_input_get() | (((uint64_t ) gpio_input_get_high()) << 32);
+   _gpios = gpio_input_get() | (((uint64_t) gpio_input_get_high()) << 32);
 }
 
 float IRAM_ATTR Demiurge::input(int number) {
@@ -195,8 +193,10 @@ float IRAM_ATTR Demiurge::output(int number) {
    return _outputs[number - 1];
 }
 
+static int count = 4;
+
 bool IRAM_ATTR Demiurge::gpio(int pin) {
-   return (_gpios & (1 << pin)) != 0;
+   return (_gpios >> pin & 1) != 0;
 }
 
 void IRAM_ATTR Demiurge::print_adc_buffer(void *dest) {

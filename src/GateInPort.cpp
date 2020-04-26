@@ -19,10 +19,11 @@ See the License for the specific language governing permissions and
 #include "driver/gpio.h"
 
 GateInPort::GateInPort(int position) {
-   ESP_LOGE("GateInPort", "Constructor: %x at position %d", (void *) this, position );
+   ESP_LOGD("GateInPort", "Constructor: %x at position %d", (void *) this, position );
    configASSERT(position > 0 && position <= 1 )
    _data.position = position-1;
    _signal.data = &_data;
+   _signal.read_fn = gateinport_read;
 }
 
 GateInPort::~GateInPort() = default;

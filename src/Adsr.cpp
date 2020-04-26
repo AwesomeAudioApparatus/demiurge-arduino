@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 
 Adsr::Adsr() {
-   ESP_LOGE("Adsr", "Constructor: %x", (void *) this );
+   ESP_LOGD("Adsr", "Constructor: %x", (void *) this );
    _signal.read_fn = adsr_read;
 }
 

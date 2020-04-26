@@ -28,8 +28,6 @@ See the License for the specific language governing permissions and
 #define TAG "ADC128S102"
 
 static void initialize(gpio_num_t pin_out) {
-   ESP_LOGI(TAG, "Initializing ADC timer.");
-
    // We use MCPWM0 TIMER 1 Operator 1 for CS generation to DAC.
 
    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[pin_out], PIN_FUNC_GPIO);
@@ -49,8 +47,6 @@ static void initialize(gpio_num_t pin_out) {
    WRITE_PERI_REG(MCPWM_TIMER1_CFG1_REG(0), (1 << MCPWM_TIMER1_MOD_S) |
                                             (2 << MCPWM_TIMER1_START_S));        // Continuously running, decrease mode.
 
-
-   ESP_LOGI(TAG, "Initializing ADC timer....Done");
 }
 
 ADC128S102::ADC128S102(gpio_num_t mosi_pin, gpio_num_t miso_pin, gpio_num_t sclk_pin, gpio_num_t cs_pin) {

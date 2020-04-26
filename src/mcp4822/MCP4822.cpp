@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#include <esp_system.h>
 #include <string.h>
 #include <driver/ledc.h>
 #include <esp_log.h>
-#include <soc/mcpwm_struct.h>
-#include <soc/mcpwm_reg.h>
 #include <driver/mcpwm.h>
 #include <driver/periph_ctrl.h>
 #include "driver/spi_master.h"
+#include <soc/mcpwm_struct.h>
+#include <soc/mcpwm_reg.h>
+#include <esp_system.h>
 
 #include "MCP4822.h"
 #include "../spi/aaa_spi.h"

@@ -106,8 +106,10 @@ esp_err_t aaa_spi_prepare_circular(const spi_host_device_t spiHostDevice, const 
 
    gpio_set_direction(mosi_gpio_num, GPIO_MODE_INPUT_OUTPUT);
    gpio_set_direction(sclk_gpio_num, GPIO_MODE_INPUT_OUTPUT);
-   gpio_set_direction(miso_gpio_num, GPIO_MODE_INPUT);
-   gpio_set_pull_mode(miso_gpio_num, GPIO_PULLUP_ONLY);
+   if (miso_gpio_num < GPIO_NUM_MAX) {
+      gpio_set_direction(miso_gpio_num, GPIO_MODE_INPUT);
+      gpio_set_pull_mode(miso_gpio_num, GPIO_PULLUP_ONLY);
+   }
 
    gpio_matrix_out(mosi_gpio_num, getSpidOutByHost(spiHostDevice), false, false);
    gpio_matrix_in(mosi_gpio_num, getSpidInByHost(spiHostDevice), false);

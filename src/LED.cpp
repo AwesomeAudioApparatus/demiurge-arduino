@@ -21,7 +21,7 @@ See the License for the specific language governing permissions and
 #include <esp_log.h>
 
 LED::LED(int position) {
-   ESP_LOGE("LED", "Constructor: %x", (void *) this);
+   ESP_LOGD("LED", "Constructor: %x", (void *) this);
    configASSERT(position > 0 && position <= 4)
    _data.me = &_signal;
    _data.position = position;
@@ -46,9 +46,9 @@ LED::LED(int position) {
    conf.hpoint = 4095;
    conf.intr_type = LEDC_INTR_DISABLE;
    conf.duty = 0;
-   ESP_LOGE("LED", "Channel: %d", conf.channel);
-   ESP_LOGE("LED", "Timer: %d", conf.timer_sel);
-   ESP_LOGE("LED", "GPIO: %d", conf.gpio_num);
+   ESP_LOGD("LED", "Channel: %d", conf.channel);
+   ESP_LOGD("LED", "Timer: %d", conf.timer_sel);
+   ESP_LOGD("LED", "GPIO: %d", conf.gpio_num);
    err = ledc_channel_config(&conf);
    ESP_ERROR_CHECK(err)
 

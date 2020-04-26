@@ -16,26 +16,24 @@
 
 cmake_minimum_required(VERSION 3.14)
 project(demiurge)
+set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_STANDARD 14)
 
 if ("!$ENV{ESP_INCLUDES}" STREQUAL "!")
     set(ESP_INCLUDES "$ENV{HOME}/.arduino15/packages/esp32/hardware/esp32/1.0.4/tools/sdk/include")
-else ()
-    set(ESP_INCLUDES, "$ENV{ESP_INCLUDES}")
+    INCLUDE_DIRECTORIES(
+            ${ESP_INCLUDES}/config
+            ${ESP_INCLUDES}/driver
+            ${ESP_INCLUDES}/esp32
+            ${ESP_INCLUDES}/freertos
+            ${ESP_INCLUDES}/hal
+            ${ESP_INCLUDES}/heap
+            ${ESP_INCLUDES}/log
+            ${ESP_INCLUDES}/newlib
+            ${ESP_INCLUDES}/soc
+    )
 endif ()
 
-INCLUDE_DIRECTORIES(
-        ${ESP_INCLUDES}/config
-        ${ESP_INCLUDES}/driver
-        ${ESP_INCLUDES}/esp32
-        ${ESP_INCLUDES}/freertos
-        ${ESP_INCLUDES}/hal
-        ${ESP_INCLUDES}/heap
-        ${ESP_INCLUDES}/log
-        ${ESP_INCLUDES}/newlib
-        ${ESP_INCLUDES}/soc
-)
 
 add_library(
         demiurge

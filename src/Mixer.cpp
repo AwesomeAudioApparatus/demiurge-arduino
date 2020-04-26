@@ -22,7 +22,7 @@ See the License for the specific language governing permissions and
 
 
 Mixer::Mixer() {
-   ESP_LOGE("Mixer", "Constructor: %x", (void *) this);
+   ESP_LOGD("Mixer", "Constructor: %x", (void *) this);
    for (auto &input : _data.inputs)
       input = nullptr;
    _signal.read_fn = mixer_read;
@@ -46,7 +46,7 @@ float IRAM_ATTR mixer_read(signal_t *handle, uint64_t time) {
       float output = 0;
       int counter = 0;
       if( handle->extra1 == -1.0 ){
-         ESP_LOGE("Mixer", "Inputs: %x      %x      %x      %x", (void *) mixer->inputs[0], (void *) mixer->inputs[1], (void *) mixer->inputs[2], (void *) mixer->inputs[3] );
+         ESP_LOGD("Mixer", "Inputs: %x      %x      %x      %x", (void *) mixer->inputs[0], (void *) mixer->inputs[1], (void *) mixer->inputs[2], (void *) mixer->inputs[3] );
       }
 
       for (auto inp : mixer->inputs) {

@@ -25,38 +25,21 @@ See the License for the specific language governing permissions and
 
 ControlPair pair1(1);
 ControlPair pair2(2);
-ControlPair pair3(3);
-ControlPair pair4(4);
-
-GateInPort gate(1);
-
 AudioOutPort out1(1);
 AudioOutPort out2(2);
-
-Oscillator vco1(DEMIURGE_SQUARE);
-
-Mixer mixer;
-FixedSignal fixed(1.0);
-Pan pan;
+Oscillator vco1(DEMIURGE_SINE);
 
 void setup() {
    disableCore0WDT();
    Serial.begin(115200);
 
-   Serial.println("setting up mixer");
-   mixer.configure(2, &pair2, &fixed);
-   mixer.configure(1, &pair3, &fixed);
-
    Serial.println("setting up vco");
-   vco1.configureFrequency(&mixer);
-   vco1.configureAmplitude(&pair4);
-
-   Serial.println("setting up pan");
-   pan.configure(&vco1, &pair1);
+   vco1.configureFrequency(&pair1);
+   vco1.configureAmplitude(&pair2);
 
    Serial.println("setting up output ports");
-   out1.configure(pan.outputLeft());
-   out2.configure(pan.outputRight());
+   out1.configure(&vco1);
+   out2.configure(&vco1);
    Demiurge::begin();
    delay(100);
 }

@@ -104,6 +104,8 @@ public:
 
    void print_adc_buffer(void *dest);
 
+   uint64_t _gpios;
+
 private:
 
    Demiurge();
@@ -118,7 +120,6 @@ private:
 
    signal_t *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
    bool _started;
-   uint64_t _gpios;
    float _inputs[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
    float _outputs[2] = {0.0f, 0.0f};
    TaskHandle_t _taskHandle = nullptr;

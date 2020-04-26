@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 
 
 Potentiometer::Potentiometer(int position) {
-   ESP_LOGE("Potentiometer", "Constructor: %x at position %d", (void *) this, position );
+   ESP_LOGD("Potentiometer", "Constructor: %x at position %d", (void *) this, position );
    configASSERT(position > 0 && position <= 4 )
    _data.position = position + DEMIEURGE_POTENTIOMETER_OFFSET;
    _signal.data = &_data;
@@ -31,12 +31,6 @@ Potentiometer::~Potentiometer() = default;
 
 float IRAM_ATTR potentiometer_read(signal_t *handle, uint64_t time) {
    auto *port = (potentiometer_t *) handle->data;
-   if( time > handle->last_calc )
-   {
-      handle->last_calc = time;
-      float result = Demiurge::runtime().input(port->position);
-      handle->cached = result;
-      return result;
-   }
-   return handle->cached;
+   float result = Demiurge::runtime().input(port->position);
+   return result;
 }

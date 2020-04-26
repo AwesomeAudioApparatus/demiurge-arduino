@@ -1,5 +1,5 @@
 /*
-  Copyright 2019, Awesome Audio Apparatus.
+  Copyright 2019-2020, Awesome Audio Apparatus.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,25 +32,21 @@ AudioOutPort out2(2);
 
 Mixer mixer(4);
 
-void setup()
-{
+void setup() {
    Demiurge::runtime().begin();
 
    mixer.configure(1, &in1, &pot1);
 
-   mixer.configure(2, &in2, &pot2 );
+   mixer.configure(2, &in2, &pot2);
 
-   mixer.configure(3, &in3,&pot3);
+   mixer.configure(3, &in3, &pot3);
 
    mixer.configure(4, &in4, &pot4);
 
    out1.configure(&mixer);
    out2.configure(&mixer);
-
-
 }
 
-void loop()
-{
+void loop() {
 
 }

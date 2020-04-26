@@ -1,5 +1,5 @@
 /*
-  Copyright 2019, Awesome Audio Apparatus.
+  Copyright 2019-2020, Awesome Audio Apparatus.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,9 +23,7 @@ ControlPair sustain(3);
 ControlPair release(4);
 
 Adsr adsr;
-
-GatePort gate(1);
-
+GateInPort gate(1);
 Inverter invert;
 
 AudioOutPort out1(1);
@@ -41,9 +39,7 @@ void setup() {
    adsr.configureRelease(&release);
 
    out1.configure(&adsr);
-
    invert.configure(&adsr);
-
    out2.configure(&invert);
 }
 
