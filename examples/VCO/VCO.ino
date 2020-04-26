@@ -21,8 +21,10 @@ See the License for the specific language governing permissions and
 
 ControlPair pair1(1);
 ControlPair pair2(2);
+
 AudioOutPort out1(1);
 AudioOutPort out2(2);
+
 Oscillator vco1(DEMIURGE_SINE);
 
 /*
