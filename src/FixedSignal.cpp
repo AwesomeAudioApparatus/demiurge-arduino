@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_system.h>
 #include <esp_log.h>
 #include "FixedSignal.h"
-#include "esp_system.h"
 
 FixedSignal::FixedSignal(float value) {
-   ESP_LOGD("FixedSignal", "Constructor: %x with value %f", (void *) this, value );
+   ESP_LOGD("FixedSignal", "Constructor: %llx with value %f", (uint64_t) this, value );
    _data.value = value;
    _signal.read_fn = fixedsignal_read;
    _signal.data = &_data;

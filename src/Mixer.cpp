@@ -18,11 +18,11 @@ See the License for the specific language governing permissions and
 #include <esp_system.h>
 #include <esp_task.h>
 #include <esp_log.h>
-#include "Demiurge.h"
+#include "Mixer.h"
 
 
 Mixer::Mixer() {
-   ESP_LOGD("Mixer", "Constructor: %x", (void *) this);
+   ESP_LOGD("Mixer", "Constructor: %llx", (uint64_t) this);
    for (auto &input : _data.inputs)
       input = nullptr;
    _signal.read_fn = mixer_read;
@@ -46,7 +46,7 @@ float IRAM_ATTR mixer_read(signal_t *handle, uint64_t time) {
       float output = 0;
       int counter = 0;
       if( handle->extra1 == -1.0 ){
-         ESP_LOGD("Mixer", "Inputs: %x      %x      %x      %x", (void *) mixer->inputs[0], (void *) mixer->inputs[1], (void *) mixer->inputs[2], (void *) mixer->inputs[3] );
+         ESP_LOGD("Mixer", "Inputs: %llx      %llx      %llx      %llx", (uint64_t) mixer->inputs[0], (uint64_t) mixer->inputs[1], (uint64_t) mixer->inputs[2], (uint64_t) mixer->inputs[3] );
       }
 
       for (auto inp : mixer->inputs) {

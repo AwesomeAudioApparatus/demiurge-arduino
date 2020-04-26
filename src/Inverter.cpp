@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_system.h>
 #include <esp_log.h>
 #include "Inverter.h"
-#include "esp_system.h"
 
 
 // TODO:
 Inverter::Inverter() {
-   ESP_LOGD("Inverter", "Constructor: %x", (void *) this);
+   ESP_LOGD("Inverter", "Constructor: %llx", (uint64_t) this);
    _signal.data = &_data;
    _data.midpoint = nullptr;
    _data.scale = nullptr;

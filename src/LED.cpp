@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#include "LED.h"
-#include "Demiurge.h"
 #include <driver/ledc.h>
 #include <esp_task.h>
 #include <esp_log.h>
+#include "LED.h"
+#include "Demiurge.h"
 
 LED::LED(int position) {
-   ESP_LOGD("LED", "Constructor: %x", (void *) this);
+   ESP_LOGD("LED", "Constructor: %llx", (uint64_t) this);
    configASSERT(position > 0 && position <= 4)
    _data.me = &_signal;
    _data.position = position;

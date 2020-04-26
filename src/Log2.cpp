@@ -1,5 +1,5 @@
 /*
-  Copyright 2019, Awesome Audio Apparatus.
+  Copyright 2020, Awesome Audio Apparatus.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,28 +14,32 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_system.h>
 #include <esp_log.h>
-#include "Demiurge.h"
-#include "AudioInPort.h"
+#include <math.h>
+#include "Log2.h"
+#include "Signal.h"
 
-
-AudioInPort::AudioInPort(int position) {
-   ESP_LOGD("AudioInPort", "Constructor: %llx at position %d", (uint64_t) this, position );
-   configASSERT(position > 0 && position <= 4)
-   _data.position = position;
-   _signal.read_fn = audioinport_read;
+Log2::Log2() {
+   ESP_LOGD("Log2", "Constructor: %llx ", (uint64_t) this);
    _signal.data = &_data;
+   _signal.read_fn = log2_read;
 }
 
-AudioInPort::~AudioInPort() = default;
+Log2::~Log2()  = default;
 
-float IRAM_ATTR audioinport_read(signal_t *handle, uint64_t time) {
-   auto *port = (audio_in_port_t *) handle->data;
+void Log2::configure(Signal *input) {
+   _data.input = &input->_signal;
+}
+
+float IRAM_ATTR log2_read(signal_t *handle, uint64_t time){
    if (time > handle->last_calc) {
       handle->last_calc = time;
-      float result = Demiurge::runtime().input(port->position);
-      handle->cached = result;
-      return result;
+      auto *log2 = (log2_t *) handle->data;
+      float input = log2->input->read_fn(log2->input, time);
+      float  new_output = log2f(input);
+      handle->cached = new_output;
+      return new_output;
    }
    return handle->cached;
 }

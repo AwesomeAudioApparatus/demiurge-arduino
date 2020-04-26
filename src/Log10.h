@@ -1,5 +1,5 @@
 /*
-  Copyright 2019, Awesome Audio Apparatus.
+  Copyright 2020, Awesome Audio Apparatus.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,19 +14,28 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#ifndef _DEMIURGE_LOG10_H_
+#define _DEMIURGE_LOG10_H_
 
-#include <esp_system.h>
-#include <stdint.h>
-#include <esp_task.h>
-#include "OctavePerVolt.h"
+#include "Signal.h"
+
+typedef struct {
+   signal_t *input;
+} log10_t;
+
+float log10_read(signal_t *handle, uint64_t time);
+
+class Log10 : public Signal {
+public:
+   Log10();
+
+   virtual ~Log10();
+
+   void configure(Signal *input);
+
+private:
+   log10_t _data{};
+};
 
 
-float IRAM_ATTR octave_frequencyOf(float voltage) {
-   double scale = pow(2, voltage);
-   return (440.0 / TWO_POWER_OF_2_75) * scale;
-}
-
-float IRAM_ATTR octave_voltageOf(float frequency) {
-   // TODO:
-   return 1;
-}
+#endif

@@ -1,5 +1,5 @@
 /*
-  Copyright 2019, Awesome Audio Apparatus.
+  Copyright 2020, Awesome Audio Apparatus.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,19 +14,35 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#ifndef _DEMIURGE_OFFSET_H_
+#define _DEMIURGE_OFFSET_H_
 
-#include <esp_system.h>
-#include <stdint.h>
-#include <esp_task.h>
-#include "OctavePerVolt.h"
+#include "Signal.h"
+
+typedef struct {
+   float offset;
+   signal_t *input;
+   signal_t *offset_control;
+} offset_t;
+
+float offset_read(signal_t *handle, uint64_t time);
+
+class Adder : public Signal {
+public:
+   Adder();
+
+   virtual ~Adder();
+
+   void configure(Signal *input);
+
+   void configure(Signal *input, Signal *offset_control);
+
+   float get_offset();
+   void set_offset(float new_offset);
+
+private:
+   offset_t _data{};
+};
 
 
-float IRAM_ATTR octave_frequencyOf(float voltage) {
-   double scale = pow(2, voltage);
-   return (440.0 / TWO_POWER_OF_2_75) * scale;
-}
-
-float IRAM_ATTR octave_voltageOf(float frequency) {
-   // TODO:
-   return 1;
-}
+#endif

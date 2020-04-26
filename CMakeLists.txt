@@ -43,12 +43,18 @@ add_library(
         src/LED.cpp
         src/mcp4822/MCP4822.cpp
         src/mcp4822/MCP4822.h
+        src/Adder.cpp
+        src/Adder.h
         src/Adsr.cpp
         src/Adsr.h
         src/AudioInPort.cpp
         src/AudioInPort.h
         src/AudioOutPort.cpp
         src/AudioOutPort.h
+        src/Averager.cpp
+        src/Averager.h
+        src/Calculator.cpp
+        src/Calculator.h
         src/ControlPair.cpp
         src/ControlPair.h
 #        src/Cordic.h
@@ -63,8 +69,16 @@ add_library(
         src/GateInPort.h
         src/Inverter.cpp
         src/Inverter.h
+        src/Log.cpp
+        src/Log.h
+        src/Log2.cpp
+        src/Log2.h
+        src/Log10.cpp
+        src/Log10.h
         src/Mixer.cpp
         src/Mixer.h
+        src/Multiplier.cpp
+        src/Multiplier.h
         src/OctavePerVolt.cpp
         src/OctavePerVolt.h
         src/Pan.cpp

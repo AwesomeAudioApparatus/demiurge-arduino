@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <freertos/FreeRTOS.h>
 #include "esp_log.h"
-#include "Demiurge.h"
 #include "Pan.h"
 
 
 Pan::Pan() {
-   ESP_LOGD("Pan", "Constructor: %x", (void *) this );
+   ESP_LOGD("Pan", "Constructor: %llx", (uint64_t) this );
    _left = new PanChannel(this, 0.5);
    _right = new PanChannel(this, -0.5);
 };

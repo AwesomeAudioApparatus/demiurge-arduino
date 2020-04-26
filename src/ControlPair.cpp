@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <freertos/FreeRTOS.h>
+#include <esp_system.h>
 #include <esp_log.h>
-#include "Demiurge.h"
+#include "ControlPair.h"
 
 ControlPair::ControlPair(int position) {
-   ESP_LOGD("ControlPair", "Constructor: %x at position %d", (void *) this, position );
+   ESP_LOGD("ControlPair", "Constructor: %llx at position %d", (uint64_t) this, position );
    configASSERT(position > 0 && position <= 4)
    _potentiometer = new Potentiometer(position);
    _cvIn = new CvInPort(position);

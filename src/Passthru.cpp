@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#include "Passthru.h"
 #include <esp_system.h>
 #include <esp_log.h>
+#include "Passthru.h"
 
 Passthru::Passthru() {
-   ESP_LOGD("Passthru", "Constructor: %x", (void *) this );
+   ESP_LOGD("Passthru", "Constructor: %llx", (uint64_t) this );
    _signal.read_fn = passthru_read;
 }
 

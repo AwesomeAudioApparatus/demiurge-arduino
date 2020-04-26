@@ -14,16 +14,18 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <freertos/FreeRTOS.h>
 #include <math.h>
 #include <esp_task.h>
 #include <esp_log.h>
-#include "Demiurge.h"
+#include "Oscillator.h"
+#include "OctavePerVolt.h"
 
 static bool sine_wave_initialized = false;
 static float sine_wave[SINEWAVE_SAMPLES];
 
 Oscillator::Oscillator(int mode) {
-   ESP_LOGD("Oscillator", "Constructor: %x", (void *) this);
+   ESP_LOGD("Oscillator", "Constructor: %llx", (uint64_t) this);
    if (!sine_wave_initialized) {
       for (int i = 0; i < SINEWAVE_SAMPLES; i++) {
          double radians = ((double) i / SINEWAVE_SAMPLES) * M_TWOPI;
@@ -54,19 +56,19 @@ void Oscillator::configure(Signal *freqControl, Signal *amplitudeControl, Signal
 
 void Oscillator::configureFrequency(Signal *freqControl) {
    configASSERT(freqControl != nullptr)
-   ESP_LOGD("Oscillator", "Configure frequency control: %x for %x", freqControl, (void *) this);
+   ESP_LOGD("Oscillator", "Configure frequency control: %llx for %llx", (uint64_t) freqControl, (uint64_t) this);
 
    _frequencyControl = freqControl;
    _data.frequency = &freqControl->_signal;
-   ESP_LOGD("Oscillator", "frequency controller: %x", freqControl->_signal);
+   ESP_LOGD("Oscillator", "frequency controller: %llx", (uint64_t) &freqControl->_signal);
 }
 
 void Oscillator::configureAmplitude(Signal *amplitudeControl) {
    configASSERT(amplitudeControl != nullptr)
-   ESP_LOGD("Oscillator", "Configure amplitude control: %x for %x", amplitudeControl, (void *) this);
+   ESP_LOGD("Oscillator", "Configure amplitude control: %llx for %llx", (uint64_t) amplitudeControl, (uint64_t) this);
    _amplitudeControl = amplitudeControl;
    _data.amplitude = &amplitudeControl->_signal;
-   ESP_LOGD("Oscillator", "amplitude controller: %x", amplitudeControl->_signal);
+   ESP_LOGD("Oscillator", "amplitude controller: %llx", (uint64_t) &amplitudeControl->_signal);
 }
 
 void Oscillator::configureTrig(Signal *trigControl) {

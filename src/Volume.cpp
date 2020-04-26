@@ -14,12 +14,13 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
+#include <esp_system.h>
 #include <esp_task.h>
 #include <esp_log.h>
-#include "Demiurge.h"
+#include "Volume.h"
 
 Volume::Volume() {
-   ESP_LOGD("Volume", "Constructor: %x", (void *) this );
+   ESP_LOGD("Volume", "Constructor: %llx", (uint64_t) this );
    _signal.read_fn = volume_read;
 }
 

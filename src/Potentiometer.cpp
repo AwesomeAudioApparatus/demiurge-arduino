@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-
+#include <freertos/FreeRTOS.h>
 #include <esp_log.h>
+#include "Potentiometer.h"
 #include "Demiurge.h"
 
 
 Potentiometer::Potentiometer(int position) {
-   ESP_LOGD("Potentiometer", "Constructor: %x at position %d", (void *) this, position );
+   ESP_LOGD("Potentiometer", "Constructor: %llx at position %d", (uint64_t) this, position );
    configASSERT(position > 0 && position <= 4 )
    _data.position = position + DEMIEURGE_POTENTIOMETER_OFFSET;
    _signal.data = &_data;
