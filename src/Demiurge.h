@@ -45,7 +45,7 @@ See the License for the specific language governing permissions and
 #ifndef DEMIURGE_SAMPLE_TIME
 #define DEMIURGE_SAMPLE_TIME 20     // Number of microseconds per tick(), a.k.a sample time
 #endif
-#define DEMIURGE_MAX_SINKS 2
+#define DEMIURGE_MAX_SINKS 6
 
 class Demiurge {
 
@@ -101,7 +101,7 @@ private:
 
    void readGpio();
 
-   signal_t *_sinks[DEMIURGE_MAX_SINKS] = {nullptr, nullptr};
+   signal_t *_sinks[DEMIURGE_MAX_SINKS];
    bool _started;
    float _inputs[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
    float _outputs[2] = {0.0f, 0.0f};

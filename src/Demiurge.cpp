@@ -65,7 +65,8 @@ void IRAM_ATTR startInfiniteTask(void *parameter) {
 
 Demiurge::Demiurge() {
    ESP_LOGI(TAG, "Starting Demiurge...\n");
-
+   for( int i=0 ; i < DEMIURGE_MAX_SINKS; i++ )
+      _sinks[i] = nullptr;
    _started = false;
    _gpios = 0;
    initializeSinks();
@@ -120,20 +121,25 @@ Demiurge::~Demiurge() {
 void Demiurge::registerSink(signal_t *processor) {
    ESP_LOGI("MAIN", "Registering Sink: %llx", (uint64_t) processor);
    configASSERT(processor != nullptr)
-   auto *port = (audio_out_port_t *) processor->data;
-   configASSERT(port != nullptr)
-   configASSERT(port->position > 0 && port->position <= DEMIURGE_MAX_SINKS)
-   _sinks[port->position - 1] = processor;
-   ESP_LOGI("MAIN", "Registering Sink: %d", port->position);
+   for( int i=0; i < DEMIURGE_MAX_SINKS; i++ ){
+      if( _sinks[i] == nullptr ){
+         _sinks[i] = processor;
+         ESP_LOGI("MAIN", "Registering Sink: %d", i);
+         break;
+      }
+   }
 }
 
 void Demiurge::unregisterSink(signal_t *processor) {
    ESP_LOGI("MAIN", "Unregistering Sink: %llx", (uint64_t) processor);
    configASSERT(processor != nullptr)
-   auto *port = (audio_out_port_t *) processor->data;
-   configASSERT(port != nullptr)
-   configASSERT(port->position > 0 && port->position <= DEMIURGE_MAX_SINKS)
-   _sinks[port->position - 1] = nullptr;
+   for( int i=0; i < DEMIURGE_MAX_SINKS; i++ ){
+      if( _sinks[i] == processor ){
+         _sinks[i] = nullptr;
+         ESP_LOGI("MAIN", "Unregistering Sink: %d, %llx", i, (uint64_t) processor);
+         break;
+      }
+   }
 }
 
 void IRAM_ATTR Demiurge::tick() {
