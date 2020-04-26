@@ -42,9 +42,6 @@ See the License for the specific language governing permissions and
 #include "adc128s102/ADC128S102.h"
 #include "mcp4822/MCP4822.h"
 
-#ifndef DEMIURGE_SAMPLE_TIME
-#define DEMIURGE_SAMPLE_TIME 20     // Number of microseconds per tick(), a.k.a sample time
-#endif
 #define DEMIURGE_MAX_SINKS 6
 
 class Demiurge {
@@ -57,13 +54,13 @@ public:
       return instance;
    }
 
-   static void begin() {
-      Demiurge::runtime().startRuntime();
+   static void begin(int speed) {
+      Demiurge::runtime().startRuntime(speed);
    }
 
    void operator=(Demiurge const &) = delete;
 
-   void startRuntime();
+   void startRuntime(int speed);
 
    void tick();
 
@@ -88,6 +85,8 @@ public:
    void print_adc_buffer(void *dest);
 
    uint64_t _gpios;
+
+   int _computes_per_second;
 
 private:
 
