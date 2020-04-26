@@ -29,44 +29,19 @@ AudioOutPort out1(1);
 AudioOutPort out2(2);
 Oscillator vco1(DEMIURGE_SINE);
 
+/*
+ * Simple VCO with sine wave on both outputs.
+ */
 void setup() {
    disableCore0WDT();
-   Serial.begin(115200);
 
-   Serial.println("setting up vco");
    vco1.configureFrequency(&pair1);
    vco1.configureAmplitude(&pair2);
 
-   Serial.println("setting up output ports");
    out1.configure(&vco1);
    out2.configure(&vco1);
    Demiurge::begin(48000);
-   delay(100);
 }
 
 void loop() {
-   auto &demiurge = Demiurge::runtime();
-
-   double value1 = vco1._signal.extra1;
-   double value2 = vco1._signal.extra2;
-   double value3 = vco1._signal.extra3;
-   double value4 = vco1._signal.extra4;
-   Serial.print( "VCO: " );
-   Serial.print(millis());
-   Serial.print(", ");
-   Serial.print(value1);
-   Serial.print(", ");
-   Serial.print(value2);
-   Serial.print(", ");
-   Serial.print(value3);
-   Serial.print(", ");
-   Serial.print(value4);
-
-   for( int i=1; i<=8; i++ ) {
-      Serial.print( ", " );
-      Serial.print(demiurge.input(i));
-   }
-
-   Serial.println();
-   delay(1021);
 }

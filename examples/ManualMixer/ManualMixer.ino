@@ -18,25 +18,34 @@ See the License for the specific language governing permissions and
 #include "Demiurge.h"
 
 AudioInPort in1(1);
-AudioInPort in2(3);
+AudioInPort in2(2);
+AudioInPort in3(3);
+AudioInPort in4(4);
 
-ControlPair pair1(2);
-ControlPair pair2(4);
+Potentiometer pot1(1);
+Potentiometer pot2(2);
+Potentiometer pot3(3);
+Potentiometer pot4(4);
 
 AudioOutPort out1(1);
 AudioOutPort out2(2);
 
-// Mixing 2 channels
-Mixer mixer(2);
+// Mixing 4 channels
+Mixer mixer(4);
 
 /*
- * A two port Mixer, with CV control
+ * 4 input mixer with manual level control.
  */
 void setup() {
    disableCore0WDT();
 
-   mixer.configure(1, &in1, &pair1);
-   mixer.configure(2, &in2, &pair2);
+   mixer.configure(1, &in1, &pot1);
+
+   mixer.configure(2, &in2, &pot2);
+
+   mixer.configure(3, &in3, &pot3);
+
+   mixer.configure(4, &in4, &pot4);
 
    out1.configure(&mixer);
    out2.configure(&mixer);

@@ -29,7 +29,11 @@ Inverter invert;
 AudioOutPort out1(1);
 AudioOutPort out2(2);
 
+/*
+ * Envelope generator.
+ */
 void setup() {
+   disableCore0WDT();
 
    adsr.configureGate(&gate);
    adsr.configureAttack(&attack);
@@ -42,7 +46,7 @@ void setup() {
 
    out2.configure(&adsr);
 
-   Demiurge::runtime().begin(48000);
+   Demiurge::runtime().begin(10000);
 }
 
 void loop() {
