@@ -19,10 +19,6 @@ See the License for the specific language governing permissions and
 #include "Arduino.h"
 #include "Demiurge.h"
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
-
-#include "esp_log.h"
-
 ControlPair pair1(1);
 ControlPair pair2(2);
 AudioOutPort out1(1);
