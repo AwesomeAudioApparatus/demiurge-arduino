@@ -25,6 +25,14 @@ FixedSignal::FixedSignal(float value) {
    _signal.data = &_data;
 }
 
+void FixedSignal::set_value(float value) {
+   _data.value = value;
+}
+
+float FixedSignal::get_value() {
+   return _data.value;
+}
+
 FixedSignal::~FixedSignal() = default;
 
 float IRAM_ATTR fixedsignal_read(signal_t *handle, uint64_t time)

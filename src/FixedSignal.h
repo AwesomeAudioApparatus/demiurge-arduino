@@ -30,6 +30,11 @@ class FixedSignal : public Signal {
 public:
    explicit FixedSignal(float value);
    ~FixedSignal() override;
+
+   void set_value(float value);
+
+   float get_value();
+
 private:
    fixed_signal_t _data{};
 };
