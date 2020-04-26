@@ -28,8 +28,8 @@ See the License for the specific language governing permissions and
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 
-static void IRAM_ATTR initialize_tick_timer(int speed) {
-   uint16_t micros_per_tick = 1000000 / speed;
+static void IRAM_ATTR initialize_tick_timer(int ticks_per_second) {
+   uint16_t micros_per_tick = 1000000 / ticks_per_second;
    WRITE_PERI_REG(TIMG_T0CONFIG_REG(DEMIURGE_TIMER_GROUP),
                   (1 << TIMG_T0_DIVIDER_S) | TIMG_T0_EN | TIMG_T0_AUTORELOAD | TIMG_T0_INCREASE | TIMG_T0_ALARM_EN);
 
@@ -51,7 +51,7 @@ void IRAM_ATTR startInfiniteTask(void *parameter) {
    ESP_LOGD("MAIN", "Starting audio algorithm in Core %d", xTaskGetAffinity(nullptr));
    auto *demiurge = static_cast<Demiurge *>(parameter);
    demiurge->initialize();
-   initialize_tick_timer(demiurge->_computes_per_second);
+   initialize_tick_timer(demiurge->_ticks_per_second);
    while (true) {
       wait_timer_alarm();
       demiurge->tick();
@@ -96,11 +96,11 @@ void Demiurge::initialize() {
    _adc = new ADC128S102(GPIO_NUM_23, GPIO_NUM_19, GPIO_NUM_18, GPIO_NUM_5);
 }
 
-void Demiurge::startRuntime(int speed) {
+void Demiurge::startRuntime(int ticks_per_second) {
    if (_started)
       return;
    _started = true;
-   _computes_per_second = speed;
+   _ticks_per_second = ticks_per_second;
    TaskHandle_t idleTask = xTaskGetIdleTaskHandle();
    esp_task_wdt_delete(idleTask);
    ESP_LOGI("MAIN", "Executing in Core %d", xTaskGetAffinity(nullptr));

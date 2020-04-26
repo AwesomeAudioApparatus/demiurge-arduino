@@ -54,13 +54,13 @@ public:
       return instance;
    }
 
-   static void begin(int speed) {
-      Demiurge::runtime().startRuntime(speed);
+   static void begin(int ticks_per_second) {
+      Demiurge::runtime().startRuntime(ticks_per_second);
    }
 
    void operator=(Demiurge const &) = delete;
 
-   void startRuntime(int speed);
+   void startRuntime(int ticks_per_second);
 
    void tick();
 
@@ -86,7 +86,7 @@ public:
 
    uint64_t _gpios;
 
-   int _computes_per_second;
+   int _ticks_per_second;
 
 private:
 
