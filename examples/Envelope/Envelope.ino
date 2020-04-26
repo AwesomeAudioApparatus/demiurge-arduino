@@ -30,7 +30,6 @@ AudioOutPort out1(1);
 AudioOutPort out2(2);
 
 void setup() {
-   Demiurge::runtime().begin();
 
    adsr.configureGate(&gate);
    adsr.configureAttack(&attack);
@@ -38,9 +37,12 @@ void setup() {
    adsr.configureSustain(&sustain);
    adsr.configureRelease(&release);
 
-   out1.configure(&adsr);
    invert.configure(&adsr);
-   out2.configure(&invert);
+   out1.configure(&invert);
+
+   out2.configure(&adsr);
+
+   Demiurge::runtime().begin(48000);
 }
 
 void loop() {

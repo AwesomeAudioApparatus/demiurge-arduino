@@ -40,7 +40,7 @@ void setup() {
    Serial.println("setting up output ports");
    out1.configure(&vco1);
    out2.configure(&vco1);
-   Demiurge::begin();
+   Demiurge::begin(48000);
    delay(100);
 }
 

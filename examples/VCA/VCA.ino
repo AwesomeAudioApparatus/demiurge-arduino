@@ -33,7 +33,6 @@ AudioOutPort out2(2);
 Mixer mixer(4);
 
 void setup() {
-   Demiurge::runtime().begin();
 
    mixer.configure(1, &in1, &pot1);
 
@@ -45,6 +44,8 @@ void setup() {
 
    out1.configure(&mixer);
    out2.configure(&mixer);
+
+   Demiurge::runtime().begin(48000);
 }
 
 void loop() {
