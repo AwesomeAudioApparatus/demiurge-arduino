@@ -14,33 +14,22 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#ifndef _DEMIURGE_AUDIOOUTPORT_H_
-#define _DEMIURGE_AUDIOOUTPORT_H_
+#include "Clipping.h"
 
-#include "Signal.h"
+float clipGate(float value) {
+   if (value >= 0.5) return 1.0;
+   return 0.0;
+}
 
-typedef struct {
-   int position;
-   signal_t *me;
-   signal_t *input;
-   bool registered;
-} cv_out_port_t;
+float clipCV(float value) {
+   if (value >= 5.0) return 5.0;
+   if (value <= -5.0) return -5.0;
+   return value;
+}
 
-float audiooutport_read(signal_t *handle, uint64_t time);
-
-class AudioOutPort : public Signal {
-
-public:
-   explicit AudioOutPort(int position);
-
-   ~AudioOutPort() override;
-
-   void configure(Signal *input);
-
-   cv_out_port_t _data{};
-private:
-   Signal *_input{};
+float clipAudio(float value) {
+   if (value >= 10.0) return 10.0;
+   if (value <= -10.0) return -10.0;
+   return value;
 };
 
-
-#endif

@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 #include <esp_log.h>
 #include "Demiurge.h"
 #include "CvInPort.h"
+#include "Clipping.h"
 
 
 CvInPort::CvInPort(int position) {
@@ -37,10 +38,9 @@ float IRAM_ATTR cvinport_read(signal_t *handle, uint64_t time) {
    auto *cv = (cv_in_port_t *) handle->data;
    if (time > handle->last_calc) {
       handle->last_calc = time;
-      float input = Demiurge::runtime().input(cv->position);
-      float out = input;
-      handle->cached = out;
-      return out;
+      float input = clipCV(Demiurge::runtime().input(cv->position));
+      handle->cached = input;
+      return input;
    }
    return handle->cached;
 }

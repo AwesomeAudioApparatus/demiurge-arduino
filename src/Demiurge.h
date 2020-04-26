@@ -63,23 +63,6 @@ public:
 
    void operator=(Demiurge const &) = delete;
 
-   static float clipGate(float value) {
-      if (value >= 0.9) return 1.0;
-      return 0.0;
-   }
-
-   static float clipCV(float value) {
-      if (value >= 5.0) return 5.0;
-      if (value <= -5.0) return -5.0;
-      return value;
-   }
-
-   static float clipAudio(float value) {
-      if (value >= 10.0) return 10.0;
-      if (value <= -10.0) return -10.0;
-      return value;
-   };
-
    void startRuntime();
 
    void tick();

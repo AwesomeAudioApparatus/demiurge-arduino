@@ -61,12 +61,16 @@ add_library(
 #        src/Cordic.cpp
         src/CvInPort.cpp
         src/CvInPort.h
+        src/CvOutPort.cpp
+        src/CvOutPort.h
         src/Demiurge.cpp
         src/Demiurge.h
         src/FixedSignal.cpp
         src/FixedSignal.h
         src/GateInPort.cpp
         src/GateInPort.h
+        src/GateOutPort.cpp
+        src/GateOutPort.h
         src/Inverter.cpp
         src/Inverter.h
         src/Log.cpp

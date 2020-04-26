@@ -18,6 +18,7 @@ See the License for the specific language governing permissions and
 #include <esp_system.h>
 #include <esp_log.h>
 #include "Adsr.h"
+#include "Clipping.h"
 
 Adsr::Adsr() {
    ESP_LOGD("Adsr", "Constructor: %llx", (uint64_t) this );
@@ -122,7 +123,7 @@ float IRAM_ATTR adsr_read(signal_t *handle, uint64_t time){
       }
       adsr->currentGate = gateIn;
 
-      float result = Demiurge::clipAudio(output);
+      float result = clipAudio(output);
       handle->cached = result;
       return result;
    }

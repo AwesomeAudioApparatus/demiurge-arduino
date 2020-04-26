@@ -16,12 +16,13 @@ See the License for the specific language governing permissions and
 
 #include <esp_log.h>
 #include <driver/gpio.h>
+#include "Clipping.h"
 #include "Demiurge.h"
 
 GateInPort::GateInPort(int position) {
    ESP_LOGD("GateInPort", "Constructor: %llx at position %d", (uint64_t) this, position );
-   configASSERT(position > 0 && position <= 1 )
-   _data.position = position-1;
+   configASSERT(position >= 0 && position <= 4 )
+   _data.position = position;
    _signal.data = &_data;
    _signal.read_fn = gateinport_read;
 }
@@ -31,7 +32,13 @@ GateInPort::~GateInPort() = default;
 float IRAM_ATTR gateinport_read(signal_t *handle, uint64_t time){
    if( time > handle->last_calc ) {
       handle->last_calc = time;
-      bool state = Demiurge::runtime().gpio(32);
+      auto *port = (gate_in_port_t *) handle->data;
+      bool state;
+      // if position == 0, then use digital input, otherwise use analog inputs.
+      if( port->position )
+         state = clipGate( Demiurge::runtime().input(port->position) );
+      else
+         state = Demiurge::runtime().gpio(32);
       handle->cached = state ? DEMIURGE_GATE_HIGH : DEMIURGE_GATE_LOW;
    }
    return handle->cached;

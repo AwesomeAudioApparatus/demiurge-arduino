@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
       limitations under the License.
 */
 
-#ifndef _DEMIURGE_AUDIOOUTPORT_H_
-#define _DEMIURGE_AUDIOOUTPORT_H_
+#ifndef _DEMIURGE_GATEOUTPORT_H_
+#define _DEMIURGE_GATEOUTPORT_H_
 
 #include "Signal.h"
 
@@ -26,14 +26,14 @@ typedef struct {
    bool registered;
 } cv_out_port_t;
 
-float audiooutport_read(signal_t *handle, uint64_t time);
+float gateoutport_read(signal_t *handle, uint64_t time);
 
-class AudioOutPort : public Signal {
+class GateOutPort : public Signal {
 
 public:
-   explicit AudioOutPort(int position);
+   explicit GateOutPort(int position);
 
-   ~AudioOutPort() override;
+   ~GateOutPort() override;
 
    void configure(Signal *input);
 

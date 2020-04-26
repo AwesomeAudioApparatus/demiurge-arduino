@@ -120,7 +120,7 @@ Demiurge::~Demiurge() {
 void Demiurge::registerSink(signal_t *processor) {
    ESP_LOGI("MAIN", "Registering Sink: %llx", (uint64_t) processor);
    configASSERT(processor != nullptr)
-   auto *port = (audio_out_port_t *) processor->data;
+   auto *port = (cv_out_port_t *) processor->data;
    configASSERT(port != nullptr)
    configASSERT(port->position > 0 && port->position <= DEMIURGE_MAX_SINKS)
    _sinks[port->position - 1] = processor;
@@ -130,7 +130,7 @@ void Demiurge::registerSink(signal_t *processor) {
 void Demiurge::unregisterSink(signal_t *processor) {
    ESP_LOGI("MAIN", "Unregistering Sink: %llx", (uint64_t) processor);
    configASSERT(processor != nullptr)
-   auto *port = (audio_out_port_t *) processor->data;
+   auto *port = (cv_out_port_t *) processor->data;
    configASSERT(port != nullptr)
    configASSERT(port->position > 0 && port->position <= DEMIURGE_MAX_SINKS)
    _sinks[port->position - 1] = nullptr;
