@@ -1,3 +1,6 @@
 [submodule "src"]
 	path = src
 	url = https://github.com/AwesomeAudioApparatus/demiurge.git
+[submodule "examples"]
+	path = examples
+	url = https://github.com/AwesomeAudioApparatus/demiurge-examples
